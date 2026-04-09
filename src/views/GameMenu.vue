@@ -13,6 +13,13 @@
                 background: radial-gradient(ellipse at center, rgba(12,8,4,0.26), rgba(8,5,2,0.55));"></div>
     <div class="absolute inset-0 z-0 pointer-events-none"
          style="background: linear-gradient(to bottom, rgba(8,5,2,0.52), rgba(8,5,2,0.66));"></div>
+    <div
+      class="absolute inset-0 z-[5] pointer-events-none transition-opacity duration-700 ease-out"
+      :style="{
+        background: 'linear-gradient(to bottom, rgba(8,5,2,0.15), rgba(8,5,2,0.6))',
+        opacity: introDimOpacity,
+      }"
+    ></div>
 
     <!-- Film strip top border -->
     <div class="flex shrink-0 h-4 z-20" style="background: #140C06;">
@@ -70,9 +77,11 @@
     <main class="flex-1 px-3 sm:px-4 md:px-6 lg:px-10 py-3 sm:py-4 md:py-6 grid gap-3 sm:gap-4 md:gap-6 relative z-10"
           style="grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); max-width: 1400px; margin: 0 auto; width: 100%; height: calc(100% - 100px);">
       <div
-        v-for="game in games"
+        v-for="(game, index) in games"
         :key="game.id"
-        class="relative rounded-[16px] md:rounded-[20px] overflow-hidden cursor-pointer group active:scale-[0.98] hover:-translate-y-1 transition-transform duration-200 night-card"
+        class="relative rounded-[16px] md:rounded-[20px] overflow-hidden cursor-pointer group active:scale-[0.98] hover:-translate-y-1 transition-transform duration-200 night-card intro-card"
+        :class="{ 'intro-card-visible': cardsVisible }"
+        :style="{ transitionDelay: cardsVisible ? `${index * 120}ms` : '0ms' }"
         @click="goToGame(game)"
       >
         <!-- Outer brass frame -->
@@ -132,7 +141,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DifficultySelector from '../components/DifficultySelector.vue'
 import SongSelector from '../components/SongSelector.vue'
@@ -150,6 +159,11 @@ const showDifficultyModal = ref(false)
 const showSongModal = ref(false)
 const selectedGameName = ref('')
 const selectedGameId = ref(null)
+const introDimOpacity = ref(0)
+const cardsVisible = ref(false)
+
+let introDimTimer = null
+let introCardTimer = null
 
 const games = [
   {
@@ -250,6 +264,21 @@ const handleSongConfirm = (song) => {
     query: { track: song.id },
   })
 }
+
+onMounted(() => {
+  introDimTimer = setTimeout(() => {
+    introDimOpacity.value = 1
+  }, 260)
+
+  introCardTimer = setTimeout(() => {
+    cardsVisible.value = true
+  }, 760)
+})
+
+onUnmounted(() => {
+  if (introDimTimer) clearTimeout(introDimTimer)
+  if (introCardTimer) clearTimeout(introCardTimer)
+})
 </script>
 
 <style scoped>
@@ -258,6 +287,24 @@ const handleSongConfirm = (song) => {
 
 .night-card {
   min-height: 0;
+}
+
+.intro-card {
+  opacity: 0;
+  transform: translateY(24px) scale(0.97);
+  filter: blur(2px);
+  pointer-events: none;
+  transition:
+    opacity 0.46s ease,
+    transform 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.46s ease;
+}
+
+.intro-card-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  pointer-events: auto;
 }
 
 .kimi-brand-title {

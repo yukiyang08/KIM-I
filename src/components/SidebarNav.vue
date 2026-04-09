@@ -27,7 +27,8 @@
     <div
       v-if="isOpen"
       @click="isOpen = false"
-      class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80]"
+      class="fixed inset-0 backdrop-blur-sm z-[80]"
+      style="background: rgba(22, 14, 8, 0.24);"
     ></div>
   </transition>
 
@@ -36,9 +37,9 @@
     <div
       v-if="isOpen"
       class="fixed top-0 right-0 h-full w-64 z-[90] overflow-y-auto"
-      style="background: linear-gradient(to bottom, #2A1508, #1E0F06);
-              border-left: 2px solid rgba(200,150,30,0.2);
-              box-shadow: -20px 0 60px rgba(0,0,0,0.5);">
+          style="background: linear-gradient(to bottom, #4B2A12, #2E1A0C);
+            border-left: 2px solid rgba(242,198,106,0.45);
+            box-shadow: -20px 0 60px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,229,170,0.16);">
       
       <!-- Film strip decoration -->
       <div class="h-2 flex" style="background: #140C06;">
@@ -61,27 +62,27 @@
           to="/"
           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
           :class="route.path === '/' 
-            ? 'bg-gradient-to-r from-yellow-600/30 to-transparent' 
-            : 'hover:bg-white/5'"
+            ? 'bg-gradient-to-r from-amber-300/35 to-transparent' 
+            : 'hover:bg-white/10'"
           @click="isOpen = false"
-          :style="{ color: route.path === '/' ? '#C8961E' : 'rgba(255,255,255,0.7)' }">
+          :style="{ color: route.path === '/' ? '#F7D58A' : 'rgba(255,244,220,0.88)' }">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <span class="font-bold">長者遊戲</span>
+          <span class="font-bold">遊戲大廳</span>
         </router-link>
 
         <router-link
           to="/dashboard"
           class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
           :class="route.path === '/dashboard' 
-            ? 'bg-gradient-to-r from-yellow-600/30 to-transparent' 
-            : 'hover:bg-white/5'"
+            ? 'bg-gradient-to-r from-amber-300/35 to-transparent' 
+            : 'hover:bg-white/10'"
           @click="isOpen = false"
-          :style="{ color: route.path === '/dashboard' ? '#C8961E' : 'rgba(255,255,255,0.7)' }">
+          :style="{ color: route.path === '/dashboard' ? '#F7D58A' : 'rgba(255,244,220,0.88)' }">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -90,7 +91,7 @@
         </router-link>
 
         <!-- Version info -->
-        <div class="mt-8 pt-6 border-t text-xs px-2 py-4 text-center" style="color: rgba(255,255,255,0.4); border-color: rgba(200,150,30,0.2);">
+        <div class="mt-8 pt-6 border-t text-xs px-2 py-4 text-center" style="color: rgba(255,237,198,0.68); border-color: rgba(242,198,106,0.32);">
           <p class="mb-1">v0.0.0</p>
           <p>認知訓練平台</p>
         </div>

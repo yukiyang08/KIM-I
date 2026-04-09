@@ -108,13 +108,9 @@
                class="flex-1 relative overflow-hidden"
            :style="{ background: lane.trackBg, borderRight: li < lanes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }">
 
-            <!-- Top instrument label -->
-            <div class="absolute top-3 inset-x-0 flex flex-col items-center z-10 pointer-events-none">
+            <!-- Top lane marker -->
+            <div class="absolute top-3 inset-x-0 flex justify-center z-10 pointer-events-none">
               <span class="text-4xl drop-shadow-lg">{{ lane.icon }}</span>
-              <span class="text-xl font-black mt-1 tracking-widest"
-                    :style="{ color: lane.accent, textShadow: `0 0 12px ${lane.glow}` }">
-                {{ lane.label }}
-              </span>
             </div>
 
             <!-- Centre guide line -->
@@ -162,7 +158,7 @@
                     @mousedown.prevent="onTap(li)"
                     @touchstart.prevent="onTap(li)">
               <span class="text-3xl font-black" :style="{ color: lane.accent }">
-                {{ lane.tapLabel }}
+                拍
               </span>
             </button>
           </div>
@@ -240,28 +236,28 @@ const gameStore = useGameStore()
 // ── Lane definitions ──────────────────────────────────────────
 const ALL_LANES = [
   {
-    icon: '🥁', label: '鼓', tapLabel: '鼓', noteChar: '♩',
+    icon: '🥁', noteChar: '♩',
     trackBg: 'rgba(100,20,10,0.14)',
     btnBg: 'rgba(160,30,15,0.45)',
     accent: '#E06030', glow: 'rgba(220,80,40,0.5)',
     noteLight: '#F09860', noteDark: '#803010',
   },
   {
-    icon: '🪙', label: '鑼', tapLabel: '鑼', noteChar: '♪',
+    icon: '🪙', noteChar: '♪',
     trackBg: 'rgba(140,100,10,0.12)',
     btnBg: 'rgba(180,130,10,0.42)',
     accent: '#C8961E', glow: 'rgba(200,150,30,0.5)',
     noteLight: '#F0C040', noteDark: '#906A10',
   },
   {
-    icon: '🎋', label: '木', tapLabel: '木', noteChar: '♫',
+    icon: '🎋', noteChar: '♫',
     trackBg: 'rgba(30,80,30,0.12)',
     btnBg: 'rgba(40,100,40,0.42)',
     accent: '#6ABE50', glow: 'rgba(100,190,70,0.5)',
     noteLight: '#90D870', noteDark: '#306A20',
   },
   {
-    icon: '🎴', label: '笛', tapLabel: '笛', noteChar: '♬',
+    icon: '🎴', noteChar: '♬',
     trackBg: 'rgba(20,60,120,0.12)',
     btnBg: 'rgba(25,80,155,0.42)',
     accent: '#50A0D8', glow: 'rgba(60,150,220,0.5)',
