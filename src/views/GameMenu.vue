@@ -9,14 +9,14 @@
 
     <!-- Soften background details so game cards stay dominant -->
     <div class="absolute inset-0 z-0 pointer-events-none"
-         style="backdrop-filter: blur(5px) saturate(0.88);
-                background: radial-gradient(ellipse at center, rgba(12,8,4,0.26), rgba(8,5,2,0.55));"></div>
+          style="backdrop-filter: blur(2px) saturate(1.02);
+           background: radial-gradient(ellipse at center, rgba(12,8,4,0.08), rgba(8,5,2,0.3));"></div>
     <div class="absolute inset-0 z-0 pointer-events-none"
-         style="background: linear-gradient(to bottom, rgba(8,5,2,0.52), rgba(8,5,2,0.66));"></div>
+          style="background: linear-gradient(to bottom, rgba(8,5,2,0.22), rgba(8,5,2,0.34));"></div>
     <div
       class="absolute inset-0 z-[5] pointer-events-none transition-opacity duration-700 ease-out"
       :style="{
-        background: 'linear-gradient(to bottom, rgba(8,5,2,0.15), rgba(8,5,2,0.6))',
+        background: 'linear-gradient(to bottom, rgba(8,5,2,0.08), rgba(8,5,2,0.28))',
         opacity: introDimOpacity,
       }"
     ></div>

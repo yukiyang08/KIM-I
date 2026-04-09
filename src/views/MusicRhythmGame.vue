@@ -26,11 +26,15 @@
           提前結束本局
         </button>
         <h1 class="font-black leading-tight" style="font-size: clamp(1.6rem, 7vw, 3rem); color: #C8961E; text-shadow: 0 0 40px rgba(200,150,30,0.3);">
-          <span style="color: #C04030;">♪</span> 懷舊音樂節拍
+          <span style="color: #C04030;">♪</span> {{ selectedSong.name }}
         </h1>
 
         <p class="text-xs sm:text-sm md:text-base mt-1 font-semibold" style="color: rgba(240,208,144,0.75);">
           曲目：{{ selectedSong.name }}
+        </p>
+        <p v-if="isMultiplayer && multiplayerRoom" class="text-[11px] sm:text-sm mt-1"
+           style="color: rgba(255,231,179,0.72);">
+          多人房號：{{ multiplayerRoom.code }} ・ {{ multiplayerStatusText }}
         </p>
       </div>
       <div class="text-center shrink-0 min-w-[110px] sm:min-w-[140px]">
@@ -193,16 +197,21 @@
           <span class="font-black text-3xl sm:text-4xl md:text-5xl text-white ml-2 sm:ml-3">{{ score }}</span>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-[440px] px-4">
-          <button @click="startGame"
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-[520px] px-4">
+          <button v-if="!isMultiplayer" @click="startGame"
             class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
             style="background: linear-gradient(135deg, #D4A020, #8B6000);">
             再演一曲
           </button>
-          <button @click="goBack"
+          <button v-else @click="goBack"
+            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
+            style="background: linear-gradient(135deg, #D4A020, #8B6000);">
+            回多人房間
+          </button>
+          <button @click="exitGame"
             class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-white text-xl sm:text-2xl md:text-3xl font-bold active:scale-95 transition-transform"
             style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
-            離開
+            {{ isMultiplayer ? '回遊戲大廳' : '離開' }}
           </button>
         </div>
       </div>
@@ -218,10 +227,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
 import { guess } from 'web-audio-beat-detector'
+import { getRoom, submitRoomScore } from '../utils/multiplayerRoom'
 
 const router = useRouter()
 const route = useRoute()
@@ -277,6 +287,9 @@ const selectedSongKey = computed(() => {
 })
 
 const selectedSong = computed(() => SONG_LIBRARY[selectedSongKey.value])
+const isMultiplayer = computed(() => route.query.mp === '1' && typeof route.query.roomId === 'string')
+const multiplayerRoomId = computed(() => String(route.query.roomId || ''))
+const multiplayerPlayerId = computed(() => String(route.query.playerId || ''))
 const NOTE_DURATION = 2600 // ms to traverse full height
 
 const HIT_ZONE_Y = 76      // % from top — center of hit window
@@ -342,6 +355,22 @@ let bgmSource = ''
 let analysisPromise = null
 let analyzedRhythm = getFallbackRhythm()
 let chart = []
+let multiplayerSyncTimer = null
+
+const multiplayerRoom = ref(null)
+
+const multiplayerStatusText = computed(() => {
+  if (!multiplayerRoom.value) return '同步中'
+  if (multiplayerRoom.value.status === 'finished') return '本局結算中'
+  const me = (multiplayerRoom.value.players || []).find((player) => player.id === multiplayerPlayerId.value)
+  if (me && Number.isFinite(me.score)) return `你的分數：${me.score}`
+  return '對局進行中'
+})
+
+const syncMultiplayerRoom = () => {
+  if (!isMultiplayer.value) return
+  multiplayerRoom.value = getRoom(multiplayerRoomId.value)
+}
 
 // ── Helpers ───────────────────────────────────────────────────
 const flashColor = (type) => {
@@ -553,6 +582,12 @@ const endGame = () => {
       maxCombo: maxCombo.value,
     })
   }
+
+  if (isMultiplayer.value && multiplayerRoomId.value && multiplayerPlayerId.value) {
+    submitRoomScore(multiplayerRoomId.value, multiplayerPlayerId.value, score.value)
+    syncMultiplayerRoom()
+  }
+
   gameState.value = 'finished'
 }
 
@@ -570,12 +605,29 @@ const goBack = () => {
     const hitRate = total > 0 ? (accuracy.perfect + accuracy.good) / total : 0
     gameStore.addSession('music', Math.round(hitRate * 80), {})
   }
+  if (isMultiplayer.value && multiplayerRoomId.value) {
+    router.push({ name: 'multiplayer-room', params: { roomId: multiplayerRoomId.value } })
+    return
+  }
   router.push('/')
 }
+
+const exitGame = () => {
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+  stopAudio()
+  router.push('/')
+}
+
+onMounted(() => {
+  if (!isMultiplayer.value) return
+  syncMultiplayerRoom()
+  multiplayerSyncTimer = setInterval(syncMultiplayerRoom, 1000)
+})
 
 onUnmounted(() => {
   if (rafId) cancelAnimationFrame(rafId)
   stopAudio()
+  if (multiplayerSyncTimer) clearInterval(multiplayerSyncTimer)
 })
 </script>
 

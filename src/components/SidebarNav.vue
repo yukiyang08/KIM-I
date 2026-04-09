@@ -90,6 +90,21 @@
           <span class="text-[1.65rem] leading-none font-black tracking-[0.02em]">數據報表</span>
         </router-link>
 
+        <router-link
+          to="/multiplayer"
+          class="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200"
+          :class="route.path.startsWith('/multiplayer')
+            ? 'bg-gradient-to-r from-amber-300/35 to-transparent'
+            : 'hover:bg-white/10'"
+          @click="isOpen = false"
+          :style="{ color: route.path.startsWith('/multiplayer') ? '#F7D58A' : 'rgba(255,244,220,0.88)' }">
+          <svg class="w-7 h-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 20h5V9H2v11h5m10 0v-2a4 4 0 00-4-4H11a4 4 0 00-4 4v2m10 0H7m8-13a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <span class="text-[1.65rem] leading-none font-black tracking-[0.02em]">多人模式</span>
+        </router-link>
+
         <!-- Version info -->
         <div class="mt-8 pt-6 border-t text-xs px-2 py-4 text-center" style="color: rgba(255,237,198,0.68); border-color: rgba(242,198,106,0.32);">
           <p class="mb-1">v0.0.0</p>

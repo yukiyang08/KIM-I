@@ -7,6 +7,8 @@ import CookingGame from '../views/CookingGame.vue'
 import PuppetGame from '../views/PuppetGame.vue'
 import RiddleGame from '../views/RiddleGame.vue'
 import PuzzleGame from '../views/PuzzleGame.vue'
+import MultiplayerLobby from '../views/MultiplayerLobby.vue'
+import MultiplayerRoom from '../views/MultiplayerRoom.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +21,8 @@ const router = createRouter({
     { path: '/game/riddle',    name: 'riddle',   component: RiddleGame },
     { path: '/game/puzzle',    name: 'puzzle',   component: PuzzleGame },
     { path: '/dashboard',      name: 'dashboard',component: CaregiverDashboard },
+    { path: '/multiplayer',    name: 'multiplayer-lobby', component: MultiplayerLobby },
+    { path: '/multiplayer/room/:roomId', name: 'multiplayer-room', component: MultiplayerRoom },
   ],
 })
 

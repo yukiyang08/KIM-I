@@ -124,6 +124,42 @@ const stageRef = ref(null)
 const errorMsg = ref('')
 const totalErrors = ref(0)
 const finalScore = ref(0)
+const PUPPET_WIDTH = 192
+const PUPPET_HEIGHT = 256
+
+const pickStagePositions = (count) => {
+  const stageEl = stageRef.value
+  if (!stageEl) {
+    return Array.from({ length: count }, (_, i) => ({ x: 90 + i * 180, y: 140 }))
+  }
+
+  const stageW = stageEl.clientWidth
+  const stageH = stageEl.clientHeight
+  const minX = 24
+  const maxX = Math.max(minX, stageW - PUPPET_WIDTH - 24)
+  const minY = 32
+  const maxY = Math.max(minY, stageH - PUPPET_HEIGHT - 24)
+
+  const slotStepX = 220
+  const slotStepY = 180
+  const slots = []
+
+  for (let y = minY; y <= maxY; y += slotStepY) {
+    for (let x = minX; x <= maxX; x += slotStepX) {
+      slots.push({ x, y })
+    }
+  }
+
+  if (slots.length < count) {
+    return Array.from({ length: count }, (_, i) => ({
+      x: Math.min(maxX, minX + i * 180),
+      y: minY + (i % 2) * 150,
+    }))
+  }
+
+  const shuffled = [...slots].sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, count)
+}
 
 const showError = (msg) => {
   errorMsg.value = msg
@@ -147,8 +183,9 @@ const restartGame = () => {
 const nextRound = () => {
   puppets.value = [...puppetList].sort(() => 0.5 - Math.random()).slice(0, 5)
   setTimeout(() => {
+    const initialPositions = pickStagePositions(puppets.value.length)
     puppets.value.forEach((p, i) => {
-      gsap.set(puppetRefs[p.id], { x: 100 + i * 180, y: 150 })
+      gsap.set(puppetRefs[p.id], { x: initialPositions[i].x, y: initialPositions[i].y })
     })
     identifyTarget()
   }, 100)
@@ -176,10 +213,12 @@ const shufflePuppets = () => {
 
   // 10 rounds of random movement
   for (let r = 0; r < 6; r++) {
+    const roundPositions = pickStagePositions(puppets.value.length)
     puppets.value.forEach(p => {
+      const nextPos = roundPositions.pop()
       tl.to(puppetRefs[p.id], {
-        x: Math.random() * (stageRef.value.clientWidth - 200),
-        y: Math.random() * (stageRef.value.clientHeight - 300),
+        x: nextPos.x,
+        y: nextPos.y,
         duration: 0.8,
         ease: "power2.inOut"
       }, r * 0.6)
