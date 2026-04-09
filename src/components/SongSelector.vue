@@ -21,9 +21,9 @@
 
       <h2 class="text-center song-title mb-6 sm:mb-7">選擇歌曲</h2>
 
-      <div class="space-y-4 sm:space-y-5 px-1 sm:px-2">
+      <div class="song-list space-y-4 sm:space-y-5 px-1 sm:px-2 overflow-y-auto pr-2">
         <button
-          v-for="song in songs"
+          v-for="song in themedSongs"
           :key="song.id"
           class="song-row"
           :style="{ background: song.cardBg }"
@@ -57,6 +57,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -69,6 +71,19 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['confirm', 'cancel'])
+
+const rowThemes = [
+  'linear-gradient(145deg, #8D3F3F, #6E2E2E)',
+  'linear-gradient(145deg, #35669A, #204A79)',
+  'linear-gradient(145deg, #2F7054, #1E4E3A)',
+]
+
+const themedSongs = computed(() =>
+  props.songs.map((song, index) => ({
+    ...song,
+    cardBg: rowThemes[index % rowThemes.length],
+  }))
+)
 
 const confirm = (song) => {
   emit('confirm', song)
@@ -121,6 +136,10 @@ const cancel = () => {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.song-list {
+  max-height: calc(110px * 3 + 20px * 2 + 4px);
+}
+
 .song-row:active {
   transform: translateY(2px);
   box-shadow: 0 3px 0 rgba(54, 39, 20, 0.35), 0 6px 12px rgba(0, 0, 0, 0.12);
@@ -157,6 +176,10 @@ const cancel = () => {
 }
 
 @media (max-width: 640px) {
+  .song-list {
+    max-height: calc(98px * 3 + 16px * 2 + 4px);
+  }
+
   .song-row {
     min-height: 98px;
     border-radius: 16px;

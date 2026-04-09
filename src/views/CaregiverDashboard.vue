@@ -1,31 +1,31 @@
 <template>
-  <div class="h-full w-full overflow-y-auto pb-[100px] px-5 pt-6 font-['Outfit','Noto_Sans_TC']"
+  <div class="h-full w-full overflow-y-auto pb-[100px] px-6 sm:px-7 md:px-8 pt-6 font-['Outfit','Noto_Sans_TC']"
        style="background: #FAF5ED;">
 
     <!-- ── User Profile Header ── -->
-    <header class="flex items-center gap-4 mb-5">
+    <header class="flex items-center gap-4 mb-6">
       <div class="w-16 h-16 rounded-full flex items-center justify-center shrink-0 shadow-lg"
            style="background: linear-gradient(135deg, #F5D98A, #C8961E);">
         <span class="text-3xl">👵</span>
       </div>
       <div>
-        <h2 class="text-3xl font-black tracking-tight" style="color:#3D2010;">陳金美 奶奶</h2>
-        <p class="text-base font-medium mt-0.5" style="color:#9B7040;">
+        <h2 class="text-3xl sm:text-4xl font-black tracking-tight" style="color:#3D2010;">陳金美 奶奶</h2>
+        <p class="text-lg font-medium mt-0.5" style="color:#9B7040;">
           {{ hasData ? `上次遊玩：${lastPlayedLabel}` : '尚未開始遊玩' }}
         </p>
       </div>
       <!-- Weekly badge -->
       <div class="ml-auto text-right">
-        <div class="text-2xl font-black" style="color:#C8961E;">{{ weeklyCount }}</div>
-        <div class="text-sm font-semibold" style="color:#9B7040;">本週場次</div>
+        <div class="text-4xl sm:text-5xl leading-none font-black" style="color:#C8961E;">{{ weeklyCount }}</div>
+        <div class="text-base font-semibold mt-1" style="color:#9B7040;">本週場次</div>
       </div>
     </header>
 
     <!-- ── Kim-I AI 分析 ── -->
-    <section class="rounded-3xl p-5 mb-5 relative overflow-hidden"
+    <section class="rounded-3xl p-6 mb-6 relative overflow-hidden"
              style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
       <!-- AI badge (top-right) -->
-      <div class="absolute top-4 right-4 px-3 py-1 rounded-lg text-base font-black text-white tracking-widest"
+      <div class="absolute top-4 right-4 px-3 py-1.5 rounded-lg text-lg font-black text-white tracking-widest"
            style="background:#C8961E;">AI</div>
 
       <div class="flex items-start gap-4 pr-16">
@@ -35,36 +35,36 @@
           🧠
         </div>
         <div>
-          <h3 class="text-xl font-black mb-1" style="color:#3D2010;">Kim-I AI 分析</h3>
-          <p class="text-base leading-relaxed" style="color:#7A5030;">{{ aiInsight }}</p>
+          <h3 class="text-2xl font-black mb-1" style="color:#3D2010;">Kim-I AI 分析</h3>
+          <p class="text-lg leading-relaxed" style="color:#7A5030;">{{ aiInsight }}</p>
         </div>
       </div>
     </section>
 
     <!-- ── 今日康復數據價值 ── -->
-    <section class="rounded-3xl p-5 mb-5"
+    <section class="rounded-3xl p-6 mb-6"
              style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
 
-      <h3 class="text-lg font-black mb-4 flex items-center gap-2" style="color:#3D2010;">
+      <h3 class="text-xl sm:text-2xl font-black mb-5 flex items-center gap-2" style="color:#3D2010;">
         <span class="w-1 h-5 rounded-full inline-block" style="background:#C8961E;"></span>
         今日數據
       </h3>
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-2 gap-4">
 
         <!-- 康復時長 -->
-        <div class="rounded-2xl p-4" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
-          <div class="text-sm font-semibold mb-2" style="color:#9B7040;">遊玩時長</div>
+        <div class="rounded-2xl p-5" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
+          <div class="text-base font-semibold mb-2" style="color:#9B7040;">遊玩時長</div>
           <div class="flex items-end gap-1">
-            <span class="text-4xl font-black leading-none" style="color:#3D2010;">{{ todayMinutes }}</span>
-            <span class="text-base font-bold mb-0.5" style="color:#9B7040;">分鐘</span>
+            <span class="text-5xl sm:text-6xl font-black leading-none" style="color:#3D2010;">{{ todayMinutes }}</span>
+            <span class="text-xl font-bold mb-1" style="color:#9B7040;">分鐘</span>
           </div>
-          <div class="text-sm mt-2" style="color:#B89060;">今日遊玩 {{ todayCount }} 場</div>
+          <div class="text-base mt-2" style="color:#B89060;">今日遊玩 {{ todayCount }} 場</div>
         </div>
 
         <!-- 手眼協調度 -->
-        <div class="rounded-2xl p-4" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
-          <div class="text-sm font-semibold mb-2" style="color:#9B7040;">手眼協調度</div>
+        <div class="rounded-2xl p-5" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
+          <div class="text-base font-semibold mb-2" style="color:#9B7040;">手眼協調度</div>
           <!-- Progress bar -->
           <div class="h-4 rounded-full overflow-hidden mb-2" style="background:rgba(200,150,30,0.12);">
             <div class="h-full rounded-full transition-all duration-700"
@@ -72,14 +72,14 @@
             </div>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm" style="color:#B89060;">同齡比較</span>
-            <span class="text-base font-black" style="color:#C8961E;">{{ handEyeScore }}%</span>
+            <span class="text-base" style="color:#B89060;">同齡比較</span>
+            <span class="text-2xl font-black leading-none" style="color:#C8961E;">{{ handEyeScore }}%</span>
           </div>
         </div>
 
         <!-- 精細動作穩定度 -->
-        <div class="rounded-2xl p-4" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
-          <div class="text-sm font-semibold mb-2" style="color:#9B7040;">精細動作穩定度</div>
+        <div class="rounded-2xl p-5" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
+          <div class="text-base font-semibold mb-2" style="color:#9B7040;">精細動作穩定度</div>
           <div class="h-12 w-full">
             <svg viewBox="0 0 120 48" class="w-full h-full" preserveAspectRatio="none">
               <defs>
@@ -110,15 +110,15 @@
             <span class="text-lg" :style="{ color: trendUp ? '#10b981' : '#C8961E' }">
               {{ trendUp ? '↗' : '→' }}
             </span>
-            <span class="text-sm" style="color:#B89060;">{{ trendUp ? '持續上升' : '保持穩定' }}</span>
+            <span class="text-base" style="color:#B89060;">{{ trendUp ? '持續上升' : '保持穩定' }}</span>
           </div>
         </div>
 
         <!-- 認知得分 (Gauge) -->
-        <div class="rounded-2xl p-4 flex flex-col items-center justify-center"
+        <div class="rounded-2xl p-5 flex flex-col items-center justify-center"
              style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
-          <div class="text-sm font-semibold mb-2 self-start" style="color:#9B7040;">認知得分</div>
-          <div class="relative" style="width:110px;height:64px;">
+          <div class="text-base font-semibold mb-2 self-start" style="color:#9B7040;">認知得分</div>
+          <div class="relative" style="width:150px;height:92px;">
             <svg viewBox="0 0 120 68" class="w-full h-full">
               <defs>
                 <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -137,22 +137,22 @@
             </svg>
             <!-- Score text -->
             <div class="absolute inset-0 flex flex-col items-center justify-end pb-1">
-              <span class="text-3xl font-black leading-none" style="color:#3D2010;">{{ cognitiveScore }}</span>
+              <span class="text-5xl font-black leading-none" style="color:#3D2010;">{{ cognitiveScore }}</span>
             </div>
           </div>
-          <div class="text-sm mt-1" style="color:#B89060;">滿分 100 分</div>
+          <div class="text-base mt-1" style="color:#B89060;">滿分 100 分</div>
         </div>
 
       </div>
     </section>
 
     <!-- ── 五維度認知評估 ── -->
-    <section class="rounded-3xl p-5 mb-5"
+    <section class="rounded-3xl p-6 mb-6"
              style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
-      <h3 class="text-lg font-black mb-4 flex items-center gap-2" style="color:#3D2010;">
+      <h3 class="text-xl sm:text-2xl font-black mb-4 flex items-center gap-2" style="color:#3D2010;">
         <span class="w-1 h-5 rounded-full inline-block" style="background:#C8961E;"></span>
         五維度認知評估
-        <span class="ml-auto text-sm font-semibold px-2 py-0.5 rounded-full"
+        <span class="ml-auto text-base font-semibold px-2.5 py-0.5 rounded-full"
               :style="hasData
                 ? 'background:rgba(200,150,30,0.12);color:#C8961E;'
                 : 'background:rgba(0,0,0,0.05);color:#9B7040;'">
@@ -161,7 +161,7 @@
       </h3>
       <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_1.2fr] gap-4 lg:gap-5 items-start">
         <div class="rounded-2xl p-3 sm:p-4" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
-          <div class="relative w-full h-[250px] lg:h-[320px] flex justify-center items-center">
+          <div class="relative w-full h-[280px] lg:h-[360px] flex justify-center items-center">
             <Radar :data="chartData" :options="chartOptions" />
           </div>
         </div>
@@ -169,13 +169,13 @@
         <div>
           <div class="grid gap-2.5">
             <div v-for="item in dimensionBreakdown" :key="item.key"
-                 class="rounded-2xl px-3 py-2.5"
+                 class="rounded-2xl px-4 py-3"
                  style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
               <div class="flex items-center justify-between gap-3 mb-1.5">
-                <div class="text-base font-black" style="color:#3D2010;">{{ item.label }}</div>
+                <div class="text-lg font-black" style="color:#3D2010;">{{ item.label }}</div>
                 <div class="flex items-center gap-2">
-                  <span class="text-sm font-semibold" style="color:#9B7040;">{{ item.current }} / {{ item.baseline }}</span>
-                  <span class="text-sm font-black px-2 py-0.5 rounded-full"
+                  <span class="text-base font-semibold" style="color:#9B7040;">{{ item.current }} / {{ item.baseline }}</span>
+                  <span class="text-base font-black px-2.5 py-0.5 rounded-full"
                         :style="trendBadgeStyle(item.trend)">
                     {{ trendLabel(item.trend) }}
                   </span>
@@ -188,7 +188,7 @@
             </div>
           </div>
 
-          <div class="mt-3 text-sm sm:text-base leading-relaxed" style="color:#7A5030;">
+          <div class="mt-3 text-base sm:text-lg leading-relaxed" style="color:#7A5030;">
             <span class="font-bold">進步：</span>{{ improvingSummary }}
             <span class="mx-2">|</span>
             <span class="font-bold">卡住：</span>{{ stuckSummary }}
@@ -198,26 +198,26 @@
     </section>
 
     <!-- ── 最近遊玩紀錄 ── -->
-    <section v-if="hasData" class="rounded-3xl p-5 mb-5"
+    <section v-if="hasData" class="rounded-3xl p-6 mb-6"
              style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
-      <h3 class="text-lg font-black mb-3 flex items-center gap-2" style="color:#3D2010;">
+      <h3 class="text-xl sm:text-2xl font-black mb-3 flex items-center gap-2" style="color:#3D2010;">
         <span class="w-1 h-5 rounded-full inline-block" style="background:#C8961E;"></span>
         最近遊玩紀錄
       </h3>
       <div class="space-y-2.5">
         <div v-for="s in recentSessions" :key="s.timestamp"
-             class="flex items-center justify-between py-2 border-b last:border-0"
+             class="flex items-center justify-between py-3 border-b last:border-0"
              style="border-color:rgba(200,150,30,0.1);">
           <div class="flex items-center gap-3">
-            <span class="text-xl">{{ gameEmoji[s.gameId] ?? '🎮' }}</span>
-            <span class="text-base font-semibold" style="color:#3D2010;">{{ gameName[s.gameId] ?? s.gameId }}</span>
+            <span class="text-2xl">{{ gameEmoji[s.gameId] ?? '🎮' }}</span>
+            <span class="text-lg font-semibold" style="color:#3D2010;">{{ gameName[s.gameId] ?? s.gameId }}</span>
           </div>
           <div class="flex items-center gap-3">
             <div class="w-24 h-2 rounded-full overflow-hidden" style="background:rgba(200,150,30,0.12);">
               <div class="h-full rounded-full transition-all"
                    :style="{ width: s.score + '%', background: scoreGradient(s.score) }"></div>
             </div>
-            <span class="text-base font-black w-8 text-right" :style="{ color: scoreColor(s.score) }">
+            <span class="text-2xl font-black w-12 text-right leading-none" :style="{ color: scoreColor(s.score) }">
               {{ s.score }}
             </span>
           </div>
@@ -229,8 +229,8 @@
     <section v-if="!hasData" class="rounded-3xl p-8 text-center"
              style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
       <div class="text-5xl mb-4">🎮</div>
-      <p class="text-lg font-bold" style="color:#7A5030;">尚無遊玩紀錄</p>
-      <p class="text-base mt-1" style="color:#B89060;">完成任一遊戲後，數據將自動更新</p>
+      <p class="text-2xl font-bold" style="color:#7A5030;">尚無遊玩紀錄</p>
+      <p class="text-lg mt-1" style="color:#B89060;">完成任一遊戲後，數據將自動更新</p>
     </section>
 
   </div>
@@ -328,7 +328,7 @@ const aiInsight = computed(() => {
 const trendLabel = (trend) => {
   if (trend === 'improving') return '進步'
   if (trend === 'declining') return '下滑'
-  return '卡住'
+  return '穩定'
 }
 
 const trendBadgeStyle = (trend) => {
@@ -401,7 +401,7 @@ const chartOptions = {
       angleLines: { color: 'rgba(100,60,20,0.08)' },
       grid:       { color: 'rgba(100,60,20,0.08)' },
       pointLabels: {
-        font: { family: 'Outfit, Noto Sans TC', size: 14, weight: '600' },
+        font: { family: 'Outfit, Noto Sans TC', size: 17, weight: '700' },
         color: '#7A5030',
       },
       ticks: { display: false, min: 0, max: 100 },
@@ -411,7 +411,7 @@ const chartOptions = {
     legend: {
       position: 'bottom',
       labels: {
-        font: { family: 'Outfit, Noto Sans TC', size: 13 },
+        font: { family: 'Outfit, Noto Sans TC', size: 15 },
         usePointStyle: true,
         padding: 20,
         color: '#9B7040',
@@ -419,9 +419,9 @@ const chartOptions = {
     },
     tooltip: {
       backgroundColor: 'rgba(61,32,16,0.92)',
-      titleFont: { size: 14, family: 'Outfit, Noto Sans TC' },
-      bodyFont:  { size: 13, family: 'Outfit, Noto Sans TC' },
-      padding: 10,
+      titleFont: { size: 16, family: 'Outfit, Noto Sans TC' },
+      bodyFont:  { size: 15, family: 'Outfit, Noto Sans TC' },
+      padding: 12,
       cornerRadius: 10,
     },
   },

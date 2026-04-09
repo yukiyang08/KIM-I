@@ -125,7 +125,7 @@
             <div v-for="note in notesInLane[li]" :key="note.id"
                  class="absolute left-1/2 pointer-events-none z-20"
                  :style="{ top: note.y + '%', transform: 'translate(-50%, -50%)' }">
-              <div class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full drop-shadow-2xl"
+                <div class="w-12 h-12 sm:w-16 sm:h-16 md:w-30 md:h-30 rounded-full drop-shadow-2xl"
                    :style="{
                      background: `radial-gradient(circle at 38% 32%, ${lane.noteLight}, ${lane.noteDark})`,
                      border: `3px solid ${lane.accent}`,
@@ -134,6 +134,16 @@
             </div>
 
             <!-- Hit zone -->
+              <div class="absolute left-1/2 pointer-events-none z-10 rounded-full"
+                :style="{
+                  top: HIT_ZONE_Y + '%',
+                  width: '68px',
+                  height: '68px',
+                  transform: 'translate(-50%, -50%)',
+                  border: `3px solid ${lane.accent}B5`,
+                  boxShadow: `0 0 18px ${lane.glow}, inset 0 0 16px ${lane.glow}55`,
+                  background: 'rgba(255,255,255,0.04)',
+                }"></div>
             <div class="absolute inset-x-0 pointer-events-none z-10"
                  :style="{ top: HIT_ZONE_Y + '%', height: '2px', background: `${lane.accent}50` }"></div>
             <div class="absolute inset-x-0 pointer-events-none z-10"
@@ -147,7 +157,7 @@
 
             <!-- Hit result text -->
             <transition name="result-pop">
-              <div v-if="laneResult[li]" class="absolute inset-x-0 z-30 text-center font-black text-3xl pointer-events-none"
+              <div v-if="laneResult[li]" class="absolute inset-x-0 z-30 text-center font-black text-4xl sm:text-5xl md:text-6xl pointer-events-none"
                    :style="{ top: '54%', color: laneResult[li].color,
                              textShadow: `0 0 20px ${laneResult[li].color}` }">
                 {{ laneResult[li].text }}
@@ -266,17 +276,43 @@ const ALL_LANES = [
 ]
 
 // ── Constants ─────────────────────────────────────────────────
+const audioSrc = (fileName) => `/audio/${encodeURIComponent(fileName)}`
+
 const SONG_LIBRARY = {
   'music-rhythm1': {
     name: '愛拚才會贏',
-    src: '/audio/music-rhythm1.mp3',
+    src: audioSrc('music-rhythm1.mp3'),
     fallbackBpm: 92,
     fallbackFirstBeatOffsetMs: 600,
   },
   'music-rhythm2': {
     name: '月亮代表我的心',
-    src: '/audio/music-rhythm2.mp3',
+    src: audioSrc('music-rhythm2.mp3'),
     fallbackBpm: 70,
+    fallbackFirstBeatOffsetMs: 900,
+  },
+  'music-yijianmei': {
+    name: '一剪梅',
+    src: audioSrc('一剪梅~費玉清的經典好歌(新版高清) - 王志平 (youtube).mp3'),
+    fallbackBpm: 74,
+    fallbackFirstBeatOffsetMs: 900,
+  },
+  'music-jiahou': {
+    name: '家後',
+    src: audioSrc('江蕙 - 家後 - 影音娛樂台Fujit Music (youtube).mp3'),
+    fallbackBpm: 76,
+    fallbackFirstBeatOffsetMs: 850,
+  },
+  'music-wowentian': {
+    name: '我問天',
+    src: audioSrc('翁立友-我問天(官方KTV版) - 豪記唱片 HCM Music (youtube).mp3'),
+    fallbackBpm: 84,
+    fallbackFirstBeatOffsetMs: 750,
+  },
+  'music-citymoon': {
+    name: '城裡的月光',
+    src: audioSrc('許美靜 - 城裡的月光 (Lyric Video) [yYwn8k502qY].mp3'),
+    fallbackBpm: 72,
     fallbackFirstBeatOffsetMs: 900,
   },
 }

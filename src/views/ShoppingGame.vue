@@ -360,10 +360,6 @@ const onSelect = (item) => {
 
 const resetGame = () => {
   clearTimers()
-  if (toastTimer) {
-    clearTimeout(toastTimer)
-    toastTimer = null
-  }
 
   round.value = 0
   totalRounds.value = difficultyConfig.value.rounds

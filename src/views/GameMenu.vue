@@ -112,6 +112,15 @@
         >
           <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(12,7,4,0.75) 0%, rgba(12,7,4,0.15) 40%, rgba(0,0,0,0.08) 100%);"></div>
 
+          <div class="absolute left-2.5 top-2.5 md:left-3 md:top-3 z-20">
+            <span
+              class="px-4 py-1.5 rounded-full text-[0.96rem] sm:text-[1.05rem] md:text-[1.15rem] font-black tracking-[0.05em]"
+              style="background: rgba(22,12,4,0.82); color:#F8DEAC; border: 1px solid rgba(216,172,92,0.56); backdrop-filter: blur(4px); box-shadow: 0 6px 16px rgba(0,0,0,0.3);"
+            >
+              {{ game.skill }}
+            </span>
+          </div>
+
           <div v-if="!game.poster" class="absolute inset-0 flex items-center justify-center">
             <div class="text-[72px] md:text-[86px] transition-transform duration-300 group-hover:scale-110"
                  :style="{ filter: `drop-shadow(0 0 16px ${game.accent}70)` }">
@@ -160,6 +169,7 @@ const showDifficultyModal = ref(false)
 const showSongModal = ref(false)
 const selectedGameName = ref('')
 const selectedGameId = ref(null)
+const selectedSongId = ref('music-rhythm2')
 const introDimOpacity = ref(0)
 const cardsVisible = ref(false)
 
@@ -170,6 +180,7 @@ const games = [
   {
     id: 'music',
     name: '懷舊音樂',
+    skill: '反應力',
     icon: '🎵',
     bg: 'linear-gradient(155deg, #230D10, #3A1508)',
     accent: '#E06030',
@@ -178,6 +189,7 @@ const games = [
   {
     id: 'shopping',
     name: '柑仔店採買',
+    skill: '記憶力',
     icon: '🥫',
     bg: 'linear-gradient(155deg, #231508, #3D2608)',
     accent: '#C8961E',
@@ -186,6 +198,7 @@ const games = [
   {
     id: 'cooking',
     name: '阿嬤家常菜',
+    skill: '執行力',
     icon: '🍲',
     bg: 'linear-gradient(155deg, #0D2010, #162818)',
     accent: '#6ABE50',
@@ -194,6 +207,7 @@ const games = [
   {
     id: 'puppet',
     name: '廟口布袋戲',
+    skill: '注意力',
     icon: '🎭',
     bg: 'linear-gradient(155deg, #080F20, #0E1C38)',
     accent: '#50A0D8',
@@ -202,6 +216,7 @@ const games = [
   {
     id: 'riddle',
     name: '老歌猜謎',
+    skill: '語意理解',
     icon: '🎶',
     bg: 'linear-gradient(155deg, #160E22, #241535)',
     accent: '#A070D0',
@@ -210,6 +225,7 @@ const games = [
   {
     id: 'puzzle',
     name: '廟口大拼圖',
+    skill: '視覺空間',
     icon: '🧩',
     bg: 'linear-gradient(155deg, #121220, #1C1C30)',
     accent: '#6080B0',
@@ -234,12 +250,46 @@ const musicSongs = [
     cardBg: 'linear-gradient(145deg, #8D3F3F, #6E2E2E)',
     poster: game4Poster,
   },
+  {
+    id: 'music-yijianmei',
+    name: '【一剪梅】',
+    meta: '抒情、穩拍',
+    cardBg: 'linear-gradient(145deg, #5B4A8C, #3B2A67)',
+    poster: game5Poster,
+  },
+  {
+    id: 'music-jiahou',
+    name: '【家後】',
+    meta: '台語、溫暖',
+    cardBg: 'linear-gradient(145deg, #2A6D66, #1C4E48)',
+    poster: game2Poster,
+  },
+  {
+    id: 'music-wowentian',
+    name: '【我問天】',
+    meta: '台語、經典',
+    cardBg: 'linear-gradient(145deg, #7A5432, #563519)',
+    poster: game3Poster,
+  },
+  {
+    id: 'music-citymoon',
+    name: '【城裡的月光】',
+    meta: '抒情、慢板',
+    cardBg: 'linear-gradient(145deg, #355A84, #244066)',
+    poster: game1Poster,
+  },
 ]
 
 const goToGame = (game) => {
   if (availableIds.has(game.id)) {
     selectedGameName.value = game.name
     selectedGameId.value = game.id
+
+    if (game.id === 'music') {
+      showSongModal.value = true
+      return
+    }
+
     showDifficultyModal.value = true
   } else {
     comingSoon.value = game.name
@@ -251,7 +301,10 @@ const handleDifficultyConfirm = () => {
   showDifficultyModal.value = false
 
   if (selectedGameId.value === 'music') {
-    showSongModal.value = true
+    router.push({
+      name: 'music',
+      query: { track: selectedSongId.value },
+    })
     return
   }
 
@@ -259,11 +312,9 @@ const handleDifficultyConfirm = () => {
 }
 
 const handleSongConfirm = (song) => {
+  selectedSongId.value = song.id
   showSongModal.value = false
-  router.push({
-    name: 'music',
-    query: { track: song.id },
-  })
+  showDifficultyModal.value = true
 }
 
 onMounted(() => {
