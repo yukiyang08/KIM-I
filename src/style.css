@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --animate-bounce-slow: bounce-slow 2s infinite;
+
+  @keyframes bounce-slow {
+    0%, 100% {
+      transform: translateY(-10%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+}
+
+:root {
+  --primary: #F0A500;
+  --accent: #CF7500;
+  --bg-dark: #121212;
+  --text-light: #F5F5F5;
+  --medical-green: #4ADE80;
+}
+
+body {
+  font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
