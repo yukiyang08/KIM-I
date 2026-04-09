@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full flex flex-col font-['Outfit','Noto_Sans_TC'] overflow-hidden select-none touch-none"
+  <div class="h-full w-full flex flex-col font-['Outfit','Noto_Sans_TC'] overflow-y-auto overflow-x-hidden select-none touch-none"
        style="background: #0A0704;">
 
     <!-- Film strip top -->
@@ -37,7 +37,7 @@
     </header>
 
     <!-- Main game area -->
-    <main class="flex-1 relative overflow-hidden">
+    <main class="flex-1 relative overflow-y-auto overflow-x-hidden">
 
       <!-- ── IDLE ── -->
       <div v-if="gameState === 'idle'"

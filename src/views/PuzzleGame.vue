@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full flex flex-col font-['Outfit','Noto_Sans_TC'] overflow-hidden select-none"
+  <div class="h-full w-full flex flex-col font-['Outfit','Noto_Sans_TC'] overflow-y-auto overflow-x-hidden select-none"
        style="background: #080810;">
 
     <!-- Decorative top strip -->
@@ -33,7 +33,7 @@
     </header>
 
     <!-- Main -->
-    <main class="flex-1 relative overflow-hidden flex flex-col items-center justify-center px-8 py-6 gap-6">
+    <main class="flex-1 relative overflow-y-auto overflow-x-hidden flex flex-col items-center justify-center px-8 py-6 gap-6">
 
       <!-- ── IDLE ── -->
       <div v-if="gameState === 'idle'" class="flex flex-col items-center text-center gap-8">

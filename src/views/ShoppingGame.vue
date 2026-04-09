@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full bg-[#1A1209] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-hidden text-white relative">
+  <div class="h-full w-full bg-[#1A1209] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-y-auto overflow-x-hidden text-white relative">
     
     <!-- Background Grid Pattern (local, no external dependency) -->
     <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 40px);"></div>

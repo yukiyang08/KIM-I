@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full bg-[#2D1B1B] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-hidden text-white relative">
+  <div class="h-full w-full bg-[#2D1B1B] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-y-auto overflow-x-hidden text-white relative">
     
     <!-- Kitchen Background Glow -->
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[#FF4D4D]/5 rounded-full blur-[150px] pointer-events-none"></div>
@@ -22,7 +22,7 @@
     </header>
 
     <!-- Main Cooking Area -->
-    <main class="flex-1 relative flex flex-col justify-center items-center px-12 py-8">
+    <main class="flex-1 relative flex flex-col justify-center items-center px-12 py-8 overflow-y-auto overflow-x-hidden">
       
       <!-- The Big Pot (Central Interaction) -->
       <div class="relative mb-12">

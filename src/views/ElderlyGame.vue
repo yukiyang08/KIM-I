@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full bg-[#0d0b0a] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-hidden relative">
+  <div class="h-full w-full bg-[#0d0b0a] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-y-auto overflow-x-hidden relative">
     
     <!-- Background Glows -->
     <div class="absolute top-0 left-0 w-[40%] h-[40%] bg-[#FF4D4D]/5 rounded-full blur-[100px] pointer-events-none"></div>
@@ -22,7 +22,7 @@
     </header>
 
     <!-- Main Game Canvas Area -->
-    <main class="flex-1 relative overflow-hidden flex justify-center items-center">
+    <main class="flex-1 relative overflow-y-auto overflow-x-hidden flex justify-center items-center">
       <!-- Game Container (Phaser will mount here) -->
       <div ref="phaserRef" class="w-full h-full max-w-[1100px] max-h-[750px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] border-[12px] border-[#3D2F1B] rounded-[50px] overflow-hidden bg-black relative">
         <!-- AI Overlay (Hints - Much bolder for elderly) -->

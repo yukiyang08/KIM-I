@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full bg-[#1A0909] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-hidden text-white relative">
+  <div class="h-full w-full bg-[#1A0909] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-y-auto overflow-x-hidden text-white relative">
     
     <!-- Stage Curtain Background -->
     <div class="absolute inset-x-0 top-0 h-40 bg-[#D32F2F] shadow-lg flex justify-around p-4 z-20 border-b-8 border-[#F0A500]">
@@ -24,7 +24,7 @@
     </header>
 
     <!-- The Play Area -->
-    <main class="flex-1 relative flex flex-col justify-center items-center px-12 py-8 overflow-hidden">
+    <main class="flex-1 relative flex flex-col justify-center items-center px-12 py-8 overflow-y-auto overflow-x-hidden">
       <!-- The Puppet Stage -->
       <div 
         ref="stageRef" 
