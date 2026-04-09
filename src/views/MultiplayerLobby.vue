@@ -23,7 +23,7 @@
             maxlength="20"
             class="w-full px-4 py-3 rounded-xl text-base outline-none"
             style="background: rgba(255,245,220,0.95); color:#241305;"
-            placeholder="例如：王奶奶"
+            placeholder="例如：王小美"
           />
 
           <label class="block text-sm mt-4 mb-2" style="color: rgba(255,232,188,0.82);">加入房號</label>

@@ -90,6 +90,42 @@ export const useGameStore = defineStore('game', () => {
     [...sessions.value].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5)
   )
 
+  const dimensionOrder = ['memory', 'attention', 'execution', 'visual', 'reactionSpeed']
+  const dimensionLabel = {
+    memory: '記憶力',
+    attention: '注意力',
+    execution: '執行力',
+    visual: '視覺空間',
+    reactionSpeed: '反應力',
+  }
+
+  const dimensionBreakdown = computed(() =>
+    dimensionOrder.map((dim) => {
+      const related = sessions.value.filter((s) => dimensionOf[s.gameId] === dim)
+      const recent = related.slice(-3)
+      const current = recent.length
+        ? Math.round(recent.reduce((sum, item) => sum + item.score, 0) / recent.length)
+        : baseline[dim]
+
+      const base = baseline[dim]
+      const delta = current - base
+
+      let trend = 'stuck'
+      if (delta >= 5) trend = 'improving'
+      else if (delta <= -5) trend = 'declining'
+
+      return {
+        key: dim,
+        label: dimensionLabel[dim],
+        current,
+        baseline: base,
+        delta,
+        trend,
+        sessionsCount: related.length,
+      }
+    })
+  )
+
   return {
     sessions,
     addSession,
@@ -101,5 +137,6 @@ export const useGameStore = defineStore('game', () => {
     alertMessage,
     recentSessions,
     latestByDimension,
+    dimensionBreakdown,
   }
 })

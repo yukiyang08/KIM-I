@@ -1,97 +1,161 @@
 <template>
-  <div class="h-full w-full bg-[#1A1209] flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-y-auto overflow-x-hidden text-white relative">
-    
-    <!-- Background Grid Pattern (local, no external dependency) -->
-    <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 40px);"></div>
+  <div class="h-full w-full flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-y-auto overflow-x-hidden text-white relative"
+       style="background: radial-gradient(ellipse at top, #2A180B 0%, #140B05 45%, #0B0603 100%);">
 
-    <!-- Header Section -->
-    <header class="px-12 py-10 flex justify-between items-end relative z-10 border-b border-white/5 bg-black/40">
-      <div>
-        <button @click="router.push('/')" class="flex items-center gap-2 text-white/40 hover:text-[#F0A500] transition-colors text-xl font-bold mb-4">
-          ← 離開遊戲
-        </button>
-        <h1 class="text-6xl font-black tracking-widest text-[#F0A500] drop-shadow-lg">
-          <span class="text-[#FF4D4D]">●</span> 柑仔店採買記
-        </h1>
-        <p class="text-2xl text-white/50 mt-4 font-medium italic">奶奶，今天阿公想喝沙士喔！</p>
-      </div>
-      <div class="text-right">
-        <div class="text-xl font-bold opacity-40 uppercase tracking-widest mb-2">正確次數</div>
-        <div class="text-7xl font-black text-[#4ADE80] tabular-nums">{{ correctCount }}</div>
+    <div class="absolute inset-0 opacity-[0.07] pointer-events-none"
+         style="background-image: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 44px), repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 44px);"></div>
+
+    <header class="px-4 sm:px-6 md:px-10 lg:px-12 py-4 sm:py-6 md:py-8 border-b relative z-10"
+            style="border-color: rgba(255,255,255,0.06); background: rgba(12,8,4,0.62); backdrop-filter: blur(8px);">
+      <div class="flex flex-wrap gap-4 sm:gap-6 items-start justify-between">
+        <div class="min-w-0">
+          <button @click="router.push('/')"
+                  class="flex items-center gap-2 text-sm sm:text-base md:text-lg font-bold mb-2 sm:mb-3 transition-colors"
+                  style="color: rgba(255,255,255,0.44);"
+                  @mouseover="e => e.currentTarget.style.color = '#F0A500'"
+                  @mouseleave="e => e.currentTarget.style.color = 'rgba(255,255,255,0.44)'">
+            ← 離開遊戲
+          </button>
+          <h1 class="font-black tracking-[0.08em] leading-tight" style="font-size: clamp(1.7rem, 6vw, 3.6rem); color: #F0B84A;">
+            <span style="color:#FF5A45;">●</span> 柑仔店採買記
+          </h1>
+          <p class="mt-1 sm:mt-2 text-sm sm:text-base md:text-xl italic"
+             style="color: rgba(255,231,186,0.7);">
+            記住清單，在貨架裡把正確商品找出來。
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 w-full sm:w-auto">
+          <div class="rounded-xl px-3 py-2 text-center"
+               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+            <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">關卡</div>
+            <div class="text-lg sm:text-2xl font-black tabular-nums">{{ round + 1 }}/{{ totalRounds }}</div>
+          </div>
+          <div class="rounded-xl px-3 py-2 text-center"
+               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+            <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">正確</div>
+            <div class="text-lg sm:text-2xl font-black tabular-nums text-[#7DFFAE]">{{ totalCorrect }}</div>
+          </div>
+          <div class="rounded-xl px-3 py-2 text-center"
+               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+            <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">失誤</div>
+            <div class="text-lg sm:text-2xl font-black tabular-nums text-[#FFB19E]">{{ totalErrors }}</div>
+          </div>
+          <div class="rounded-xl px-3 py-2 text-center"
+               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+            <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">耗時</div>
+            <div class="text-lg sm:text-2xl font-black tabular-nums">{{ elapsedTime.toFixed(1) }}s</div>
+          </div>
+        </div>
       </div>
     </header>
 
-    <!-- Game Stages -->
-    <main class="flex-1 relative flex justify-center items-center px-12 py-8">
-      
-      <!-- Stage 1: Memorization (The Shopping List) -->
-      <transition name="scale">
-        <div v-if="stage === 'memo'" class="w-[600px] bg-[#FDF5E6] p-12 rounded-[40px] shadow-[0_30px_60px_rgba(0,0,0,0.8)] border-[12px] border-[#3D2F1B] text-gray-800 text-center">
-          <h2 class="text-5xl font-black mb-8 border-b-4 border-dashed border-gray-300 pb-6 uppercase tracking-[0.2em]">採買清單</h2>
-          <div class="flex flex-wrap justify-center gap-10 py-6">
-            <div v-for="item in currentTarget" :key="item.id" class="flex flex-col items-center">
-              <span class="text-[120px] filter drop-shadow-md mb-4">{{ item.icon }}</span>
-              <span class="text-4xl font-bold text-gray-700">{{ item.name }}</span>
+    <main ref="mainRef" class="flex-1 relative px-3 sm:px-5 md:px-8 lg:px-12 py-4 sm:py-6 md:py-8 z-10">
+      <transition name="scale" mode="out-in">
+        <section v-if="stage === 'memo'" key="memo"
+                 class="max-w-3xl mx-auto rounded-[24px] sm:rounded-[36px] p-5 sm:p-8 md:p-10 text-[#2C1C0D]"
+                 style="background: linear-gradient(145deg, #FFF6E9, #F7E4CB); border: 10px solid #6A4823; box-shadow: 0 28px 60px rgba(0,0,0,0.55);">
+          <div class="text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-black tracking-[0.14em]"
+                 style="background: rgba(160,112,36,0.2); color:#6A4823;">
+              記憶階段
+            </div>
+            <h2 class="mt-4 text-2xl sm:text-4xl md:text-5xl font-black tracking-[0.12em]">本關採買清單</h2>
+            <p class="mt-2 text-sm sm:text-base md:text-lg font-semibold text-[#6A5337]">請記住以下 {{ targetItems.length }} 樣商品</p>
+          </div>
+
+          <div class="mt-6 sm:mt-8 overflow-x-auto">
+            <div class="flex flex-nowrap justify-start sm:justify-center gap-3 sm:gap-5 min-w-max">
+              <article v-for="item in targetItems" :key="item.id" class="rounded-2xl px-3 sm:px-4 py-4 sm:py-5 text-center min-w-[150px] sm:min-w-[180px]"
+                     style="background: rgba(255,255,255,0.72); border: 1px dashed rgba(106,72,35,0.35);">
+                <div class="text-5xl sm:text-7xl">{{ item.icon }}</div>
+                <div class="mt-2 text-base sm:text-xl font-black">{{ item.name }}</div>
+              </article>
             </div>
           </div>
-          <div class="mt-12">
-            <div class="text-2xl font-bold text-gray-400 mb-4 tracking-widest">請在倒數結束前記住它們</div>
-            <div class="text-6xl font-black text-[#FF4D4D]">{{ timer }}</div>
-          </div>
-        </div>
-      </transition>
 
-      <!-- Stage 2: Selection (The Shelf) -->
-      <transition name="fade">
-        <div v-if="stage === 'play'" class="w-full h-full flex flex-col items-center">
-          <div class="text-4xl font-black text-[#F0A500] mb-12 py-4 px-12 bg-white/5 rounded-full border border-white/10 italic">
-            「請在架上點擊您剛才記下的商品」
+          <div class="mt-7 sm:mt-9 text-center">
+            <div class="text-sm sm:text-base font-bold text-[#6A5337]">倒數</div>
+            <div class="text-5xl sm:text-6xl font-black text-[#D14A33] tabular-nums">{{ memoCountdown }}</div>
           </div>
-          
-          <div class="grid grid-cols-4 gap-12 max-w-[1200px]">
-            <button 
-              v-for="item in shelfItems" 
+        </section>
+
+        <section v-else-if="stage === 'play'" key="play" class="max-w-6xl mx-auto">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-5">
+            <div class="px-4 sm:px-6 py-2.5 rounded-full text-sm sm:text-lg font-black"
+                 style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color:#F2CB83;">
+              請點出清單商品（剩餘 {{ remainTargetCount }} 樣）
+            </div>
+            <div class="text-sm sm:text-base font-semibold" style="color: rgba(255,236,201,0.78);">
+              難度：{{ difficultyLabel }}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
+            <button
+              v-for="item in shelfItems"
               :key="item.id"
-              class="group relative aspect-square w-full rounded-[40px] bg-white/5 border-4 border-white/10 flex flex-col items-center justify-center p-8 transition-all active:scale-90 hover:bg-white/10"
+              class="group relative rounded-3xl min-h-[150px] sm:min-h-[190px] p-3 sm:p-4 md:p-5 text-left transition-transform active:scale-[0.96]"
+              :class="{ 'pointer-events-none': selectedIds.includes(item.id) }"
+              :style="cardStyle(item.id)"
+              :ref="el => registerCardRef(item.id, el)"
               @click="onSelect(item)"
-              :disabled="selectedIds.includes(item.id)"
             >
-              <span class="text-[100px] mb-6 filter drop-shadow-lg">{{ item.icon }}</span>
-              <span class="text-3xl font-bold text-white/80 transition-colors group-hover:text-[#F0A500]">{{ item.name }}</span>
-              
-              <!-- Selected Overlay -->
-              <div v-if="selectedIds.includes(item.id)" class="absolute inset-0 bg-black/60 flex items-center justify-center rounded-[36px]">
-                <span class="text-7xl">✔️</span>
+              <div class="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity"
+                   style="background: radial-gradient(circle at 50% 30%, rgba(255,214,131,0.2), transparent 65%);"></div>
+
+              <div class="relative z-10 flex flex-col items-center justify-center h-full text-center">
+                <div class="text-5xl sm:text-7xl md:text-8xl leading-none">{{ item.icon }}</div>
+                <div class="mt-2 sm:mt-3 text-sm sm:text-lg md:text-xl font-black tracking-[0.02em] text-[#FFE9C5]">{{ item.name }}</div>
+              </div>
+
+              <div v-if="selectedIds.includes(item.id)" class="absolute inset-0 rounded-3xl flex items-center justify-center"
+                   style="background: rgba(9,7,5,0.68);">
+                <span class="text-5xl sm:text-6xl">✔</span>
               </div>
             </button>
           </div>
-        </div>
-      </transition>
+        </section>
 
-      <!-- Stage 3: Score / Success -->
-      <transition name="scale">
-        <div v-if="stage === 'success'" class="text-center">
-          <div class="text-[200px] mb-8">🏆</div>
-          <h2 class="text-8xl font-black text-[#F0A500] mb-6 tracking-widest">採買大成功！</h2>
-          <p class="text-3xl text-white/60 mb-12 font-medium">您只花了 {{ totalTime }} 秒，記憶力非常好喔！</p>
-          <button @click="resetGame" class="px-16 py-8 bg-[#F0A500] rounded-full text-black text-4xl font-black shadow-[0_20px_40px_rgba(240,165,0,0.3)] hover:scale-105 transition-transform active:scale-95 leading-none">
-             再次挑戰
+        <section v-else key="result" class="max-w-3xl mx-auto text-center rounded-[28px] sm:rounded-[40px] p-6 sm:p-10"
+                 style="background: linear-gradient(145deg, rgba(52,31,15,0.86), rgba(23,14,8,0.94)); border: 1px solid rgba(239,192,101,0.32); box-shadow: 0 28px 60px rgba(0,0,0,0.5);">
+          <div class="text-[110px] sm:text-[140px] mb-2">🧺</div>
+          <h2 class="text-4xl sm:text-6xl font-black tracking-[0.08em]" style="color:#F0B84A;">採買完成</h2>
+          <p class="mt-2 text-base sm:text-xl" style="color: rgba(255,226,169,0.76);">做得很好，今天的採買記憶訓練結束了！</p>
+
+          <div class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 text-left">
+            <div class="rounded-2xl px-4 py-3" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">
+              <div class="text-xs uppercase tracking-[0.16em] opacity-65">總分</div>
+              <div class="text-3xl sm:text-4xl font-black text-[#7DFFAE]">{{ finalScore }}</div>
+            </div>
+            <div class="rounded-2xl px-4 py-3" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">
+              <div class="text-xs uppercase tracking-[0.16em] opacity-65">總耗時</div>
+              <div class="text-3xl sm:text-4xl font-black">{{ elapsedTime.toFixed(1) }}s</div>
+            </div>
+            <div class="rounded-2xl px-4 py-3" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">
+              <div class="text-xs uppercase tracking-[0.16em] opacity-65">答對數</div>
+              <div class="text-3xl sm:text-4xl font-black">{{ totalCorrect }}</div>
+            </div>
+            <div class="rounded-2xl px-4 py-3" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">
+              <div class="text-xs uppercase tracking-[0.16em] opacity-65">失誤數</div>
+              <div class="text-3xl sm:text-4xl font-black text-[#FFB19E]">{{ totalErrors }}</div>
+            </div>
+          </div>
+
+          <button @click="resetGame"
+                  class="mt-7 sm:mt-9 px-8 sm:px-12 py-4 sm:py-5 rounded-full text-2xl sm:text-3xl font-black active:scale-95 transition-transform"
+                  style="background: linear-gradient(135deg, #E4B84D, #A37212); color:#2A1808; box-shadow: 0 18px 40px rgba(240,165,0,0.3);">
+            再次挑戰
           </button>
-        </div>
+        </section>
       </transition>
-
     </main>
-
-    <!-- AI Toast (Hidden Data Collection Feedback) -->
-    <div id="ai-toast" class="fixed bottom-32 left-1/2 -translate-x-1/2 bg-[#4ADE80] text-black px-8 py-3 rounded-full font-bold text-xl shadow-lg opacity-0 transition-opacity pointer-events-none">
-       AI 正在分析您的決策時長...
-    </div>
 
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import gsap from 'gsap'
 import { useGameStore } from '../stores/gameStore'
@@ -99,7 +163,6 @@ import { useGameStore } from '../stores/gameStore'
 const router = useRouter()
 const gameStore = useGameStore()
 
-// Game Data
 const allItems = [
   { id: 1, name: '黑松沙士', icon: '🥫' },
   { id: 2, name: '懷舊乖乖', icon: '🥨' },
@@ -112,121 +175,221 @@ const allItems = [
   { id: 9, name: '懷舊陀螺', icon: '🪀' },
   { id: 10, name: '發光燈籠', icon: '🏮' },
   { id: 11, name: '紅豆湯圓', icon: '🍡' },
-  { id: 12, name: '中藥貼布', icon: '🩹' }
+  { id: 12, name: '中藥貼布', icon: '🩹' },
 ]
 
-const stage = ref('memo') // memo, play, success
-const currentTarget = ref([])
-const shelfItems = ref([])
-const selectedIds = ref([])
-const timer = ref(10)
-const correctCount = ref(0)
-const totalTime = ref(0)
-let startTime = 0
-let errorCount = 0
-
-// Game logic
-const resetGame = () => {
-  stage.value = 'memo'
-  selectedIds.value = []
-  correctCount.value = 0
-  timer.value = 10
-  errorCount = 0
-  
-  // Randomly pick 3 targets
-  const shuffled = [...allItems].sort(() => 0.5 - Math.random())
-  currentTarget.value = shuffled.slice(0, 3)
-  
-  // Mixed shelf (All items)
-  shelfItems.value = [...allItems].sort(() => 0.5 - Math.random())
-  
-  startMemoTimer()
+const configByDifficulty = {
+  easy: { rounds: 2, targetBase: 2, memoSec: 9, shelfSize: 8 },
+  normal: { rounds: 3, targetBase: 3, memoSec: 8, shelfSize: 10 },
+  hard: { rounds: 4, targetBase: 3, memoSec: 7, shelfSize: 12 },
 }
 
-const startMemoTimer = () => {
-  const intv = setInterval(() => {
-    timer.value--
-    if (timer.value <= 0) {
-      clearInterval(intv)
-      startPlay()
+const stage = ref('memo')
+const round = ref(0)
+const totalRounds = ref(3)
+const targetItems = ref([])
+const shelfItems = ref([])
+const selectedIds = ref([])
+const disabledIds = ref([])
+const memoCountdown = ref(8)
+const totalCorrect = ref(0)
+const totalErrors = ref(0)
+const elapsedTime = ref(0)
+const finalScore = ref(0)
+
+const cardRefs = reactive({})
+const mainRef = ref(null)
+
+let memoTimer = null
+let playTimer = null
+let stageStartAt = 0
+
+const difficultyConfig = computed(() => configByDifficulty[gameStore.difficulty] || configByDifficulty.normal)
+const difficultyLabel = computed(() => {
+  if (gameStore.difficulty === 'easy') return '簡單'
+  if (gameStore.difficulty === 'hard') return '困難'
+  return '一般'
+})
+const remainTargetCount = computed(() => targetItems.value.length - selectedIds.value.length)
+
+const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5)
+const sample = (arr, count) => shuffle(arr).slice(0, count)
+
+const clearTimers = () => {
+  if (memoTimer) {
+    clearInterval(memoTimer)
+    memoTimer = null
+  }
+  if (playTimer) {
+    clearInterval(playTimer)
+    playTimer = null
+  }
+}
+
+const cardStyle = (id) => {
+  const picked = selectedIds.value.includes(id)
+  return {
+    background: picked
+      ? 'linear-gradient(145deg, rgba(47,89,50,0.55), rgba(21,45,25,0.8))'
+      : 'linear-gradient(145deg, rgba(56,35,16,0.72), rgba(22,14,8,0.88))',
+    border: picked
+      ? '2px solid rgba(130,230,150,0.5)'
+      : '2px solid rgba(238,190,94,0.24)',
+    boxShadow: picked
+      ? '0 10px 24px rgba(70,140,80,0.28)'
+      : '0 10px 24px rgba(0,0,0,0.28)',
+  }
+}
+
+const registerCardRef = (id, el) => {
+  if (el) cardRefs[id] = el
+}
+
+const startMemoStage = () => {
+  clearTimers()
+  stage.value = 'memo'
+  selectedIds.value = []
+  disabledIds.value = []
+
+  const roundOffset = Math.min(2, round.value)
+  const targetCount = Math.min(allItems.length - 2, difficultyConfig.value.targetBase + roundOffset)
+  targetItems.value = sample(allItems, targetCount)
+
+  const others = allItems.filter((item) => !targetItems.value.some((target) => target.id === item.id))
+  const decoyCount = Math.max(0, difficultyConfig.value.shelfSize - targetItems.value.length)
+  shelfItems.value = shuffle([...targetItems.value, ...sample(others, decoyCount)])
+
+  memoCountdown.value = Math.max(4, difficultyConfig.value.memoSec - roundOffset)
+
+  memoTimer = setInterval(() => {
+    memoCountdown.value -= 1
+    if (memoCountdown.value <= 0) {
+      clearInterval(memoTimer)
+      memoTimer = null
+      startPlayStage()
     }
   }, 1000)
 }
 
-const startPlay = () => {
+const startPlayStage = () => {
   stage.value = 'play'
-  startTime = Date.now()
+  stageStartAt = Date.now()
+  playTimer = setInterval(() => {
+    const sec = (Date.now() - stageStartAt) / 1000
+    elapsedTime.value = Number(sec.toFixed(1))
+  }, 100)
 }
 
-const onSelect = (item) => {
-  // Check if correct
-  const isTarget = currentTarget.value.find(t => t.id === item.id)
-  
-  if (isTarget) {
-    selectedIds.value.push(item.id)
-    correctCount.value++
-    
-    // AI Feedback simulation
-    showAIFeedback()
-    
-    if (selectedIds.value.length === currentTarget.value.length) {
-      setTimeout(finishGame, 800)
-    }
-  } else {
-    errorCount++
-    gsap.to('main', { x: 10, duration: 0.1, repeat: 5, yoyo: true })
+const endRound = () => {
+  if (playTimer) {
+    clearInterval(playTimer)
+    playTimer = null
   }
+
+  if (round.value + 1 >= totalRounds.value) {
+    finishGame()
+    return
+  }
+
+  round.value += 1
+  setTimeout(() => {
+    startMemoStage()
+  }, 800)
 }
 
 const finishGame = () => {
-  const elapsed = (Date.now() - startTime) / 1000
-  totalTime.value = elapsed.toFixed(1)
-  // Score: up to 80 pts for speed (lose 2 pts/sec after 5s), up to 20 pts for no errors
-  const speedScore = Math.max(0, 80 - Math.max(0, elapsed - 5) * 2)
-  const errorPenalty = Math.min(20, errorCount * 5)
-  gameStore.addSession('shopping', speedScore + (20 - errorPenalty), {
-    correctCount: correctCount.value,
-    totalTime: elapsed,
-    errors: errorCount,
+  clearTimers()
+
+  const maxTargets = Array.from({ length: totalRounds.value }, (_, idx) => {
+    const offset = Math.min(2, idx)
+    return Math.min(allItems.length - 2, difficultyConfig.value.targetBase + offset)
+  }).reduce((sum, count) => sum + count, 0)
+
+  const accuracyRate = maxTargets > 0 ? totalCorrect.value / maxTargets : 0
+  const errorPenalty = Math.min(28, totalErrors.value * 4)
+  const speedPenalty = Math.min(24, Math.max(0, elapsedTime.value - totalRounds.value * 6) * 1.2)
+  const rawScore = Math.round(72 * accuracyRate + 28 - errorPenalty - speedPenalty)
+  finalScore.value = Math.max(0, Math.min(100, rawScore))
+
+  gameStore.addSession('shopping', finalScore.value, {
+    rounds: totalRounds.value,
+    correctCount: totalCorrect.value,
+    totalTime: elapsedTime.value,
+    errors: totalErrors.value,
+    difficulty: gameStore.difficulty,
   })
-  stage.value = 'success'
+
+  stage.value = 'result'
 }
 
-const showAIFeedback = () => {
-  const t = document.getElementById('ai-toast')
-  if (!t) return
-  gsap.to(t, { opacity: 1, y: -20, duration: 0.4 })
-  gsap.to(t, { opacity: 0, y: 0, duration: 0.4, delay: 1.5 })
+const onSelect = (item) => {
+  if (stage.value !== 'play') return
+  if (selectedIds.value.includes(item.id)) return
+  if (disabledIds.value.includes(item.id)) return
+
+  const isTarget = targetItems.value.some((target) => target.id === item.id)
+  if (isTarget) {
+    selectedIds.value.push(item.id)
+    totalCorrect.value += 1
+
+    if (selectedIds.value.length === targetItems.value.length) {
+      setTimeout(endRound, 280)
+    }
+    return
+  }
+
+  totalErrors.value += 1
+  disabledIds.value.push(item.id)
+
+  if (cardRefs[item.id]) {
+    gsap.fromTo(cardRefs[item.id],
+      { x: -8 },
+      { x: 8, duration: 0.06, repeat: 5, yoyo: true, clearProps: 'x' }
+    )
+  } else if (mainRef.value) {
+    gsap.fromTo(mainRef.value,
+      { x: -4 },
+      { x: 4, duration: 0.05, repeat: 5, yoyo: true, clearProps: 'x' }
+    )
+  }
+
+  setTimeout(() => {
+    disabledIds.value = disabledIds.value.filter((id) => id !== item.id)
+  }, 700)
+}
+
+const resetGame = () => {
+  clearTimers()
+  if (toastTimer) {
+    clearTimeout(toastTimer)
+    toastTimer = null
+  }
+
+  round.value = 0
+  totalRounds.value = difficultyConfig.value.rounds
+  totalCorrect.value = 0
+  totalErrors.value = 0
+  elapsedTime.value = 0
+  finalScore.value = 0
+  startMemoStage()
 }
 
 onMounted(() => {
   resetGame()
 })
+
+onUnmounted(() => {
+  clearTimers()
+})
 </script>
 
 <style scoped>
-/* State Transitions */
 .scale-enter-active, .scale-leave-active {
-  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.46s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .scale-enter-from, .scale-leave-to {
-  transform: scale(0.6);
+  transform: scale(0.95);
   opacity: 0;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-
-.animate-bounce-slow {
-  animation: bounce-slow 2s infinite;
-}
-
-@keyframes bounce-slow {
-  0%, 100% { transform: translateY(-5%); }
-  50% { transform: translateY(0); }
-}
 </style>

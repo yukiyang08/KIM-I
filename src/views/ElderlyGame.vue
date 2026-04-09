@@ -13,7 +13,7 @@
         <h1 class="text-6xl font-black tracking-[0.2em] text-[#F0A500] drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]">
           <span class="text-[#FF4D4D] animate-pulse">●</span> 金憶彈珠台攤
         </h1>
-        <p class="text-2xl text-white/50 mt-4 font-medium tracking-wide italic">奶奶，今天的手氣看起來大好喔！</p>
+        <p class="text-2xl text-white/50 mt-4 font-medium tracking-wide italic">今天的手氣看起來大好喔！</p>
       </div>
       <div class="text-right ml-8">
         <div class="text-xl font-bold opacity-60 uppercase tracking-[0.3em] text-[#F0A500] mb-2">當前得分</div>

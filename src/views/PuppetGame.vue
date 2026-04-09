@@ -15,7 +15,7 @@
         <h1 class="text-6xl font-black tracking-widest text-[#F0A500] drop-shadow-lg">
           <span class="text-[#FF4D4D]">●</span> 廟口布袋戲
         </h1>
-        <p class="text-2xl text-white/50 mt-4 font-medium italic">奶奶，請盯好這位主角，別讓他跑掉囉！</p>
+        <p class="text-2xl text-white/50 mt-4 font-medium italic">請盯好這位主角，別讓他跑掉囉！</p>
       </div>
       <div class="text-right">
         <div class="text-xl font-bold opacity-40 uppercase tracking-widest mb-2">正確次數</div>
@@ -245,7 +245,7 @@ const onSelect = (p) => {
   } else {
     totalErrors.value++
     gsap.to(puppetRefs[p.id], { x: '+=20', duration: 0.05, repeat: 5, yoyo: true })
-    showError('奶奶，再仔細看看，不是這一位喔！')
+    showError('再仔細看看，不是這一位喔！')
   }
 }
 

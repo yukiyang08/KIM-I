@@ -13,7 +13,7 @@
         <h1 class="text-6xl font-black tracking-widest text-[#F0A500] drop-shadow-lg">
           <span class="text-[#FF4D4D]">●</span> 阿嬤的家常菜
         </h1>
-        <p class="text-2xl text-white/50 mt-4 font-medium italic">奶奶，今天來煮一鍋好噴香的滷肉飯喔！</p>
+        <p class="text-2xl text-white/50 mt-4 font-medium italic">今天來煮一鍋好噴香的滷肉飯喔！</p>
       </div>
       <div class="text-right">
         <div class="text-xl font-bold opacity-40 uppercase tracking-widest mb-2">當前進度</div>
@@ -77,7 +77,7 @@
       <div v-else class="text-center">
          <div class="text-[180px] mb-4">🍚🥢</div>
          <h2 class="text-8xl font-black text-[#F0A500] mb-8 tracking-widest">滷肉飯大功告成！</h2>
-         <p class="text-3xl text-white/60 mb-12">奶奶，這鍋滷肉油亮噴香，阿公一定很滿意！</p>
+         <p class="text-3xl text-white/60 mb-12">這鍋滷肉油亮噴香，家人一定很滿意！</p>
          <button @click="resetGame" class="px-20 py-8 bg-[#F0A500] rounded-full text-black text-5xl font-black shadow-[0_20px_50px_rgba(240,165,0,0.4)] hover:scale-105 active:scale-95 transition-all">
             再煮一鍋
          </button>
