@@ -17,17 +17,23 @@
                 @mouseleave="e => e.currentTarget.style.color = 'rgba(200,150,30,0.45)'">
           ← 離開遊戲
         </button>
+        <button
+          v-if="gameState === 'playing'"
+          @click="finishEarly"
+          class="mb-2 sm:mb-3 px-4 py-1.5 rounded-full text-sm sm:text-base font-bold transition-colors"
+          style="color: rgba(255,226,180,0.9); background: rgba(90,52,20,0.45); border: 1px solid rgba(220,170,90,0.45);"
+        >
+          提前結束本局
+        </button>
         <h1 class="font-black leading-tight" style="font-size: clamp(1.6rem, 7vw, 3rem); color: #C8961E; text-shadow: 0 0 40px rgba(200,150,30,0.3);">
           <span style="color: #C04030;">♪</span> 懷舊音樂節拍
         </h1>
-        <p class="text-sm sm:text-base md:text-xl mt-1 sm:mt-1.5 italic font-medium" style="color: rgba(255,255,255,0.3);">
-          跟著節拍，輕拍正確的樂器區
-        </p>
+
         <p class="text-xs sm:text-sm md:text-base mt-1 font-semibold" style="color: rgba(240,208,144,0.75);">
           曲目：{{ selectedSong.name }}
         </p>
       </div>
-      <div class="text-right shrink-0">
+      <div class="text-center shrink-0 min-w-[110px] sm:min-w-[140px]">
         <div class="text-xs sm:text-sm md:text-base font-bold uppercase tracking-widest mb-1" style="color: rgba(255,255,255,0.2);">得分</div>
         <div class="font-black text-white tabular-nums drop-shadow-lg" style="font-size: clamp(2rem, 7vw, 3.75rem);">{{ score }}</div>
         <transition name="combo-pop">
@@ -108,11 +114,6 @@
                class="flex-1 relative overflow-hidden"
            :style="{ background: lane.trackBg, borderRight: li < lanes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }">
 
-            <!-- Top lane marker -->
-            <div class="absolute top-3 inset-x-0 flex justify-center z-10 pointer-events-none">
-              <span class="text-2xl sm:text-3xl md:text-4xl drop-shadow-lg">{{ lane.icon }}</span>
-            </div>
-
             <!-- Centre guide line -->
             <div class="absolute left-1/2 top-14 pointer-events-none" style="width:1px; bottom: 18%; background: rgba(255,255,255,0.06);"></div>
 
@@ -120,14 +121,12 @@
             <div v-for="note in notesInLane[li]" :key="note.id"
                  class="absolute left-1/2 pointer-events-none z-20"
                  :style="{ top: note.y + '%', transform: 'translate(-50%, -50%)' }">
-              <div class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl sm:text-2xl md:text-3xl font-black drop-shadow-2xl"
+              <div class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full drop-shadow-2xl"
                    :style="{
                      background: `radial-gradient(circle at 38% 32%, ${lane.noteLight}, ${lane.noteDark})`,
                      border: `3px solid ${lane.accent}`,
                      boxShadow: `0 6px 24px ${lane.glow}, 0 0 0 1px rgba(255,255,255,0.1)`,
-                   }">
-                {{ lane.noteChar }}
-              </div>
+                   }"></div>
             </div>
 
             <!-- Hit zone -->
@@ -155,11 +154,7 @@
             <button class="absolute bottom-0 inset-x-0 z-20 flex items-center justify-center"
                     :style="{ height: '18%', background: lane.btnBg,
                               borderTop: `1px solid ${lane.accent}30` }"
-                    @pointerdown.prevent="onTap(li)">
-              <span class="text-xl sm:text-2xl md:text-3xl font-black" :style="{ color: lane.accent }">
-                拍
-              </span>
-            </button>
+                    @pointerdown.prevent="onTap(li)"></button>
           </div>
         </div>
       </div>
@@ -235,28 +230,24 @@ const gameStore = useGameStore()
 // ── Lane definitions ──────────────────────────────────────────
 const ALL_LANES = [
   {
-    icon: '🥁', noteChar: '♩',
     trackBg: 'rgba(100,20,10,0.14)',
     btnBg: 'rgba(160,30,15,0.45)',
     accent: '#E06030', glow: 'rgba(220,80,40,0.5)',
     noteLight: '#F09860', noteDark: '#803010',
   },
   {
-    icon: '🪙', noteChar: '♪',
     trackBg: 'rgba(140,100,10,0.12)',
     btnBg: 'rgba(180,130,10,0.42)',
     accent: '#C8961E', glow: 'rgba(200,150,30,0.5)',
     noteLight: '#F0C040', noteDark: '#906A10',
   },
   {
-    icon: '🎋', noteChar: '♫',
     trackBg: 'rgba(30,80,30,0.12)',
     btnBg: 'rgba(40,100,40,0.42)',
     accent: '#6ABE50', glow: 'rgba(100,190,70,0.5)',
     noteLight: '#90D870', noteDark: '#306A20',
   },
   {
-    icon: '🎴', noteChar: '♬',
     trackBg: 'rgba(20,60,120,0.12)',
     btnBg: 'rgba(25,80,155,0.42)',
     accent: '#50A0D8', glow: 'rgba(60,150,220,0.5)',
@@ -563,6 +554,11 @@ const endGame = () => {
     })
   }
   gameState.value = 'finished'
+}
+
+const finishEarly = () => {
+  if (gameState.value !== 'playing') return
+  endGame()
 }
 
 const goBack = () => {
