@@ -2,23 +2,23 @@
   <!-- Hamburger Button -->
   <button
     @click="isOpen = !isOpen"
-    class="fixed top-4 right-4 z-[100] w-12 h-12 flex flex-col items-center justify-center gap-1.5 transition-all duration-300 group"
-    style="background: linear-gradient(135deg, rgba(200,150,30,0.8), rgba(139,96,0,0.8)); 
-            border: 2px solid rgba(200,150,30,0.4);
-            border-radius: 12px;
+    class="fixed top-3 right-3 sm:top-4 sm:right-4 z-[100] w-14 h-14 sm:w-16 sm:h-16 flex flex-col items-center justify-center gap-2 transition-all duration-300 group"
+    style="background: linear-gradient(135deg, rgba(242,196,78,0.96), rgba(184,128,12,0.96)); 
+            border: 2px solid rgba(255,229,160,0.75);
+            border-radius: 14px;
             backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px rgba(200,150,30,0.2);">
+            box-shadow: 0 12px 34px rgba(200,150,30,0.35), 0 0 0 1px rgba(255,244,209,0.28);">
     <span :class="[
-      'w-6 h-0.5 rounded-full transition-all duration-300 origin-center',
-      isOpen ? 'rotate-45 translate-y-2 bg-white' : 'bg-white group-hover:bg-yellow-200'
+      'w-7 sm:w-8 h-1 rounded-full transition-all duration-300 origin-center',
+      isOpen ? 'rotate-45 translate-y-3 bg-[#3A2408]' : 'bg-[#3A2408] group-hover:bg-[#2A1605]'
     ]"></span>
     <span :class="[
-      'w-6 h-0.5 rounded-full transition-all duration-300',
-      isOpen ? 'opacity-0' : 'opacity-100 bg-white group-hover:bg-yellow-200'
+      'w-7 sm:w-8 h-1 rounded-full transition-all duration-300',
+      isOpen ? 'opacity-0' : 'opacity-100 bg-[#3A2408] group-hover:bg-[#2A1605]'
     ]"></span>
     <span :class="[
-      'w-6 h-0.5 rounded-full transition-all duration-300 origin-center',
-      isOpen ? '-rotate-45 -translate-y-2 bg-white' : 'bg-white group-hover:bg-yellow-200'
+      'w-7 sm:w-8 h-1 rounded-full transition-all duration-300 origin-center',
+      isOpen ? '-rotate-45 -translate-y-3 bg-[#3A2408]' : 'bg-[#3A2408] group-hover:bg-[#2A1605]'
     ]"></span>
   </button>
 
@@ -52,7 +52,7 @@
         <div class="text-center mb-8 pb-6 border-b" style="border-color: rgba(200,150,30,0.2);">
           <div class="text-4xl mb-2">🎵</div>
           <h2 class="text-2xl font-black tracking-wider" style="color: #C8961E;">
-            金憶KIM-I
+            金憶
           </h2>
         </div>
 
@@ -86,7 +86,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
-          <span class="font-bold">家屬報表</span>
+          <span class="font-bold">數據報表</span>
         </router-link>
 
         <!-- Version info -->

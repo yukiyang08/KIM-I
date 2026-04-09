@@ -23,6 +23,9 @@
         <p class="text-xl mt-1.5 italic font-medium" style="color: rgba(255,255,255,0.3);">
           跟著節拍，輕拍正確的樂器區
         </p>
+        <p class="text-base mt-1 font-semibold" style="color: rgba(240,208,144,0.75);">
+          曲目：{{ selectedSong.name }}
+        </p>
       </div>
       <div class="text-right">
         <div class="text-base font-bold uppercase tracking-widest mb-1" style="color: rgba(255,255,255,0.2);">得分</div>
@@ -62,7 +65,14 @@
           懷舊節拍
         </h2>
         <p class="text-2xl mb-2" style="color: rgba(255,255,255,0.4);">限時 60 秒，跟著節奏一起打拍子！</p>
-        <p class="text-xl mb-12" style="color: rgba(200,150,30,0.5);">完美命中可獲得 Combo 加分</p>
+        <p class="text-xl mb-2" style="color: rgba(200,150,30,0.5);">完美命中可獲得 Combo 加分</p>
+        <p class="text-lg mb-2" style="color: rgba(255,255,255,0.45);">{{ laneModeText }}</p>
+        <p class="text-base mb-12" style="color: rgba(240,208,144,0.65);">{{ beatDetectStatus || '尚未分析歌曲節奏' }}</p>
+
+        <p v-if="audioWarning" class="text-lg mb-6 px-6 py-3 rounded-xl"
+           style="color: #FFD2B0; background: rgba(120,40,20,0.35); border: 1px solid rgba(255,180,120,0.35);">
+          {{ audioWarning }}
+        </p>
 
         <button @click="startGame"
           class="px-20 py-8 rounded-full text-black text-4xl font-black active:scale-95 transition-transform"
@@ -83,12 +93,20 @@
              style="color: rgba(255,255,255,0.35);">
           {{ Math.ceil(timeLeft / 1000) }}s
         </div>
+        <div class="absolute top-2 left-5 text-sm font-semibold z-10 px-3 py-1.5 rounded-lg"
+             style="color: rgba(255,245,214,0.9); background: rgba(60,38,14,0.42); border: 1px solid rgba(230,192,116,0.35);">
+          {{ beatDetectStatus || '節奏分析中' }}
+        </div>
+        <div v-if="audioWarning" class="absolute top-12 left-5 text-sm font-semibold z-10 px-3 py-1.5 rounded-lg"
+             style="color: #FFD2B0; background: rgba(120,40,20,0.35); border: 1px solid rgba(255,180,120,0.35);">
+          {{ audioWarning }}
+        </div>
 
-        <!-- 4 Lane tracks -->
+         <!-- Dynamic lane tracks by difficulty -->
         <div class="flex-1 flex">
           <div v-for="(lane, li) in lanes" :key="li"
                class="flex-1 relative overflow-hidden"
-               :style="{ background: lane.trackBg, borderRight: li < 3 ? '1px solid rgba(255,255,255,0.04)' : 'none' }">
+           :style="{ background: lane.trackBg, borderRight: li < lanes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }">
 
             <!-- Top instrument label -->
             <div class="absolute top-3 inset-x-0 flex flex-col items-center z-10 pointer-events-none">
@@ -211,14 +229,16 @@
 
 <script setup>
 import { ref, reactive, computed, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
+import { guess } from 'web-audio-beat-detector'
 
 const router = useRouter()
+const route = useRoute()
 const gameStore = useGameStore()
 
 // ── Lane definitions ──────────────────────────────────────────
-const lanes = [
+const ALL_LANES = [
   {
     icon: '🥁', label: '鼓', tapLabel: '鼓', noteChar: '♩',
     trackBg: 'rgba(100,20,10,0.14)',
@@ -250,11 +270,28 @@ const lanes = [
 ]
 
 // ── Constants ─────────────────────────────────────────────────
-const BPM = 70
-const BEAT_MS = Math.round(60000 / BPM)   // ≈ 857 ms
-const NOTE_DURATION = 2600                 // ms to traverse full height
-const GAME_DURATION = 60000
-const TICK_MS = 50
+const SONG_LIBRARY = {
+  'music-rhythm1': {
+    name: '愛拚才會贏',
+    src: '/audio/music-rhythm1.mp3',
+    fallbackBpm: 92,
+    fallbackFirstBeatOffsetMs: 600,
+  },
+  'music-rhythm2': {
+    name: '月亮代表我的心',
+    src: '/audio/music-rhythm2.mp3',
+    fallbackBpm: 70,
+    fallbackFirstBeatOffsetMs: 900,
+  },
+}
+
+const selectedSongKey = computed(() => {
+  const key = String(route.query.track || 'music-rhythm2')
+  return SONG_LIBRARY[key] ? key : 'music-rhythm2'
+})
+
+const selectedSong = computed(() => SONG_LIBRARY[selectedSongKey.value])
+const NOTE_DURATION = 2600 // ms to traverse full height
 
 const HIT_ZONE_Y = 76      // % from top — center of hit window
 const HIT_PERFECT = 4      // ± % for "完美"
@@ -266,26 +303,59 @@ const BEAT_PATTERNS = [
   [2], [0, 3], [1], [2, 3], [0, 2], [3], [1, 3], [0],
 ]
 
+const FALLBACK_TOTAL_BEATS = 64
+
+const getFallbackRhythm = () => ({
+  bpm: selectedSong.value.fallbackBpm,
+  beatMs: Math.round(60000 / selectedSong.value.fallbackBpm),
+  firstBeatOffsetMs: selectedSong.value.fallbackFirstBeatOffsetMs,
+  totalBeats: FALLBACK_TOTAL_BEATS,
+})
+
 // ── State ─────────────────────────────────────────────────────
 const gameState = ref('idle')
 const score = ref(0)
 const combo = ref(0)
 const maxCombo = ref(0)
-const timeLeft = ref(GAME_DURATION)
+const gameDurationMs = ref(getFallbackRhythm().firstBeatOffsetMs + (FALLBACK_TOTAL_BEATS * getFallbackRhythm().beatMs) + NOTE_DURATION + 800)
+const timeLeft = ref(gameDurationMs.value)
+const audioWarning = ref('')
+const beatDetectStatus = ref('')
 const activeNotes = ref([])
 const laneFlash = reactive([null, null, null, null])
 const laneResult = reactive([null, null, null, null])
 const accuracy = reactive({ perfect: 0, good: 0, miss: 0 })
 
-const timerBarWidth = computed(() => (timeLeft.value / GAME_DURATION * 100) + '%')
-const notesInLane = computed(() => [0, 1, 2, 3].map(li => activeNotes.value.filter(n => n.lane === li)))
+const laneCountByDifficulty = {
+  easy: 2,
+  normal: 3,
+  hard: 4,
+}
+
+const activeLaneCount = computed(() => laneCountByDifficulty[gameStore.difficulty] ?? 3)
+const lanes = computed(() => ALL_LANES.slice(0, activeLaneCount.value))
+const laneModeText = computed(() => {
+  if (activeLaneCount.value === 2) return '初級模式：2 軌道'
+  if (activeLaneCount.value === 3) return '中級模式：3 軌道'
+  return '高級模式：4 軌道'
+})
+
+const timerBarWidth = computed(() => (timeLeft.value / gameDurationMs.value * 100) + '%')
+const notesInLane = computed(() =>
+  lanes.value.map((_, li) => activeNotes.value.filter(n => n.lane === li))
+)
 
 let noteId = 0
-let tickTimer = null
-let elapsed = 0
-let lastBeat = 0
-let patternIdx = 0
+let rafId = null
+let gameStartTs = 0
+let chartStartTs = 0
+let nextChartIdx = 0
 let sessionSaved = false
+let bgmAudio = null
+let bgmSource = ''
+let analysisPromise = null
+let analyzedRhythm = getFallbackRhythm()
+let chart = []
 
 // ── Helpers ───────────────────────────────────────────────────
 const flashColor = (type) => {
@@ -294,35 +364,126 @@ const flashColor = (type) => {
   return 'rgba(220,50,50,0.18)'
 }
 
+const stopAudio = () => {
+  if (!bgmAudio) return
+  bgmAudio.pause()
+  bgmAudio.currentTime = 0
+}
+
+const ensureAudio = () => {
+  if (bgmAudio && bgmSource === selectedSong.value.src) return
+  if (bgmAudio) {
+    bgmAudio.pause()
+  }
+
+  bgmAudio = new Audio(selectedSong.value.src)
+  bgmSource = selectedSong.value.src
+  analysisPromise = null
+  bgmAudio.preload = 'auto'
+  bgmAudio.volume = 0.85
+}
+
+const buildChart = (totalBeats, laneCount) => {
+  return Array.from({ length: totalBeats }, (_, beat) => {
+    const lanesInPattern = BEAT_PATTERNS[beat % BEAT_PATTERNS.length].filter(li => li < laneCount)
+    if (!lanesInPattern.length) lanesInPattern.push(beat % laneCount)
+    return { beat, lanes: lanesInPattern }
+  })
+}
+
+const detectSongRhythm = async () => {
+  if (analysisPromise) return analysisPromise
+
+  analysisPromise = (async () => {
+    const audioCtx = new AudioContext()
+    try {
+      const response = await fetch(selectedSong.value.src)
+      if (!response.ok) throw new Error('audio file not found')
+
+      const arrayBuffer = await response.arrayBuffer()
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)
+      const result = await guess(audioBuffer, { minTempo: 60, maxTempo: 170 })
+
+      const fallback = getFallbackRhythm()
+      const bpm = Number.isFinite(result.bpm) && result.bpm > 0 ? result.bpm : fallback.bpm
+      const beatMs = Math.round(60000 / bpm)
+      const firstBeatOffsetMs = Math.max(0, Math.round((result.offset ?? 0) * 1000))
+      const remainingMs = Math.max(0, Math.round(audioBuffer.duration * 1000) - firstBeatOffsetMs)
+      const totalBeats = Math.max(16, Math.floor(remainingMs / beatMs))
+
+      return {
+        bpm: Math.round(bpm),
+        beatMs,
+        firstBeatOffsetMs,
+        totalBeats,
+      }
+    } finally {
+      await audioCtx.close()
+    }
+  })().catch((err) => {
+    analysisPromise = null
+    throw err
+  })
+
+  return analysisPromise
+}
+
 // ── Game flow ─────────────────────────────────────────────────
-const startGame = () => {
+const startGame = async () => {
+  ensureAudio()
+
+  beatDetectStatus.value = '分析節奏中...'
+  audioWarning.value = ''
+
+  try {
+    analyzedRhythm = await detectSongRhythm()
+    beatDetectStatus.value = `已偵測 ${analyzedRhythm.bpm} BPM`
+  } catch (err) {
+    analyzedRhythm = getFallbackRhythm()
+    beatDetectStatus.value = `偵測失敗，改用預設 ${analyzedRhythm.bpm} BPM`
+    audioWarning.value = '節奏分析失敗，已使用預設節拍。'
+  }
+
+  chart = buildChart(analyzedRhythm.totalBeats, activeLaneCount.value)
+  gameDurationMs.value = analyzedRhythm.firstBeatOffsetMs + (analyzedRhythm.totalBeats * analyzedRhythm.beatMs) + NOTE_DURATION + 800
+
   score.value = 0
   combo.value = 0
   maxCombo.value = 0
-  timeLeft.value = GAME_DURATION
+  timeLeft.value = gameDurationMs.value
   activeNotes.value = []
   accuracy.perfect = accuracy.good = accuracy.miss = 0
-  elapsed = 0
-  lastBeat = 0
-  patternIdx = 0
+  nextChartIdx = 0
   sessionSaved = false
   laneFlash[0] = laneFlash[1] = laneFlash[2] = laneFlash[3] = null
   laneResult[0] = laneResult[1] = laneResult[2] = laneResult[3] = null
 
   gameState.value = 'playing'
-  if (tickTimer) clearInterval(tickTimer)
-  tickTimer = setInterval(tick, TICK_MS)
+
+  stopAudio()
+  try {
+    bgmAudio.currentTime = 0
+    await bgmAudio.play()
+  } catch (err) {
+    audioWarning.value = '音檔尚未準備好，先以無聲節拍模式進行。'
+  }
+
+  gameStartTs = performance.now()
+  chartStartTs = gameStartTs + analyzedRhythm.firstBeatOffsetMs
+
+  if (rafId) cancelAnimationFrame(rafId)
+  rafId = requestAnimationFrame(tick)
 }
 
-const tick = () => {
-  elapsed += TICK_MS
-  timeLeft.value = Math.max(0, GAME_DURATION - elapsed)
+const tick = (now) => {
+  const elapsed = now - gameStartTs
+  const chartElapsed = now - chartStartTs
 
-  const moveBy = (TICK_MS / NOTE_DURATION) * 100
+  timeLeft.value = Math.max(0, gameDurationMs.value - elapsed)
 
   for (const n of activeNotes.value) {
-    n.y += moveBy
-    if (n.y > HIT_ZONE_Y + HIT_GOOD + 4) {
+    n.y = ((chartElapsed - n.spawnAt) / NOTE_DURATION) * 100
+    if (n.y > HIT_ZONE_Y + HIT_GOOD + 4 && !n._miss) {
       // Auto-miss
       n._miss = true
       combo.value = 0
@@ -333,17 +494,26 @@ const tick = () => {
   // Remove notes that missed or went off-screen
   activeNotes.value = activeNotes.value.filter(n => !n._miss && n.y < 106)
 
-  // Spawn notes on beat
-  if (elapsed - lastBeat >= BEAT_MS) {
-    lastBeat = elapsed
-    const pat = BEAT_PATTERNS[patternIdx % BEAT_PATTERNS.length]
-    patternIdx++
-    for (const li of pat) {
-      activeNotes.value.push({ id: noteId++, lane: li, y: 0 })
+  // Spawn notes based on chart beat time to keep stable song sync.
+  while (nextChartIdx < chart.length && chartElapsed >= chart[nextChartIdx].beat * analyzedRhythm.beatMs) {
+    const chartBeat = chart[nextChartIdx]
+    for (const li of chartBeat.lanes) {
+      activeNotes.value.push({
+        id: noteId++,
+        lane: li,
+        y: 0,
+        spawnAt: chartBeat.beat * analyzedRhythm.beatMs,
+      })
     }
+    nextChartIdx++
   }
 
-  if (timeLeft.value <= 0) endGame()
+  if (timeLeft.value <= 0) {
+    endGame()
+    return
+  }
+
+  rafId = requestAnimationFrame(tick)
 }
 
 const onTap = (li) => {
@@ -383,7 +553,8 @@ const onTap = (li) => {
 }
 
 const endGame = () => {
-  if (tickTimer) { clearInterval(tickTimer); tickTimer = null }
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+  stopAudio()
   if (!sessionSaved) {
     sessionSaved = true
     const total = accuracy.perfect + accuracy.good + accuracy.miss
@@ -400,7 +571,8 @@ const endGame = () => {
 }
 
 const goBack = () => {
-  if (tickTimer) { clearInterval(tickTimer); tickTimer = null }
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+  stopAudio()
   if (gameState.value === 'playing' && !sessionSaved) {
     sessionSaved = true
     const total = accuracy.perfect + accuracy.good + accuracy.miss
@@ -411,7 +583,8 @@ const goBack = () => {
 }
 
 onUnmounted(() => {
-  if (tickTimer) clearInterval(tickTimer)
+  if (rafId) cancelAnimationFrame(rafId)
+  stopAudio()
 })
 </script>
 

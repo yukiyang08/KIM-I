@@ -7,6 +7,13 @@
          backgroundSize: 'cover, auto'
        }">
 
+    <!-- Soften background details so game cards stay dominant -->
+    <div class="absolute inset-0 z-0 pointer-events-none"
+         style="backdrop-filter: blur(5px) saturate(0.88);
+                background: radial-gradient(ellipse at center, rgba(12,8,4,0.26), rgba(8,5,2,0.55));"></div>
+    <div class="absolute inset-0 z-0 pointer-events-none"
+         style="background: linear-gradient(to bottom, rgba(8,5,2,0.52), rgba(8,5,2,0.66));"></div>
+
     <!-- Film strip top border -->
     <div class="flex shrink-0 h-4 z-20" style="background: #140C06;">
       <div v-for="i in 36" :key="i" class="flex-1 my-0.5 mx-px rounded-sm" style="background:rgba(0,0,0,0.65);"></div>
@@ -28,6 +35,13 @@
       @cancel="showDifficultyModal = false"
     />
 
+    <SongSelector
+      :is-open="showSongModal"
+      :songs="musicSongs"
+      @confirm="handleSongConfirm"
+      @cancel="showSongModal = false"
+    />
+
     <!-- ── Header ── -->
     <header class="shrink-0 px-4 sm:px-6 md:px-8 lg:px-12 pt-6 sm:pt-8 md:pt-10 pb-4 sm:pb-6 md:pb-8 relative z-20 border-b"
             style="border-color:rgba(255,255,255,0.05); background: rgba(10,7,4,0.5); backdrop-filter: blur(8px);">
@@ -45,8 +59,7 @@
               🎵
             </div>
             <div class="truncate leading-none">
-              <h1 class="kimi-brand-title truncate">金憶 <span class="kimi-brand-en">KIM-I</span></h1>
-              <p class="kimi-brand-sub">memory night market collection</p>
+              <h1 class="kimi-brand-title truncate">金憶</h1>
             </div>
           </div>
         </div>
@@ -59,12 +72,17 @@
       <div
         v-for="game in games"
         :key="game.id"
-        class="relative rounded-[16px] md:rounded-[20px] overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform duration-200 night-card"
+        class="relative rounded-[16px] md:rounded-[20px] overflow-hidden cursor-pointer group active:scale-[0.98] hover:-translate-y-1 transition-transform duration-200 night-card"
         @click="goToGame(game)"
       >
         <!-- Outer brass frame -->
         <div class="absolute inset-0 rounded-[16px] md:rounded-[20px] pointer-events-none"
-             style="border: 3px solid rgba(138,103,47,0.88); box-shadow: inset 0 0 0 1px rgba(231,203,136,0.32), 0 16px 36px rgba(0,0,0,0.45);"></div>
+             style="border: 3px solid rgba(170,128,56,0.95);
+                    box-shadow: inset 0 0 0 1px rgba(245,220,150,0.42),
+                                inset 0 -10px 18px rgba(40,18,8,0.38),
+                                0 0 0 2px rgba(160,120,52,0.38),
+                                0 18px 44px rgba(0,0,0,0.52),
+                                0 0 28px rgba(220,176,78,0.2);"></div>
 
         <!-- Inner engraved frame -->
         <div class="absolute inset-[8px] md:inset-[10px] rounded-[12px] md:rounded-[14px] pointer-events-none"
@@ -102,7 +120,11 @@
 
         <!-- Hover glow -->
         <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-             style="background: radial-gradient(circle at 50% 35%, rgba(233,195,108,0.08), transparent 60%);"></div>
+             style="background: radial-gradient(circle at 50% 35%, rgba(233,195,108,0.14), transparent 60%);"></div>
+
+           <!-- Click hint rim -->
+           <div class="absolute inset-[6px] md:inset-[8px] rounded-[12px] md:rounded-[14px] pointer-events-none opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+             style="box-shadow: inset 0 0 0 1px rgba(245,220,150,0.22), 0 0 16px rgba(220,176,78,0.16);"></div>
       </div>
     </main>
 
@@ -113,6 +135,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DifficultySelector from '../components/DifficultySelector.vue'
+import SongSelector from '../components/SongSelector.vue'
 import vintageBackground from '../assets/懷舊背景3.png'
 import game1Poster from '../assets/Game1.png'
 import game2Poster from '../assets/Game2.png'
@@ -124,6 +147,7 @@ import game6Poster from '../assets/Game6.png'
 const router = useRouter()
 const comingSoon = ref(null)
 const showDifficultyModal = ref(false)
+const showSongModal = ref(false)
 const selectedGameName = ref('')
 const selectedGameId = ref(null)
 
@@ -180,6 +204,23 @@ const games = [
 
 const availableIds = new Set(['music', 'shopping', 'cooking', 'puppet', 'riddle', 'puzzle'])
 
+const musicSongs = [
+  {
+    id: 'music-rhythm2',
+    name: '【月亮代表我的心】',
+    meta: '慢板、舒緩',
+    cardBg: 'linear-gradient(145deg, #35669A, #204A79)',
+    poster: game1Poster,
+  },
+  {
+    id: 'music-rhythm1',
+    name: '【愛拚才會贏】',
+    meta: '中板、振奮',
+    cardBg: 'linear-gradient(145deg, #8D3F3F, #6E2E2E)',
+    poster: game4Poster,
+  },
+]
+
 const goToGame = (game) => {
   if (availableIds.has(game.id)) {
     selectedGameName.value = game.name
@@ -191,9 +232,23 @@ const goToGame = (game) => {
   }
 }
 
-const handleDifficultyConfirm = (difficulty) => {
+const handleDifficultyConfirm = () => {
   showDifficultyModal.value = false
+
+  if (selectedGameId.value === 'music') {
+    showSongModal.value = true
+    return
+  }
+
   router.push({ name: selectedGameId.value })
+}
+
+const handleSongConfirm = (song) => {
+  showSongModal.value = false
+  router.push({
+    name: 'music',
+    query: { track: song.id },
+  })
 }
 </script>
 
@@ -215,23 +270,6 @@ const handleDifficultyConfirm = (difficulty) => {
     0 2px 0 rgba(88, 51, 16, 0.95),
     0 0 16px rgba(200, 150, 30, 0.3),
     0 8px 24px rgba(0, 0, 0, 0.55);
-}
-
-.kimi-brand-en {
-  font-family: 'Outfit', 'Noto Sans TC', sans-serif;
-  font-size: 0.76em;
-  letter-spacing: 0.12em;
-  color: #ffd992;
-  opacity: 0.96;
-}
-
-.kimi-brand-sub {
-  margin-top: 0.22rem;
-  font-family: 'Outfit', sans-serif;
-  font-size: clamp(0.55rem, 1.1vw, 0.85rem);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: rgba(238, 197, 109, 0.75);
 }
 
 .night-card-title {

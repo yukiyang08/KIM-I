@@ -1,119 +1,45 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" 
-       style="background: rgba(10,7,4,0.85); backdrop-filter: blur(2px);">
-    
-    <!-- Film strip decoration -->
-    <div class="fixed top-0 left-0 right-0 h-3 flex z-40 pointer-events-none" style="background: #140C06;">
-      <div v-for="i in 48" :key="i" class="flex-1 my-0.5 mx-px rounded-sm" style="background:rgba(0,0,0,0.65);"></div>
-    </div>
+  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+       style="background: rgba(14,10,6,0.45); backdrop-filter: blur(4px);">
 
-    <!-- Modal Card -->
-    <div class="rounded-3xl max-w-sm w-full transform transition-all relative z-50"
-         style="background: linear-gradient(135deg, #2A1508 0%, #1E0F06 50%, #261408 100%);
-                 box-shadow: 0 0 60px rgba(200,150,30,0.25), 0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.07);
-                 border: 2px solid rgba(200,150,30,0.2);
-                 animation: slideUp 0.3s ease;">
-      
-      <!-- Decorative top glows -->
-      <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-32 h-8 bg-gradient-to-b from-yellow-600/20 to-transparent blur-xl pointer-events-none"></div>
+    <div class="difficulty-panel relative w-full max-w-[760px] rounded-[28px] px-5 sm:px-8 pt-7 sm:pt-9 pb-7 sm:pb-9"
+         role="dialog" aria-modal="true" aria-label="選擇難度"
+         style="animation: slideUp 0.28s ease;">
 
-      <!-- Header -->
-      <div class="text-center pt-8 pb-4 px-6 border-b" style="border-color: rgba(200,150,30,0.15);">
-        <div class="text-5xl mb-3 animate-bounce-slow">📍</div>
-        <h2 class="font-black tracking-wider" style="font-size: clamp(1.25rem, 4vw, 1.75rem); color: #C8961E; text-shadow: 0 2px 8px rgba(200,150,30,0.3);">
-          選擇難度
-        </h2>
-      </div>
+      <button @click="cancel"
+              class="absolute right-3 top-3 sm:right-4 sm:top-4 w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-3xl font-black leading-none transition-transform active:scale-95"
+              style="color:#7A4E22; background:rgba(209,184,136,0.55); border:1px solid rgba(131,95,46,0.35);">
+        ×
+      </button>
 
-      <!-- Difficulty Options -->
-      <div class="space-y-2 p-6">
-        <!-- Easy -->
+      <h2 class="text-center difficulty-title mb-6 sm:mb-7">選擇難度</h2>
+
+      <div class="space-y-4 sm:space-y-5 px-1 sm:px-2">
         <button
           @click="selectDifficulty('easy')"
-          :class="[
-            'w-full p-3 rounded-xl font-bold transition-all duration-200 border-2 text-sm',
-            selectedDiff === 'easy'
-              ? 'border-green-500/50 scale-105 shadow-lg'
-              : 'border-transparent hover:border-green-500/30 active:scale-95'
-          ]"
-          :style="{
-            background: selectedDiff === 'easy' 
-              ? 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)'
-              : 'rgba(76, 175, 80, 0.1)',
-            color: selectedDiff === 'easy' ? '#fff' : 'rgba(255,255,255,0.7)'
-          }"
+          class="difficulty-btn difficulty-easy"
+          :class="{ 'is-selected': selectedDiff === 'easy' }"
         >
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">🌱</span>
-            <span>簡單</span>
-          </div>
+          <span class="difficulty-label">初級</span>
+          <span class="difficulty-icon" aria-hidden="true">🌱</span>
         </button>
 
-        <!-- Normal -->
         <button
           @click="selectDifficulty('normal')"
-          :class="[
-            'w-full p-3 rounded-xl font-bold transition-all duration-200 border-2 text-sm',
-            selectedDiff === 'normal'
-              ? 'border-yellow-600/50 scale-105 shadow-lg'
-              : 'border-transparent hover:border-yellow-600/30 active:scale-95'
-          ]"
-          :style="{
-            background: selectedDiff === 'normal'
-              ? 'linear-gradient(135deg, #C8961E 0%, #9B7415 100%)'
-              : 'rgba(200, 150, 30, 0.1)',
-            color: selectedDiff === 'normal' ? '#fff' : 'rgba(255,255,255,0.7)'
-          }"
+          class="difficulty-btn difficulty-normal"
+          :class="{ 'is-selected': selectedDiff === 'normal' }"
         >
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">⭐</span>
-            <span>普通</span>
-          </div>
+          <span class="difficulty-label">中級</span>
+          <span class="difficulty-icon" aria-hidden="true">⚙️</span>
         </button>
 
-        <!-- Hard -->
         <button
           @click="selectDifficulty('hard')"
-          :class="[
-            'w-full p-3 rounded-xl font-bold transition-all duration-200 border-2 text-sm',
-            selectedDiff === 'hard'
-              ? 'border-red-600/50 scale-105 shadow-lg'
-              : 'border-transparent hover:border-red-600/30 active:scale-95'
-          ]"
-          :style="{
-            background: selectedDiff === 'hard'
-              ? 'linear-gradient(135deg, #E06030 0%, #B84928 100%)'
-              : 'rgba(224, 96, 48, 0.1)',
-            color: selectedDiff === 'hard' ? '#fff' : 'rgba(255,255,255,0.7)'
-          }"
+          class="difficulty-btn difficulty-hard"
+          :class="{ 'is-selected': selectedDiff === 'hard' }"
         >
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">🔥</span>
-            <span>困難</span>
-          </div>
-        </button>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex gap-2 p-6 pt-3 border-t" style="border-color: rgba(200,150,30,0.15);">
-        <button
-          @click="cancel"
-          class="flex-1 px-4 py-2.5 rounded-lg font-bold text-sm transition-all active:scale-95"
-          style="background: rgba(100,100,100,0.2); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1);"
-          @mouseover="e => e.target.style.background = 'rgba(100,100,100,0.3)'"
-          @mouseleave="e => e.target.style.background = 'rgba(100,100,100,0.2)'"
-        >
-          返回
-        </button>
-        <button
-          @click="confirm"
-          class="flex-1 px-4 py-2.5 rounded-lg font-bold text-sm text-white transition-all active:scale-95 shadow-lg"
-          :style="{
-            background: difficultyGradient[selectedDiff],
-            boxShadow: `0 6px 20px ${difficultyGlow[selectedDiff]}`
-          }"
-        >
-          開始
+          <span class="difficulty-label">高級</span>
+          <span class="difficulty-icon" aria-hidden="true">🔥</span>
         </button>
       </div>
     </div>
@@ -141,25 +67,10 @@ const emit = defineEmits(['confirm', 'cancel'])
 
 const selectedDiff = ref('normal')
 
-const difficultyGradient = {
-  easy: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
-  normal: 'linear-gradient(135deg, #C8961E 0%, #9B7415 100%)',
-  hard: 'linear-gradient(135deg, #E06030 0%, #B84928 100%)'
-}
-
-const difficultyGlow = {
-  easy: 'rgba(76, 175, 80, 0.4)',
-  normal: 'rgba(200, 150, 30, 0.4)',
-  hard: 'rgba(224, 96, 48, 0.4)'
-}
-
 const selectDifficulty = (level) => {
   selectedDiff.value = level
-}
-
-const confirm = () => {
-  gameStore.setDifficulty(selectedDiff.value)
-  emit('confirm', selectedDiff.value)
+  gameStore.setDifficulty(level)
+  emit('confirm', level)
 }
 
 const cancel = () => {
@@ -177,6 +88,82 @@ const cancel = () => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.difficulty-panel {
+  background: linear-gradient(180deg, #f2e4c8 0%, #ecdab7 100%);
+  border: 3px solid #8b6436;
+  box-shadow:
+    inset 0 0 0 2px rgba(250, 238, 208, 0.75),
+    0 14px 40px rgba(0, 0, 0, 0.35);
+}
+
+.difficulty-title {
+  font-family: 'Noto Serif TC', 'PMingLiU', serif;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: 0.08em;
+  color: #3a2310;
+}
+
+.difficulty-btn {
+  width: 100%;
+  min-height: 92px;
+  border-radius: 20px;
+  padding: 0.95rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  border: 3px solid rgba(77, 56, 30, 0.15);
+  box-shadow: 0 6px 0 rgba(54, 39, 20, 0.35), 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.difficulty-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 rgba(54, 39, 20, 0.35), 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.difficulty-btn.is-selected {
+  border-color: rgba(78, 56, 24, 0.42);
+}
+
+.difficulty-label {
+  font-family: 'Noto Serif TC', 'PMingLiU', serif;
+  font-size: clamp(2rem, 4.6vw, 3.2rem);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.difficulty-icon {
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: 1;
+}
+
+.difficulty-easy {
+  background: linear-gradient(180deg, #f5efdf 0%, #ebf4fd 100%);
+}
+
+.difficulty-normal {
+  background: linear-gradient(180deg, #f7edd6 0%, #fee7b6 100%);
+}
+
+.difficulty-hard {
+  background: linear-gradient(180deg, #f8e6d7 0%, #ffd0bf 100%);
+}
+
+.difficulty-easy .difficulty-label { color: #5881ab; }
+.difficulty-normal .difficulty-label { color: #c3801c; }
+.difficulty-hard .difficulty-label { color: #b44533; }
+
+@media (max-width: 640px) {
+  .difficulty-btn {
+    min-height: 84px;
+    border-radius: 17px;
   }
 }
 </style>
