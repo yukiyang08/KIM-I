@@ -51,9 +51,9 @@
       <div class="pt-20 px-6 pb-8 space-y-5">
 
         <!-- Brand text only -->
-        <div class="text-center mb-5 pb-5 border-b" style="border-color: rgba(242,198,106,0.25);">
+        <div class="text-center mb-6 pb-6 border-b" style="border-color: rgba(242,198,106,0.25);">
           <h2 class="text-[2.05rem] font-black tracking-[0.08em]" style="color: #E9C37A; text-shadow: 0 2px 12px rgba(0,0,0,0.35);">
-            金憶
+            金憶 KIM-I
           </h2>
         </div>
 

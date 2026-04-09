@@ -66,7 +66,8 @@
               🎵
             </div>
             <div class="truncate leading-none">
-              <h1 class="kimi-brand-title truncate">金憶</h1>
+              <h1 class="kimi-brand-title truncate">金憶 KIM-I</h1>
+              <p class="mt-1 text-[1rem] sm:text-[0.9rem] md:text-[1rem] tracking-[0.08em] text-[#E7D4A3] truncate opacity-95">樂齡玩伴</p>
             </div>
           </div>
         </div>
