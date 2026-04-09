@@ -16,10 +16,12 @@ export const useGameStore = defineStore('game', () => {
 
   // gameId → cognitive dimension
   const dimensionOf = {
-    pinball: 'reactionSpeed',
+    music:    'reactionSpeed', // rhythm timing ≈ reaction/processing speed
     shopping: 'memory',
-    cooking: 'execution',
-    puppet: 'attention',
+    cooking:  'execution',
+    puppet:   'attention',
+    riddle:   'memory',        // long-term memory (averaged with shopping)
+    puzzle:   'visual',        // visual-spatial reasoning
   }
 
   // Most recent score per dimension
@@ -42,7 +44,7 @@ export const useGameStore = defineStore('game', () => {
       d.memory        ?? baseline.memory,
       d.attention     ?? baseline.attention,
       d.execution     ?? baseline.execution,
-      baseline.visual,                        // 視覺空間：遊戲尚未實裝
+      d.visual        ?? baseline.visual,
       d.reactionSpeed ?? baseline.reactionSpeed,
     ]
   })
@@ -56,12 +58,12 @@ export const useGameStore = defineStore('game', () => {
 
   // Dynamic alert: check if reaction speed dropped vs baseline
   const alertMessage = computed(() => {
-    const pinball = sessions.value.filter(s => s.gameId === 'pinball')
-    if (pinball.length === 0) return null
-    const recent = pinball.slice(-3).reduce((a, b) => a + b.score, 0) / Math.min(3, pinball.length)
+    const music = sessions.value.filter(s => s.gameId === 'music')
+    if (music.length === 0) return null
+    const recent = music.slice(-3).reduce((a, b) => a + b.score, 0) / Math.min(3, music.length)
     const drop = baseline.reactionSpeed - recent
     if (drop > 8) {
-      return `過去 ${pinball.length} 場彈珠台的反應速度下降了 ${Math.round(drop)}%，建議多鼓勵進行「彈珠台」訓練。`
+      return `過去 ${music.length} 場節拍遊戲的反應速度下降了 ${Math.round(drop)}%，建議多鼓勵進行「懷舊音樂節拍」訓練。`
     }
     const memory = sessions.value.filter(s => s.gameId === 'shopping')
     if (memory.length >= 2) {

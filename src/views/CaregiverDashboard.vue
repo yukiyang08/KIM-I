@@ -108,8 +108,8 @@ const hasData = computed(() => store.hasData)
 const alertMessage = computed(() => store.alertMessage)
 const recentSessions = computed(() => store.recentSessions)
 
-const gameEmoji = { pinball: '🎰', shopping: '🥫', cooking: '🍲', puppet: '🎭' }
-const gameName = { pinball: '夜市彈珠台', shopping: '柑仔店採買記', cooking: '阿嬤的家常菜', puppet: '廟口布袋戲' }
+const gameEmoji = { music: '🎵', shopping: '🥫', cooking: '🍲', puppet: '🎭', riddle: '🎶', puzzle: '🧩' }
+const gameName  = { music: '懷舊音樂節拍', shopping: '柑仔店採買記', cooking: '阿嬤的家常菜', puppet: '廟口布袋戲', riddle: '老歌猜謎', puzzle: '廟口大拼圖' }
 
 const scoreColor = (score) => {
   if (score >= 80) return '#10b981'
