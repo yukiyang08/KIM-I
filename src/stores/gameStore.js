@@ -2,7 +2,17 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useGameStore = defineStore('game', () => {
-  // Each session: { gameId, score (0–100), timestamp, ...detail }
+  // Difficulty setting: 'easy', 'normal', 'hard'
+  const difficulty = ref('normal')
+
+  // Set difficulty level
+  const setDifficulty = (level) => {
+    if (['easy', 'normal', 'hard'].includes(level)) {
+      difficulty.value = level
+    }
+  }
+
+  // Each session: { gameId, score (0–100), timestamp, difficulty, ...detail }
   const sessions = ref([])
 
   const addSession = (gameId, score, detail = {}) => {
@@ -10,6 +20,7 @@ export const useGameStore = defineStore('game', () => {
       gameId,
       score: Math.min(100, Math.max(0, Math.round(score))),
       timestamp: Date.now(),
+      difficulty: difficulty.value,
       ...detail,
     })
   }
@@ -82,6 +93,8 @@ export const useGameStore = defineStore('game', () => {
   return {
     sessions,
     addSession,
+    difficulty,
+    setDifficulty,
     radarCurrent,
     radarBaseline,
     hasData,

@@ -1,87 +1,204 @@
 <template>
-  <div class="h-full w-full bg-[#f9fafb] text-gray-800 overflow-y-auto pb-[100px] px-5 pt-8">
+  <div class="h-full w-full overflow-y-auto pb-[100px] px-5 pt-6 font-['Outfit','Noto_Sans_TC']"
+       style="background: #FAF5ED;">
 
-    <!-- User Profile Header -->
-    <header class="flex items-center gap-4 mb-8">
-      <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-200 to-amber-500 overflow-hidden shadow-lg p-[2px] flex items-center justify-center">
-        <span class="text-4xl">👵</span>
+    <!-- ── User Profile Header ── -->
+    <header class="flex items-center gap-4 mb-5">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center shrink-0 shadow-lg"
+           style="background: linear-gradient(135deg, #F5D98A, #C8961E);">
+        <span class="text-3xl">👵</span>
       </div>
       <div>
-        <h2 class="text-2xl font-bold text-gray-900 tracking-tight">陳金美 奶奶</h2>
-        <p class="text-sm font-medium text-gray-500 mt-0.5">
-          {{ hasData ? `上次遊玩: ${lastPlayedLabel}` : '尚未開始遊玩' }}
+        <h2 class="text-2xl font-black tracking-tight" style="color:#3D2010;">陳金美 奶奶</h2>
+        <p class="text-sm font-medium mt-0.5" style="color:#9B7040;">
+          {{ hasData ? `上次遊玩：${lastPlayedLabel}` : '尚未開始遊玩' }}
         </p>
+      </div>
+      <!-- Weekly badge -->
+      <div class="ml-auto text-right">
+        <div class="text-2xl font-black" style="color:#C8961E;">{{ weeklyCount }}</div>
+        <div class="text-xs font-semibold" style="color:#9B7040;">本週場次</div>
       </div>
     </header>
 
-    <!-- Alert Card (Dynamic) -->
-    <section v-if="alertMessage" class="bg-white rounded-3xl p-5 mb-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-rose-100 relative overflow-hidden">
-      <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500"></div>
-      <div class="flex items-start gap-4 pl-2">
-        <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
-          <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    <!-- ── Kim-I AI 分析 ── -->
+    <section class="rounded-3xl p-5 mb-5 relative overflow-hidden"
+             style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
+      <!-- AI badge (top-right) -->
+      <div class="absolute top-4 right-4 px-3 py-1 rounded-lg text-sm font-black text-white tracking-widest"
+           style="background:#C8961E;">AI</div>
+
+      <div class="flex items-start gap-4 pr-16">
+        <!-- Brain icon -->
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-2xl"
+             style="background:rgba(200,150,30,0.12);border:1px solid rgba(200,150,30,0.25);">
+          🧠
         </div>
         <div>
-          <h3 class="text-lg font-bold text-gray-900 leading-tight">AI 分析提示</h3>
-          <p class="text-sm text-gray-600 mt-1 opacity-90 leading-relaxed">{{ alertMessage }}</p>
+          <h3 class="text-lg font-black mb-1" style="color:#3D2010;">Kim-I AI 分析</h3>
+          <p class="text-sm leading-relaxed" style="color:#7A5030;">{{ aiInsight }}</p>
         </div>
       </div>
     </section>
 
-    <!-- No Data Prompt -->
-    <section v-if="!hasData" class="bg-white rounded-3xl p-8 mb-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100 text-center">
-      <div class="text-6xl mb-4">🎮</div>
-      <p class="text-xl font-semibold text-gray-500">奶奶還沒有遊玩紀錄</p>
-      <p class="text-sm text-gray-400 mt-2">完成任一遊戲後，認知評估圖表就會自動更新</p>
+    <!-- ── 今日康復數據價值 ── -->
+    <section class="rounded-3xl p-5 mb-5"
+             style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
+
+      <h3 class="text-base font-black mb-4 flex items-center gap-2" style="color:#3D2010;">
+        <span class="w-1 h-5 rounded-full inline-block" style="background:#C8961E;"></span>
+        今日康復數據價值
+      </h3>
+
+      <div class="grid grid-cols-2 gap-3">
+
+        <!-- 康復時長 -->
+        <div class="rounded-2xl p-4" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
+          <div class="text-xs font-semibold mb-2" style="color:#9B7040;">康復時長</div>
+          <div class="flex items-end gap-1">
+            <span class="text-4xl font-black leading-none" style="color:#3D2010;">{{ todayMinutes }}</span>
+            <span class="text-base font-bold mb-0.5" style="color:#9B7040;">分鐘</span>
+          </div>
+          <div class="text-xs mt-2" style="color:#B89060;">今日遊玩 {{ todayCount }} 場</div>
+        </div>
+
+        <!-- 手眼協調度 -->
+        <div class="rounded-2xl p-4" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
+          <div class="text-xs font-semibold mb-2" style="color:#9B7040;">手眼協調度</div>
+          <!-- Progress bar -->
+          <div class="h-4 rounded-full overflow-hidden mb-2" style="background:rgba(200,150,30,0.12);">
+            <div class="h-full rounded-full transition-all duration-700"
+                 :style="{ width: handEyeScore + '%', background: 'linear-gradient(90deg, #C8961E, #E06030)' }">
+            </div>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs" style="color:#B89060;">同齡比較</span>
+            <span class="text-sm font-black" style="color:#C8961E;">{{ handEyeScore }}%</span>
+          </div>
+        </div>
+
+        <!-- 精細動作穩定度 -->
+        <div class="rounded-2xl p-4" style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
+          <div class="text-xs font-semibold mb-2" style="color:#9B7040;">精細動作穩定度</div>
+          <div class="h-12 w-full">
+            <svg viewBox="0 0 120 48" class="w-full h-full" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#C8961E" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#C8961E" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Fill area -->
+              <polygon v-if="sparkPoints.length >= 2"
+                       :points="`0,48 ${sparkPoints.map(p=>p.join(',')).join(' ')} 120,48`"
+                       fill="url(#sparkFill)"/>
+              <!-- Line -->
+              <polyline v-if="sparkPoints.length >= 2"
+                        :points="sparkPoints.map(p=>p.join(',')).join(' ')"
+                        fill="none" stroke="#C8961E" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- Dots -->
+              <circle v-for="(p,i) in sparkPoints" :key="i"
+                      :cx="p[0]" :cy="p[1]" r="2.5" fill="#C8961E"/>
+              <!-- Flat line placeholder -->
+              <line v-if="sparkPoints.length < 2"
+                    x1="10" y1="32" x2="110" y2="32"
+                    stroke="rgba(200,150,30,0.2)" stroke-width="2" stroke-dasharray="4,4"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-lg" :style="{ color: trendUp ? '#10b981' : '#C8961E' }">
+              {{ trendUp ? '↗' : '→' }}
+            </span>
+            <span class="text-xs" style="color:#B89060;">{{ trendUp ? '持續上升' : '保持穩定' }}</span>
+          </div>
+        </div>
+
+        <!-- 認知得分 (Gauge) -->
+        <div class="rounded-2xl p-4 flex flex-col items-center justify-center"
+             style="background:#FAF5ED;border:1px solid rgba(200,150,30,0.12);">
+          <div class="text-xs font-semibold mb-2 self-start" style="color:#9B7040;">認知得分</div>
+          <div class="relative" style="width:110px;height:64px;">
+            <svg viewBox="0 0 120 68" class="w-full h-full">
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#C8961E"/>
+                  <stop offset="100%" stop-color="#E06030"/>
+                </linearGradient>
+              </defs>
+              <!-- Track -->
+              <path d="M 12,60 A 48,48 0 0 1 108,60"
+                    fill="none" stroke="rgba(200,150,30,0.12)" stroke-width="9" stroke-linecap="round"/>
+              <!-- Fill -->
+              <path d="M 12,60 A 48,48 0 0 1 108,60"
+                    fill="none" stroke="url(#gaugeGrad)" stroke-width="9" stroke-linecap="round"
+                    stroke-dasharray="150.8"
+                    :stroke-dashoffset="150.8 * (1 - cognitiveScore / 100)"/>
+            </svg>
+            <!-- Score text -->
+            <div class="absolute inset-0 flex flex-col items-center justify-end pb-1">
+              <span class="text-3xl font-black leading-none" style="color:#3D2010;">{{ cognitiveScore }}</span>
+            </div>
+          </div>
+          <div class="text-xs mt-1" style="color:#B89060;">滿分 100 分</div>
+        </div>
+
+      </div>
     </section>
 
-    <!-- Radar Chart Section -->
-    <section class="bg-white rounded-3xl p-6 mb-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100">
-      <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-        <svg class="w-5 h-5 text-[#F0A500]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+    <!-- ── 五維度認知評估 ── -->
+    <section class="rounded-3xl p-5 mb-5"
+             style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
+      <h3 class="text-base font-black mb-4 flex items-center gap-2" style="color:#3D2010;">
+        <span class="w-1 h-5 rounded-full inline-block" style="background:#C8961E;"></span>
         五維度認知評估
-        <span v-if="hasData" class="ml-auto text-xs font-medium text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">即時數據</span>
-        <span v-else class="ml-auto text-xs font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full">基準線</span>
+        <span class="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
+              :style="hasData
+                ? 'background:rgba(200,150,30,0.12);color:#C8961E;'
+                : 'background:rgba(0,0,0,0.05);color:#9B7040;'">
+          {{ hasData ? '即時數據' : '基準線' }}
+        </span>
       </h3>
-      <div class="relative w-full h-[280px] flex justify-center items-center">
+      <div class="relative w-full h-[240px] flex justify-center items-center">
         <Radar :data="chartData" :options="chartOptions" />
       </div>
     </section>
 
-    <!-- Recent Sessions -->
-    <section v-if="hasData" class="bg-white rounded-3xl p-5 mb-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100">
-      <h4 class="text-[13px] font-semibold text-gray-500 mb-3">最近遊玩紀錄</h4>
-      <div class="space-y-2">
-        <div v-for="s in recentSessions" :key="s.timestamp" class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+    <!-- ── 最近遊玩紀錄 ── -->
+    <section v-if="hasData" class="rounded-3xl p-5 mb-5"
+             style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
+      <h3 class="text-base font-black mb-3 flex items-center gap-2" style="color:#3D2010;">
+        <span class="w-1 h-5 rounded-full inline-block" style="background:#C8961E;"></span>
+        最近遊玩紀錄
+      </h3>
+      <div class="space-y-2.5">
+        <div v-for="s in recentSessions" :key="s.timestamp"
+             class="flex items-center justify-between py-2 border-b last:border-0"
+             style="border-color:rgba(200,150,30,0.1);">
           <div class="flex items-center gap-3">
-            <span class="text-2xl">{{ gameEmoji[s.gameId] }}</span>
-            <span class="text-sm font-semibold text-gray-700">{{ gameName[s.gameId] }}</span>
+            <span class="text-xl">{{ gameEmoji[s.gameId] ?? '🎮' }}</span>
+            <span class="text-sm font-semibold" style="color:#3D2010;">{{ gameName[s.gameId] ?? s.gameId }}</span>
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all" :style="{ width: s.score + '%', background: scoreColor(s.score) }"></div>
+            <div class="w-24 h-2 rounded-full overflow-hidden" style="background:rgba(200,150,30,0.12);">
+              <div class="h-full rounded-full transition-all"
+                   :style="{ width: s.score + '%', background: scoreGradient(s.score) }"></div>
             </div>
-            <span class="text-sm font-bold w-10 text-right" :style="{ color: scoreColor(s.score) }">{{ s.score }}</span>
+            <span class="text-sm font-black w-8 text-right" :style="{ color: scoreColor(s.score) }">
+              {{ s.score }}
+            </span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Additional Vitals -->
-    <div class="grid grid-cols-2 gap-4">
-      <section class="bg-white rounded-3xl p-5 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100">
-        <h4 class="text-[13px] font-semibold text-gray-500 mb-2">手部穩定度</h4>
-        <div class="text-2xl font-bold" :class="handScore >= 75 ? 'text-emerald-500' : 'text-amber-500'">
-          {{ handScore !== null ? `優於 ${handScore}%` : '資料不足' }}
-        </div>
-        <p class="text-[11px] text-gray-400 mt-1">同齡長者對比</p>
-      </section>
-      <section class="bg-white rounded-3xl p-5 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100">
-        <h4 class="text-[13px] font-semibold text-gray-500 mb-2">本週完成度</h4>
-        <div class="text-2xl font-bold text-blue-500">{{ weeklyCount }} 場</div>
-        <p class="text-[11px] text-gray-400 mt-1">本週遊玩場次</p>
-      </section>
-    </div>
+    <!-- ── No data placeholder ── -->
+    <section v-if="!hasData" class="rounded-3xl p-8 text-center"
+             style="background:#FFFDF8;border:1px solid rgba(200,150,30,0.2);box-shadow:0 8px 32px rgba(120,70,20,0.08);">
+      <div class="text-5xl mb-4">🎮</div>
+      <p class="text-lg font-bold" style="color:#7A5030;">尚無遊玩紀錄</p>
+      <p class="text-sm mt-1" style="color:#B89060;">完成任一遊戲後，數據將自動更新</p>
+    </section>
 
   </div>
 </template>
@@ -89,13 +206,8 @@
 <script setup>
 import { computed } from 'vue'
 import {
-  Chart as ChartJS,
-  RadialLinearScale,
-  PointElement,
-  LineElement,
-  Filler,
-  Tooltip,
-  Legend
+  Chart as ChartJS, RadialLinearScale, PointElement,
+  LineElement, Filler, Tooltip, Legend,
 } from 'chart.js'
 import { Radar } from 'vue-chartjs'
 import { useGameStore } from '../stores/gameStore'
@@ -104,53 +216,99 @@ ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, 
 
 const store = useGameStore()
 
+// ── Basic computed ─────────────────────────────────────────────
 const hasData = computed(() => store.hasData)
-const alertMessage = computed(() => store.alertMessage)
 const recentSessions = computed(() => store.recentSessions)
 
 const gameEmoji = { music: '🎵', shopping: '🥫', cooking: '🍲', puppet: '🎭', riddle: '🎶', puzzle: '🧩' }
 const gameName  = { music: '懷舊音樂節拍', shopping: '柑仔店採買記', cooking: '阿嬤的家常菜', puppet: '廟口布袋戲', riddle: '老歌猜謎', puzzle: '廟口大拼圖' }
 
-const scoreColor = (score) => {
-  if (score >= 80) return '#10b981'
-  if (score >= 60) return '#f59e0b'
-  return '#ef4444'
-}
-
 const lastPlayedLabel = computed(() => {
   if (!store.recentSessions.length) return ''
-  const ts = store.recentSessions[0].timestamp
-  const diff = Date.now() - ts
-  if (diff < 60000) return '剛才'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分鐘前`
+  const diff = Date.now() - store.recentSessions[0].timestamp
+  if (diff < 60000)    return '剛才'
+  if (diff < 3600000)  return `${Math.floor(diff / 60000)} 分鐘前`
   if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小時前`
   return `${Math.floor(diff / 86400000)} 天前`
 })
 
-// Hand stability: derived from pinball score
-const handScore = computed(() => {
-  const d = store.latestByDimension
-  return d.reactionSpeed != null ? Math.min(99, 50 + Math.round(d.reactionSpeed / 4)) : null
-})
-
-// Weekly session count (past 7 days)
+// ── Today stats ────────────────────────────────────────────────
+const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
+const todaySessions = computed(() =>
+  store.sessions.filter(s => s.timestamp >= todayStart.getTime())
+)
+const gameDuration = { music: 1, shopping: 2, cooking: 2, puppet: 3, riddle: 3, puzzle: 4 }
+const todayMinutes = computed(() =>
+  todaySessions.value.reduce((sum, s) => sum + (gameDuration[s.gameId] ?? 3), 0)
+)
+const todayCount = computed(() => todaySessions.value.length)
 const weeklyCount = computed(() => {
   const cutoff = Date.now() - 7 * 86400000
   return store.sessions.filter(s => s.timestamp >= cutoff).length
 })
 
-// Chart data
+// ── Dimension scores ───────────────────────────────────────────
+const d = computed(() => store.latestByDimension)
+
+const handEyeScore = computed(() => {
+  const vals = [d.value.reactionSpeed, d.value.attention].filter(v => v != null)
+  return vals.length ? Math.round(vals.reduce((a, b) => a + b) / vals.length) : 72
+})
+
+const cognitiveScore = computed(() => {
+  const baseline = [82, 65, 88, 75, 70]
+  const live = store.radarCurrent
+  return Math.round(live.reduce((a, b) => a + b, 0) / live.length)
+})
+
+// ── Sparkline (last 6 sessions) ────────────────────────────────
+const sparkPoints = computed(() => {
+  const data = store.sessions.length >= 2
+    ? store.sessions.slice(-6).map(s => s.score)
+    : []
+  if (data.length < 2) return []
+  return data.map((v, i) => [
+    10 + (i / (data.length - 1)) * 100,
+    6 + (1 - v / 100) * 36,
+  ])
+})
+
+const trendUp = computed(() => {
+  if (sparkPoints.value.length < 2) return false
+  const pts = sparkPoints.value
+  return pts[pts.length - 1][1] < pts[0][1] // lower y = higher score
+})
+
+// ── AI insight text ────────────────────────────────────────────
+const aiInsight = computed(() => {
+  if (!hasData.value) return '歡迎使用金憶！開始遊玩後，AI 將為您分析認知健康狀態。'
+  if (store.alertMessage) return store.alertMessage
+  const s = cognitiveScore.value
+  if (s >= 85) return '各項認知指標表現優異！反應速度與記憶力均有進步，請繼續保持每日練習。'
+  if (s >= 70) return '整體表現良好。建議增加「懷舊音樂節拍」練習，有助於提升反應速度。'
+  return '認知訓練有進步空間，建議每天進行 2–3 場遊戲，並優先選擇「記憶類」遊戲練習。'
+})
+
+// ── Score color helpers ─────────────────────────────────────────
+const scoreColor = (score) =>
+  score >= 80 ? '#C8961E' : score >= 60 ? '#D4804A' : '#C04030'
+const scoreGradient = (score) =>
+  score >= 80
+    ? 'linear-gradient(90deg, #C8961E, #E0B030)'
+    : score >= 60
+    ? 'linear-gradient(90deg, #D4804A, #E06030)'
+    : 'linear-gradient(90deg, #C04030, #E04040)'
+
+// ── Radar chart ─────────────────────────────────────────────────
 const chartData = computed(() => ({
   labels: ['記憶力', '注意力', '執行力', '視覺空間', '反應力'],
   datasets: [
     ...(hasData.value ? [{
       label: '當前指數',
-      backgroundColor: 'rgba(240, 165, 0, 0.25)',
-      borderColor: '#F0A500',
-      pointBackgroundColor: '#F0A500',
+      backgroundColor: 'rgba(200,150,30,0.18)',
+      borderColor: '#C8961E',
+      pointBackgroundColor: '#C8961E',
       pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: '#F0A500',
       pointBorderWidth: 2,
       pointRadius: 4,
       data: store.radarCurrent,
@@ -158,17 +316,15 @@ const chartData = computed(() => ({
     }] : []),
     {
       label: '基準線 (上月)',
-      backgroundColor: 'rgba(156, 163, 175, 0.1)',
-      borderColor: '#9ca3af',
-      pointBackgroundColor: '#9ca3af',
+      backgroundColor: 'rgba(155,112,64,0.06)',
+      borderColor: 'rgba(155,112,64,0.4)',
+      pointBackgroundColor: 'rgba(155,112,64,0.4)',
       pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: '#9ca3af',
       borderDash: [5, 5],
       data: store.radarBaseline,
-      borderWidth: 2,
-    }
-  ]
+      borderWidth: 1.5,
+    },
+  ],
 }))
 
 const chartOptions = {
@@ -176,14 +332,14 @@ const chartOptions = {
   maintainAspectRatio: false,
   scales: {
     r: {
-      angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
-      grid: { color: 'rgba(0, 0, 0, 0.05)' },
+      angleLines: { color: 'rgba(100,60,20,0.08)' },
+      grid:       { color: 'rgba(100,60,20,0.08)' },
       pointLabels: {
-        font: { family: 'Outfit, Noto Sans TC', size: 12, weight: '500' },
-        color: '#4b5563'
+        font: { family: 'Outfit, Noto Sans TC', size: 12, weight: '600' },
+        color: '#7A5030',
       },
-      ticks: { display: false, min: 0, max: 100 }
-    }
+      ticks: { display: false, min: 0, max: 100 },
+    },
   },
   plugins: {
     legend: {
@@ -191,16 +347,17 @@ const chartOptions = {
       labels: {
         font: { family: 'Outfit, Noto Sans TC', size: 11 },
         usePointStyle: true,
-        padding: 20
-      }
+        padding: 20,
+        color: '#9B7040',
+      },
     },
     tooltip: {
-      backgroundColor: 'rgba(17, 24, 39, 0.9)',
+      backgroundColor: 'rgba(61,32,16,0.92)',
       titleFont: { size: 13, family: 'Outfit, Noto Sans TC' },
-      bodyFont: { size: 12, family: 'Outfit, Noto Sans TC' },
+      bodyFont:  { size: 12, family: 'Outfit, Noto Sans TC' },
       padding: 10,
-      cornerRadius: 8,
-    }
-  }
+      cornerRadius: 10,
+    },
+  },
 }
 </script>
