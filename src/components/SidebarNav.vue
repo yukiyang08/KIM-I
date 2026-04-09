@@ -36,7 +36,7 @@
   <transition name="sidebar-slide">
     <div
       v-if="isOpen"
-      class="fixed top-0 right-0 h-full w-64 z-[90] overflow-y-auto"
+      class="fixed top-0 right-0 h-full w-[78vw] max-w-[320px] z-[90] overflow-y-auto"
           style="background: linear-gradient(to bottom, #4B2A12, #2E1A0C);
             border-left: 2px solid rgba(242,198,106,0.45);
             box-shadow: -20px 0 60px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,229,170,0.16);">
@@ -48,11 +48,11 @@
       </div>
 
       <!-- Menu content -->
-      <div class="pt-20 px-6 pb-8 space-y-4">
-        <!-- Logo section -->
-        <div class="text-center mb-8 pb-6 border-b" style="border-color: rgba(200,150,30,0.2);">
-          <div class="text-4xl mb-2">🎵</div>
-          <h2 class="text-2xl font-black tracking-wider" style="color: #C8961E;">
+      <div class="pt-20 px-6 pb-8 space-y-5">
+
+        <!-- Brand text only -->
+        <div class="text-center mb-5 pb-5 border-b" style="border-color: rgba(242,198,106,0.25);">
+          <h2 class="text-[2.05rem] font-black tracking-[0.08em]" style="color: #E9C37A; text-shadow: 0 2px 12px rgba(0,0,0,0.35);">
             金憶
           </h2>
         </div>
@@ -60,34 +60,34 @@
         <!-- Menu items -->
         <router-link
           to="/"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
+          class="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200"
           :class="route.path === '/' 
             ? 'bg-gradient-to-r from-amber-300/35 to-transparent' 
             : 'hover:bg-white/10'"
           @click="isOpen = false"
           :style="{ color: route.path === '/' ? '#F7D58A' : 'rgba(255,244,220,0.88)' }">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-7 h-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <span class="font-bold">遊戲大廳</span>
+          <span class="text-[1.65rem] leading-none font-black tracking-[0.02em]">遊戲大廳</span>
         </router-link>
 
         <router-link
           to="/dashboard"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
+          class="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-200"
           :class="route.path === '/dashboard' 
             ? 'bg-gradient-to-r from-amber-300/35 to-transparent' 
             : 'hover:bg-white/10'"
           @click="isOpen = false"
           :style="{ color: route.path === '/dashboard' ? '#F7D58A' : 'rgba(255,244,220,0.88)' }">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-7 h-7 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
-          <span class="font-bold">數據報表</span>
+          <span class="text-[1.65rem] leading-none font-black tracking-[0.02em]">數據報表</span>
         </router-link>
 
         <!-- Version info -->

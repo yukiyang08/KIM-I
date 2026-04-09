@@ -1,5 +1,6 @@
 <template>
-  <div class="h-screen w-full bg-[#1e1e1e] overflow-hidden flex flex-col font-['Outfit',_'Noto_Sans_TC']">
+    <div class="h-[100dvh] min-h-screen w-full bg-[#1e1e1e] overflow-hidden flex flex-col font-['Outfit',_'Noto_Sans_TC']"
+      style="padding-bottom: env(safe-area-inset-bottom, 0px);">
     
     <!-- Sidebar Navigation -->
     <SidebarNav />

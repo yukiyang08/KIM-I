@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full flex flex-col font-['Outfit','Noto_Sans_TC'] overflow-y-auto overflow-x-hidden select-none touch-none"
+  <div class="h-full w-full flex flex-col font-['Outfit','Noto_Sans_TC'] overflow-y-auto overflow-x-hidden select-none"
        style="background: #0A0704;">
 
     <!-- Film strip top -->
@@ -8,30 +8,30 @@
     </div>
 
     <!-- Header -->
-    <header class="shrink-0 px-10 py-5 flex justify-between items-center border-b z-10 relative"
+    <header class="shrink-0 px-4 sm:px-6 md:px-10 py-3 sm:py-4 md:py-5 flex justify-between items-start sm:items-center gap-3 sm:gap-0 border-b z-10 relative"
             style="background: rgba(8,5,2,0.97); border-color: rgba(255,255,255,0.05);">
       <div>
-        <button @click="goBack" class="flex items-center gap-2 mb-3 text-lg font-bold transition-colors"
+        <button @click="goBack" class="flex items-center gap-2 mb-2 sm:mb-3 text-base sm:text-lg font-bold transition-colors"
                 style="color: rgba(200,150,30,0.45);"
                 @mouseover="e => e.currentTarget.style.color = '#C8961E'"
                 @mouseleave="e => e.currentTarget.style.color = 'rgba(200,150,30,0.45)'">
           ← 離開遊戲
         </button>
-        <h1 class="text-5xl font-black" style="color: #C8961E; text-shadow: 0 0 40px rgba(200,150,30,0.3);">
+        <h1 class="font-black leading-tight" style="font-size: clamp(1.6rem, 7vw, 3rem); color: #C8961E; text-shadow: 0 0 40px rgba(200,150,30,0.3);">
           <span style="color: #C04030;">♪</span> 懷舊音樂節拍
         </h1>
-        <p class="text-xl mt-1.5 italic font-medium" style="color: rgba(255,255,255,0.3);">
+        <p class="text-sm sm:text-base md:text-xl mt-1 sm:mt-1.5 italic font-medium" style="color: rgba(255,255,255,0.3);">
           跟著節拍，輕拍正確的樂器區
         </p>
-        <p class="text-base mt-1 font-semibold" style="color: rgba(240,208,144,0.75);">
+        <p class="text-xs sm:text-sm md:text-base mt-1 font-semibold" style="color: rgba(240,208,144,0.75);">
           曲目：{{ selectedSong.name }}
         </p>
       </div>
-      <div class="text-right">
-        <div class="text-base font-bold uppercase tracking-widest mb-1" style="color: rgba(255,255,255,0.2);">得分</div>
-        <div class="text-6xl font-black text-white tabular-nums drop-shadow-lg">{{ score }}</div>
+      <div class="text-right shrink-0">
+        <div class="text-xs sm:text-sm md:text-base font-bold uppercase tracking-widest mb-1" style="color: rgba(255,255,255,0.2);">得分</div>
+        <div class="font-black text-white tabular-nums drop-shadow-lg" style="font-size: clamp(2rem, 7vw, 3.75rem);">{{ score }}</div>
         <transition name="combo-pop">
-          <div v-if="combo > 1" key="combo" class="text-2xl font-black mt-1"
+          <div v-if="combo > 1" key="combo" class="text-base sm:text-lg md:text-2xl font-black mt-1"
                style="color: #C8961E; text-shadow: 0 0 16px rgba(200,150,30,0.5);">
             {{ combo }}x COMBO！
           </div>
@@ -48,10 +48,10 @@
            style="background: radial-gradient(ellipse at center, rgba(30,15,5,0.95), rgba(8,5,2,0.98));">
 
         <!-- Vinyl record -->
-        <div class="relative mb-10" style="width:210px; height:210px;">
+        <div class="relative mb-7 sm:mb-10" style="width: min(44vw, 210px); height: min(44vw, 210px);">
           <div class="w-full h-full rounded-full flex items-center justify-center vinyl-spin"
                style="background: conic-gradient(from 0deg, #150A04 0%, #221008 15%, #150A04 30%, #221008 45%, #150A04 60%, #221008 75%, #150A04 90%, #221008 100%); border: 10px solid #1E0E06; box-shadow: 0 0 60px rgba(200,150,30,0.15);">
-            <div class="w-20 h-20 rounded-full flex items-center justify-center text-4xl font-black"
+            <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-2xl sm:text-4xl font-black"
                  style="background: radial-gradient(circle at 40% 35%, #F0C040, #7A5A10); box-shadow: 0 0 30px rgba(200,150,30,0.5);">
               金
             </div>
@@ -61,12 +61,12 @@
                style="background: rgba(200,150,30,0.4); transform: rotate(30deg);"></div>
         </div>
 
-        <h2 class="text-6xl font-black text-white mb-4 tracking-widest" style="text-shadow: 0 4px 20px rgba(0,0,0,0.8);">
+        <h2 class="font-black text-white mb-3 sm:mb-4 tracking-widest" style="font-size: clamp(2rem, 9vw, 3.75rem); text-shadow: 0 4px 20px rgba(0,0,0,0.8);">
           懷舊節拍
         </h2>
-        <p class="text-2xl mb-2" style="color: rgba(255,255,255,0.4);">限時 60 秒，跟著節奏一起打拍子！</p>
-        <p class="text-xl mb-2" style="color: rgba(200,150,30,0.5);">完美命中可獲得 Combo 加分</p>
-        <p class="text-lg mb-2" style="color: rgba(255,255,255,0.45);">{{ laneModeText }}</p>
+        <p class="text-base sm:text-xl mb-2 text-center px-6" style="color: rgba(255,255,255,0.4);">限時 60 秒，跟著節奏一起打拍子！</p>
+        <p class="text-sm sm:text-lg mb-2 text-center px-6" style="color: rgba(200,150,30,0.5);">完美命中可獲得 Combo 加分</p>
+        <p class="text-sm sm:text-base md:text-lg mb-2" style="color: rgba(255,255,255,0.45);">{{ laneModeText }}</p>
         <p class="text-base mb-12" style="color: rgba(240,208,144,0.65);">{{ beatDetectStatus || '尚未分析歌曲節奏' }}</p>
 
         <p v-if="audioWarning" class="text-lg mb-6 px-6 py-3 rounded-xl"
@@ -75,7 +75,7 @@
         </p>
 
         <button @click="startGame"
-          class="px-20 py-8 rounded-full text-black text-4xl font-black active:scale-95 transition-transform"
+          class="px-10 sm:px-16 md:px-20 py-5 sm:py-7 md:py-8 rounded-full text-black text-2xl sm:text-3xl md:text-4xl font-black active:scale-95 transition-transform"
           style="background: linear-gradient(135deg, #D4A020, #8B6000); box-shadow: 0 20px 60px rgba(200,150,30,0.35);">
           開始演奏
         </button>
@@ -89,15 +89,15 @@
           <div class="h-full transition-none" style="background: linear-gradient(90deg, #C8961E, #E0B030);"
                :style="{ width: timerBarWidth }"></div>
         </div>
-        <div class="absolute top-2 right-5 text-xl font-bold z-10 tabular-nums"
+        <div class="absolute top-2 right-3 sm:right-5 text-sm sm:text-xl font-bold z-10 tabular-nums"
              style="color: rgba(255,255,255,0.35);">
           {{ Math.ceil(timeLeft / 1000) }}s
         </div>
-        <div class="absolute top-2 left-5 text-sm font-semibold z-10 px-3 py-1.5 rounded-lg"
+        <div class="absolute top-2 left-3 sm:left-5 text-[11px] sm:text-sm font-semibold z-10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg"
              style="color: rgba(255,245,214,0.9); background: rgba(60,38,14,0.42); border: 1px solid rgba(230,192,116,0.35);">
           {{ beatDetectStatus || '節奏分析中' }}
         </div>
-        <div v-if="audioWarning" class="absolute top-12 left-5 text-sm font-semibold z-10 px-3 py-1.5 rounded-lg"
+        <div v-if="audioWarning" class="absolute top-11 sm:top-12 left-3 sm:left-5 text-[11px] sm:text-sm font-semibold z-10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg"
              style="color: #FFD2B0; background: rgba(120,40,20,0.35); border: 1px solid rgba(255,180,120,0.35);">
           {{ audioWarning }}
         </div>
@@ -110,7 +110,7 @@
 
             <!-- Top lane marker -->
             <div class="absolute top-3 inset-x-0 flex justify-center z-10 pointer-events-none">
-              <span class="text-4xl drop-shadow-lg">{{ lane.icon }}</span>
+              <span class="text-2xl sm:text-3xl md:text-4xl drop-shadow-lg">{{ lane.icon }}</span>
             </div>
 
             <!-- Centre guide line -->
@@ -120,7 +120,7 @@
             <div v-for="note in notesInLane[li]" :key="note.id"
                  class="absolute left-1/2 pointer-events-none z-20"
                  :style="{ top: note.y + '%', transform: 'translate(-50%, -50%)' }">
-              <div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black drop-shadow-2xl"
+              <div class="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl sm:text-2xl md:text-3xl font-black drop-shadow-2xl"
                    :style="{
                      background: `radial-gradient(circle at 38% 32%, ${lane.noteLight}, ${lane.noteDark})`,
                      border: `3px solid ${lane.accent}`,
@@ -155,9 +155,8 @@
             <button class="absolute bottom-0 inset-x-0 z-20 flex items-center justify-center"
                     :style="{ height: '18%', background: lane.btnBg,
                               borderTop: `1px solid ${lane.accent}30` }"
-                    @mousedown.prevent="onTap(li)"
-                    @touchstart.prevent="onTap(li)">
-              <span class="text-3xl font-black" :style="{ color: lane.accent }">
+                    @pointerdown.prevent="onTap(li)">
+              <span class="text-xl sm:text-2xl md:text-3xl font-black" :style="{ color: lane.accent }">
                 拍
               </span>
             </button>
@@ -169,44 +168,44 @@
       <div v-if="gameState === 'finished'"
            class="absolute inset-0 flex flex-col items-center justify-center z-20"
            style="background: rgba(5,3,1,0.85); backdrop-filter: blur(4px);">
-        <div class="text-[100px] mb-3 drop-shadow-2xl">🎼</div>
-        <h2 class="text-7xl font-black mb-6 tracking-widest"
-            style="color: #C8961E; text-shadow: 0 0 40px rgba(200,150,30,0.4);">
+        <div class="text-[56px] sm:text-[78px] md:text-[100px] mb-3 drop-shadow-2xl">🎼</div>
+        <h2 class="font-black mb-5 sm:mb-6 tracking-widest text-center px-4"
+            style="font-size: clamp(2rem, 9vw, 4.5rem); color: #C8961E; text-shadow: 0 0 40px rgba(200,150,30,0.4);">
           演奏結束！
         </h2>
 
-        <div class="flex gap-12 mb-8 text-center">
+        <div class="grid grid-cols-2 sm:flex gap-5 sm:gap-10 md:gap-12 mb-8 text-center">
           <div>
-            <div class="text-5xl font-black" style="color: #F0C040;">{{ accuracy.perfect }}</div>
-            <div class="text-xl mt-1" style="color: rgba(255,255,255,0.35);">完美</div>
+            <div class="text-3xl sm:text-4xl md:text-5xl font-black" style="color: #F0C040;">{{ accuracy.perfect }}</div>
+            <div class="text-sm sm:text-base md:text-xl mt-1" style="color: rgba(255,255,255,0.35);">完美</div>
           </div>
           <div>
-            <div class="text-5xl font-black text-green-400">{{ accuracy.good }}</div>
-            <div class="text-xl mt-1" style="color: rgba(255,255,255,0.35);">好</div>
+            <div class="text-3xl sm:text-4xl md:text-5xl font-black text-green-400">{{ accuracy.good }}</div>
+            <div class="text-sm sm:text-base md:text-xl mt-1" style="color: rgba(255,255,255,0.35);">好</div>
           </div>
           <div>
-            <div class="text-5xl font-black text-red-400">{{ accuracy.miss }}</div>
-            <div class="text-xl mt-1" style="color: rgba(255,255,255,0.35);">漏拍</div>
+            <div class="text-3xl sm:text-4xl md:text-5xl font-black text-red-400">{{ accuracy.miss }}</div>
+            <div class="text-sm sm:text-base md:text-xl mt-1" style="color: rgba(255,255,255,0.35);">漏拍</div>
           </div>
           <div>
-            <div class="text-5xl font-black text-white">{{ maxCombo }}</div>
-            <div class="text-xl mt-1" style="color: rgba(255,255,255,0.35);">最大 Combo</div>
+            <div class="text-3xl sm:text-4xl md:text-5xl font-black text-white">{{ maxCombo }}</div>
+            <div class="text-sm sm:text-base md:text-xl mt-1" style="color: rgba(255,255,255,0.35);">最大 Combo</div>
           </div>
         </div>
 
-        <div class="text-3xl mb-10" style="color: rgba(255,255,255,0.45);">
+        <div class="text-lg sm:text-2xl md:text-3xl mb-8 sm:mb-10" style="color: rgba(255,255,255,0.45);">
           總得分
-          <span class="font-black text-5xl text-white ml-3">{{ score }}</span>
+          <span class="font-black text-3xl sm:text-4xl md:text-5xl text-white ml-2 sm:ml-3">{{ score }}</span>
         </div>
 
-        <div class="flex gap-6">
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-[440px] px-4">
           <button @click="startGame"
-            class="px-14 py-6 rounded-full text-black text-3xl font-black active:scale-95 transition-transform"
+            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
             style="background: linear-gradient(135deg, #D4A020, #8B6000);">
             再演一曲
           </button>
           <button @click="goBack"
-            class="px-14 py-6 rounded-full text-white text-3xl font-bold active:scale-95 transition-transform"
+            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-white text-xl sm:text-2xl md:text-3xl font-bold active:scale-95 transition-transform"
             style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
             離開
           </button>
