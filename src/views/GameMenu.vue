@@ -61,13 +61,10 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 sm:gap-3 md:gap-4 mb-1 sm:mb-2">
             <!-- Record icon -->
-            <div class="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 text-lg sm:text-xl md:text-2xl"
-                 style="background:radial-gradient(circle at 40% 35%,#2A1508,#0E0704);border:2px solid rgba(200,150,30,0.3);">
-              🎵
-            </div>
+            
             <div class="truncate leading-none">
               <h1 class="kimi-brand-title truncate">金憶 KIM-I</h1>
-              <p class="mt-1 text-[1rem] sm:text-[0.9rem] md:text-[1rem] tracking-[0.08em] text-[#E7D4A3] truncate opacity-95">為樂齡者打造的認知訓練平台</p>
+              <p class="mt-1 text-[1rem] sm:text-[0.9rem] md:text-[1.15rem] lg:text-[1.25rem] tracking-[0.08em] text-[#E7D4A3] truncate opacity-95">為樂齡者打造的認知訓練平台</p>
             </div>
           </div>
         </div>

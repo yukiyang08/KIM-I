@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full flex flex-col font-['Outfit','Noto_Sans_TC'] overflow-y-auto overflow-x-hidden select-none"
+  <div class="h-full w-full flex flex-col font-['Noto_Serif_TC','Noto_Sans_TC'] overflow-y-auto overflow-x-hidden select-none"
        style="background: #0D0407;">
 
     <!-- Stage curtain top strip -->
@@ -19,16 +19,16 @@
                 @mouseleave="e => e.currentTarget.style.color='rgba(200,150,30,0.45)'">
           ← 離開遊戲
         </button>
-        <h1 class="text-5xl font-black" style="color:#C8961E; text-shadow:0 0 40px rgba(200,150,30,0.3);">
+        <h1 class="text-6xl font-black" style="color:#C8961E; text-shadow:0 0 40px rgba(200,150,30,0.3);">
           <span style="color:#E04040;">🎶</span> 老歌猜謎
         </h1>
-        <p class="text-xl mt-1.5 italic font-medium" style="color:rgba(255,255,255,0.3);">
+        <p class="text-2xl mt-2 italic font-semibold" style="color:rgba(255,255,255,0.38);">
           聽歌詞，猜出這首懷舊老歌的歌名！
         </p>
       </div>
       <div class="text-right">
-        <div class="text-base font-bold uppercase tracking-widest mb-1" style="color:rgba(255,255,255,0.2);">得分</div>
-        <div class="text-6xl font-black text-white tabular-nums">{{ score }}</div>
+        <div class="text-lg font-bold uppercase tracking-widest mb-1" style="color:rgba(255,255,255,0.24);">得分</div>
+        <div class="text-7xl font-black text-white tabular-nums">{{ score }}</div>
       </div>
     </header>
 
@@ -39,10 +39,10 @@
       <div v-if="gameState === 'idle'"
            class="flex flex-col items-center text-center gap-8">
         <div class="text-[110px] drop-shadow-2xl">🎙️</div>
-        <h2 class="text-6xl font-black text-white tracking-widest" style="text-shadow:0 4px 20px rgba(0,0,0,0.9);">
+        <h2 class="text-7xl font-black text-white tracking-widest" style="text-shadow:0 4px 20px rgba(0,0,0,0.9);">
           老歌猜謎
         </h2>
-        <p class="text-2xl max-w-[580px] leading-relaxed" style="color:rgba(255,255,255,0.45);">
+        <p class="text-3xl max-w-[680px] leading-relaxed" style="color:rgba(255,255,255,0.5);">
           聆聽 10 道懷舊台語老歌歌詞提示<br>猜出正確的歌名得 100 分，猜錯扣 20 分
         </p>
         <button @click="startGame"
@@ -53,7 +53,7 @@
       </div>
 
       <!-- ── PLAYING ── -->
-      <div v-if="gameState === 'playing'" class="w-full max-w-[860px] flex flex-col gap-6">
+      <div v-if="gameState === 'playing'" class="w-full max-w-[960px] flex flex-col gap-6">
 
         <!-- Progress bar -->
         <div class="flex items-center gap-4">
@@ -61,23 +61,23 @@
             <div class="h-full rounded-full transition-all duration-500" style="background:#C8961E;"
                  :style="{ width: ((currentIdx) / QUESTIONS.length * 100) + '%' }"></div>
           </div>
-          <span class="text-xl font-bold tabular-nums shrink-0" style="color:rgba(255,255,255,0.4);">
+          <span class="text-2xl font-bold tabular-nums shrink-0" style="color:rgba(255,255,255,0.45);">
             {{ currentIdx + 1 }} / {{ QUESTIONS.length }}
           </span>
         </div>
 
         <!-- Question card (parchment style) -->
-        <div class="rounded-[32px] p-10 text-center relative overflow-hidden"
-             style="background:linear-gradient(160deg,#FDF6E3,#F5E6C0);box-shadow:0 30px 80px rgba(0,0,0,0.7);border:6px solid #3D2310;">
+           <div class="rounded-[32px] p-12 text-center relative overflow-hidden"
+             style="background:linear-gradient(160deg,#FAEFCF,#F1DEAE);box-shadow:0 30px 80px rgba(0,0,0,0.7);border:7px solid #4A2A12;">
           <!-- Aged texture lines -->
           <div class="absolute inset-0 opacity-[0.04] pointer-events-none"
                style="background:repeating-linear-gradient(0deg,#000 0 1px,transparent 1px 28px);"></div>
 
-          <div class="text-5xl mb-6">🎵</div>
-          <p class="text-3xl font-bold leading-relaxed text-gray-700 tracking-wide mb-4">
+          <div class="text-6xl mb-7">🎵</div>
+          <p class="text-4xl font-black leading-relaxed tracking-wide mb-5" style="color:#4A2A12;">
             {{ q.hint }}
           </p>
-          <p class="text-lg font-semibold tracking-widest uppercase" style="color:rgba(0,0,0,0.3);">
+          <p class="text-xl font-bold tracking-widest uppercase" style="color:rgba(60,35,16,0.5);">
             — 猜猜是哪首歌？ —
           </p>
         </div>
@@ -86,20 +86,22 @@
         <div class="grid grid-cols-2 gap-4">
           <button
             v-for="opt in q.options" :key="opt"
-            class="rounded-[24px] py-6 px-8 text-3xl font-black text-left transition-all active:scale-[0.97] relative overflow-hidden"
+            class="rounded-[24px] py-6 px-8 text-4xl font-black text-left transition-all active:scale-[0.97] relative overflow-hidden vintage-option"
             :style="optionStyle(opt)"
             :disabled="answered"
             @click="guess(opt)">
             <span class="relative z-10">{{ opt }}</span>
             <!-- Correct / wrong indicator -->
-            <span v-if="answered && opt === q.answer" class="absolute right-6 top-1/2 -translate-y-1/2 text-4xl z-10">✅</span>
-            <span v-if="answered && wrongGuesses.includes(opt)" class="absolute right-6 top-1/2 -translate-y-1/2 text-4xl z-10">❌</span>
+            <span v-if="answered && opt === q.answer" class="absolute right-6 top-1/2 -translate-y-1/2 text-xl font-black z-10 px-3 py-1 rounded-full"
+              style="color:#3D2310;background:rgba(245,214,126,0.9);border:1px solid rgba(120,78,24,0.5);">正解</span>
+            <span v-if="answered && wrongGuesses.includes(opt)" class="absolute right-6 top-1/2 -translate-y-1/2 text-xl font-black z-10 px-3 py-1 rounded-full"
+              style="color:#FFF2E9;background:rgba(157,62,46,0.85);border:1px solid rgba(255,181,160,0.35);">再想想</span>
           </button>
         </div>
 
         <!-- Year / Composer hint (after answer) -->
         <transition name="info-fade">
-          <div v-if="answered" class="text-center text-xl font-medium" style="color:rgba(255,255,255,0.4);">
+          <div v-if="answered" class="text-center text-2xl font-semibold" style="color:rgba(255,255,255,0.48);">
             {{ q.year }} 年 ‧ {{ q.composer }}
           </div>
         </transition>
@@ -245,16 +247,16 @@ const q = computed(() => QUESTIONS.value[currentIdx.value] ?? ALL_QUESTIONS[0])
 // ── Styling for option buttons ────────────────────────────────
 const optionStyle = (opt) => {
   const base = {
-    border: '2px solid transparent',
-    color: 'white',
-    background: 'rgba(255,255,255,0.07)',
+    border: '2px solid rgba(197,148,73,0.45)',
+    color: '#F8E9C6',
+    background: 'linear-gradient(180deg, rgba(58,29,12,0.9), rgba(39,20,9,0.94))',
   }
   if (!answered.value) return base
   if (opt === q.value.answer) {
-    return { ...base, background: 'rgba(74,222,128,0.2)', border: '2px solid #4ADE80', color: '#4ADE80' }
+    return { ...base, background: 'linear-gradient(180deg, rgba(240,203,112,0.95), rgba(203,147,43,0.9))', border: '2px solid #F8E0A0', color: '#3D2310' }
   }
   if (wrongGuesses.value.includes(opt)) {
-    return { ...base, background: 'rgba(248,113,113,0.15)', border: '2px solid #F87171', color: '#F87171' }
+    return { ...base, background: 'linear-gradient(180deg, rgba(116,38,27,0.9), rgba(88,24,17,0.92))', border: '2px solid #D48775', color: '#FFD9CD' }
   }
   return { ...base, opacity: '0.4' }
 }
@@ -281,10 +283,11 @@ const guess = (opt) => {
     answered.value = true
     setTimeout(nextQuestion, 1600)
   } else {
-    wrongGuesses.value.push(opt)
-    questionPts.value = Math.max(20, questionPts.value - 20)
+    wrongGuesses.value = [opt]
+    score.value = Math.max(0, score.value - 20)
     result.wrong++
-    // Slight shake feedback via scale + immediate reset (CSS handles it)
+    answered.value = true
+    setTimeout(nextQuestion, 1600)
   }
 }
 
@@ -311,4 +314,8 @@ const endGame = () => {
 <style scoped>
 .info-fade-enter-active { transition: opacity 0.5s ease, transform 0.5s ease; }
 .info-fade-enter-from   { opacity: 0; transform: translateY(8px); }
+
+.vintage-option {
+  box-shadow: inset 0 0 0 1px rgba(255, 226, 164, 0.12), 0 8px 18px rgba(0, 0, 0, 0.35);
+}
 </style>

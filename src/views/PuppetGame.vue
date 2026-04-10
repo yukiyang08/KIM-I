@@ -116,7 +116,7 @@ const puppetList = [
 const maxRounds = 5
 const puppets = ref([])
 const puppetRefs = reactive({})
-const gameState = ref('idle') // idle, moving, selecting, finished
+const gameState = ref('idle') // idle, identifying, moving, selecting, finished
 const targetId = ref(null)
 const isIdentifying = ref(false)
 const score = ref(0)
@@ -169,14 +169,14 @@ const showError = (msg) => {
 const startGame = () => {
   score.value = 0
   totalErrors.value = 0
-  gameState.value = 'idle'
+  gameState.value = 'identifying'
   nextRound()
 }
 
 const restartGame = () => {
   score.value = 0
   totalErrors.value = 0
-  gameState.value = 'idle'
+  gameState.value = 'identifying'
   nextRound()
 }
 
@@ -192,7 +192,7 @@ const nextRound = () => {
 }
 
 const identifyTarget = () => {
-  gameState.value = 'idle'
+  gameState.value = 'identifying'
   targetId.value = puppets.value[Math.floor(Math.random() * puppets.value.length)].id
   isIdentifying.value = true
   

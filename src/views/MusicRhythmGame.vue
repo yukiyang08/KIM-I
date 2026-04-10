@@ -74,10 +74,28 @@
         <h2 class="font-black text-white mb-3 sm:mb-4 tracking-widest" style="font-size: clamp(2rem, 9vw, 3.75rem); text-shadow: 0 4px 20px rgba(0,0,0,0.8);">
           懷舊節拍
         </h2>
-        <p class="text-base sm:text-xl mb-2 text-center px-6" style="color: rgba(255,255,255,0.4);">限時 60 秒，跟著節奏一起打拍子！</p>
+        <p class="text-base sm:text-xl mb-2 text-center px-6" style="color: rgba(255,255,255,0.4);">{{ durationHintText }}，跟著節奏一起打拍子！</p>
         <p class="text-sm sm:text-lg mb-2 text-center px-6" style="color: rgba(200,150,30,0.5);">完美命中可獲得 Combo 加分</p>
+        <p class="text-xs sm:text-sm mb-2 text-center px-6" style="color: rgba(150,210,255,0.62);">強拍有更高分數，急速拍會下落更快</p>
         <p class="text-sm sm:text-base md:text-lg mb-2" style="color: rgba(255,255,255,0.45);">{{ laneModeText }}</p>
         <p class="text-base mb-12" style="color: rgba(240,208,144,0.65);">{{ beatDetectStatus || '尚未分析歌曲節奏' }}</p>
+
+        <div class="mb-8 sm:mb-10 w-full max-w-[560px] px-6 text-center">
+          <p class="text-sm sm:text-base mb-3 text-center" style="color: rgba(255,255,255,0.5);">遊玩時長</p>
+          <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <button
+              v-for="option in durationOptions"
+              :key="option.value"
+              @click="setDuration(option.value)"
+              class="min-w-[110px] sm:min-w-[140px] py-2.5 sm:py-3 rounded-xl text-base sm:text-xl font-black transition-colors"
+              :style="selectedDuration === option.value
+                ? 'color:#1A1208;background:linear-gradient(135deg,#E0B050,#B87E10);border:1px solid rgba(255,220,150,0.75);'
+                : 'color:rgba(255,236,198,0.85);background:rgba(70,42,16,0.5);border:1px solid rgba(220,170,90,0.35);'"
+            >
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
 
         <p v-if="audioWarning" class="text-lg mb-6 px-6 py-3 rounded-xl"
            style="color: #FFD2B0; background: rgba(120,40,20,0.35); border: 1px solid rgba(255,180,120,0.35);">
@@ -125,11 +143,24 @@
             <div v-for="note in notesInLane[li]" :key="note.id"
                  class="absolute left-1/2 pointer-events-none z-20"
                  :style="{ top: note.y + '%', transform: 'translate(-50%, -50%)' }">
-                <div class="w-12 h-12 sm:w-16 sm:h-16 md:w-30 md:h-30 rounded-full drop-shadow-2xl"
+                <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full drop-shadow-2xl"
                    :style="{
-                     background: `radial-gradient(circle at 38% 32%, ${lane.noteLight}, ${lane.noteDark})`,
-                     border: `3px solid ${lane.accent}`,
-                     boxShadow: `0 6px 24px ${lane.glow}, 0 0 0 1px rgba(255,255,255,0.1)`,
+                     transform: note.variant === 'rush' ? 'scale(0.84)' : 'scale(1)',
+                     background: note.variant === 'accent'
+                       ? 'radial-gradient(circle at 38% 32%, #FFE89A, #A86C08)'
+                       : note.variant === 'rush'
+                         ? 'radial-gradient(circle at 38% 32%, #A6E8FF, #1B5D86)'
+                         : `radial-gradient(circle at 38% 32%, ${lane.noteLight}, ${lane.noteDark})`,
+                     border: note.variant === 'accent'
+                       ? '3px solid #FFE7A8'
+                       : note.variant === 'rush'
+                         ? '3px solid #9EE3FF'
+                         : `3px solid ${lane.accent}`,
+                     boxShadow: note.variant === 'accent'
+                       ? '0 8px 30px rgba(255,215,120,0.65), 0 0 0 1px rgba(255,255,255,0.2)'
+                       : note.variant === 'rush'
+                         ? '0 8px 26px rgba(110,210,255,0.55), 0 0 0 1px rgba(255,255,255,0.2)'
+                         : `0 6px 24px ${lane.glow}, 0 0 0 1px rgba(255,255,255,0.1)`,
                    }"></div>
             </div>
 
@@ -137,8 +168,8 @@
               <div class="absolute left-1/2 pointer-events-none z-10 rounded-full"
                 :style="{
                   top: HIT_ZONE_Y + '%',
-                  width: '68px',
-                  height: '68px',
+                  width: '136px',
+                  height: '136px',
                   transform: 'translate(-50%, -50%)',
                   border: `3px solid ${lane.accent}B5`,
                   boxShadow: `0 0 18px ${lane.glow}, inset 0 0 16px ${lane.glow}55`,
@@ -369,6 +400,25 @@ const laneCountByDifficulty = {
 
 const activeLaneCount = computed(() => laneCountByDifficulty[gameStore.difficulty] ?? 3)
 const lanes = computed(() => ALL_LANES.slice(0, activeLaneCount.value))
+const durationOptions = [
+  { value: '60', label: '1分鐘' },
+  { value: '120', label: '2分鐘' },
+  { value: 'all', label: '完整歌曲' },
+]
+const durationOptionValues = durationOptions.map((option) => option.value)
+const parsedDuration = String(route.query.duration || '60')
+const selectedDuration = ref(durationOptionValues.includes(parsedDuration) ? parsedDuration : '60')
+
+const durationHintText = computed(() => {
+  if (selectedDuration.value === 'all') return '完整歌曲模式'
+  return `限時 ${Math.floor(Number(selectedDuration.value) / 60)} 分鐘`
+})
+
+const setDuration = (durationValue) => {
+  if (!durationOptionValues.includes(durationValue)) return
+  selectedDuration.value = durationValue
+}
+
 const laneModeText = computed(() => {
   if (activeLaneCount.value === 2) return '初級模式：2 軌道'
   if (activeLaneCount.value === 3) return '中級模式：3 軌道'
@@ -392,8 +442,16 @@ let analysisPromise = null
 let analyzedRhythm = getFallbackRhythm()
 let chart = []
 let multiplayerSyncTimer = null
+let gameRunToken = 0
+let timedEndingInProgress = false
+let timedEndingTimer = null
+let audioFadeRafId = null
 
 const multiplayerRoom = ref(null)
+
+const invalidateGameRun = () => {
+  gameRunToken += 1
+}
 
 const multiplayerStatusText = computed(() => {
   if (!multiplayerRoom.value) return '同步中'
@@ -416,9 +474,34 @@ const flashColor = (type) => {
 }
 
 const stopAudio = () => {
+  if (audioFadeRafId) {
+    cancelAnimationFrame(audioFadeRafId)
+    audioFadeRafId = null
+  }
   if (!bgmAudio) return
   bgmAudio.pause()
   bgmAudio.currentTime = 0
+  bgmAudio.volume = 0.85
+}
+
+const fadeOutAudio = (fadeMs = 900) => {
+  if (!bgmAudio || bgmAudio.paused) return
+  if (audioFadeRafId) cancelAnimationFrame(audioFadeRafId)
+
+  const startVolume = bgmAudio.volume
+  const fadeStart = performance.now()
+
+  const step = (now) => {
+    const progress = Math.min(1, (now - fadeStart) / fadeMs)
+    bgmAudio.volume = Math.max(0, startVolume * (1 - progress))
+    if (progress >= 1) {
+      audioFadeRafId = null
+      return
+    }
+    audioFadeRafId = requestAnimationFrame(step)
+  }
+
+  audioFadeRafId = requestAnimationFrame(step)
 }
 
 const ensureAudio = () => {
@@ -481,6 +564,9 @@ const detectSongRhythm = async () => {
 
 // ── Game flow ─────────────────────────────────────────────────
 const startGame = async () => {
+  const runToken = gameRunToken + 1
+  gameRunToken = runToken
+
   ensureAudio()
 
   beatDetectStatus.value = '分析節奏中...'
@@ -488,19 +574,38 @@ const startGame = async () => {
 
   try {
     analyzedRhythm = await detectSongRhythm()
+    if (runToken !== gameRunToken) return
     beatDetectStatus.value = `已偵測 ${analyzedRhythm.bpm} BPM`
   } catch (err) {
+    if (runToken !== gameRunToken) return
     analyzedRhythm = getFallbackRhythm()
     beatDetectStatus.value = `偵測失敗，改用預設 ${analyzedRhythm.bpm} BPM`
     audioWarning.value = '節奏分析失敗，已使用預設節拍。'
   }
 
-  chart = buildChart(analyzedRhythm.totalBeats, activeLaneCount.value)
-  gameDurationMs.value = analyzedRhythm.firstBeatOffsetMs + (analyzedRhythm.totalBeats * analyzedRhythm.beatMs) + NOTE_DURATION + 800
+  if (runToken !== gameRunToken) return
+
+  if (selectedDuration.value === 'all') {
+    chart = buildChart(analyzedRhythm.totalBeats, activeLaneCount.value)
+    gameDurationMs.value = analyzedRhythm.firstBeatOffsetMs + (analyzedRhythm.totalBeats * analyzedRhythm.beatMs) + NOTE_DURATION + 800
+  } else {
+    const totalDurationMs = Number(selectedDuration.value) * 1000
+    const playableWindowMs = Math.max(0, totalDurationMs - analyzedRhythm.firstBeatOffsetMs - NOTE_DURATION - 800)
+    const cappedBeats = Math.max(8, Math.floor(playableWindowMs / analyzedRhythm.beatMs))
+    const totalBeats = Math.min(analyzedRhythm.totalBeats, cappedBeats)
+
+    chart = buildChart(totalBeats, activeLaneCount.value)
+    gameDurationMs.value = totalDurationMs
+  }
 
   score.value = 0
   combo.value = 0
   maxCombo.value = 0
+  timedEndingInProgress = false
+  if (timedEndingTimer) {
+    clearTimeout(timedEndingTimer)
+    timedEndingTimer = null
+  }
   timeLeft.value = gameDurationMs.value
   activeNotes.value = []
   accuracy.perfect = accuracy.good = accuracy.miss = 0
@@ -515,7 +620,12 @@ const startGame = async () => {
   try {
     bgmAudio.currentTime = 0
     await bgmAudio.play()
+    if (runToken !== gameRunToken) {
+      stopAudio()
+      return
+    }
   } catch (err) {
+    if (runToken !== gameRunToken) return
     audioWarning.value = '音檔尚未準備好，先以無聲節拍模式進行。'
   }
 
@@ -533,7 +643,7 @@ const tick = (now) => {
   timeLeft.value = Math.max(0, gameDurationMs.value - elapsed)
 
   for (const n of activeNotes.value) {
-    n.y = ((chartElapsed - n.spawnAt) / NOTE_DURATION) * 100
+    n.y = ((chartElapsed - n.spawnAt) / n.durationMs) * 100
     if (n.y > HIT_ZONE_Y + HIT_GOOD + 4 && !n._miss) {
       // Auto-miss
       n._miss = true
@@ -549,18 +659,36 @@ const tick = (now) => {
   while (nextChartIdx < chart.length && chartElapsed >= chart[nextChartIdx].beat * analyzedRhythm.beatMs) {
     const chartBeat = chart[nextChartIdx]
     for (const li of chartBeat.lanes) {
+      const variant = chartBeat.beat % 12 === 0
+        ? 'accent'
+        : chartBeat.beat % 7 === 3
+          ? 'rush'
+          : 'normal'
       activeNotes.value.push({
         id: noteId++,
         lane: li,
+        variant,
         y: 0,
         spawnAt: chartBeat.beat * analyzedRhythm.beatMs,
+        durationMs: variant === 'rush' ? NOTE_DURATION * 0.78 : NOTE_DURATION,
       })
     }
     nextChartIdx++
   }
 
   if (timeLeft.value <= 0) {
-    endGame()
+    if (!timedEndingInProgress && selectedDuration.value !== 'all') {
+      timedEndingInProgress = true
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null }
+      fadeOutAudio(900)
+      timedEndingTimer = setTimeout(() => {
+        timedEndingTimer = null
+        endGame({ stopMusic: true })
+      }, 900)
+      return
+    }
+
+    endGame({ stopMusic: true })
     return
   }
 
@@ -581,13 +709,31 @@ const onTap = (li) => {
 
   const diff = Math.abs(note.y - HIT_ZONE_Y)
   let pts, flash, text, color
+  let perfectPts = 100
+  let goodPts = 50
+
+  if (note.variant === 'accent') {
+    perfectPts = 150
+    goodPts = 90
+  } else if (note.variant === 'rush') {
+    perfectPts = 120
+    goodPts = 65
+  }
 
   if (diff <= HIT_PERFECT) {
-    pts = 100; flash = 'perfect'; text = '完美！'; color = '#F0C040'
+    pts = perfectPts; flash = 'perfect'; text = '完美！'; color = '#F0C040'
     accuracy.perfect++
   } else {
-    pts = 50; flash = 'good'; text = '好！'; color = '#6ABE50'
+    pts = goodPts; flash = 'good'; text = '好！'; color = '#6ABE50'
     accuracy.good++
+  }
+
+  if (note.variant === 'accent') {
+    text = `強拍 ${text}`
+    color = '#FFD776'
+  } else if (note.variant === 'rush') {
+    text = `急速 ${text}`
+    color = '#9EDFFF'
   }
 
   combo.value++
@@ -603,9 +749,14 @@ const onTap = (li) => {
   setTimeout(() => { laneResult[li] = null }, 520)
 }
 
-const endGame = () => {
+const endGame = ({ stopMusic = true } = {}) => {
+  timedEndingInProgress = false
+  if (timedEndingTimer) {
+    clearTimeout(timedEndingTimer)
+    timedEndingTimer = null
+  }
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
-  stopAudio()
+  if (stopMusic) stopAudio()
   if (!sessionSaved) {
     sessionSaved = true
     const total = accuracy.perfect + accuracy.good + accuracy.miss
@@ -633,6 +784,12 @@ const finishEarly = () => {
 }
 
 const goBack = () => {
+  invalidateGameRun()
+  timedEndingInProgress = false
+  if (timedEndingTimer) {
+    clearTimeout(timedEndingTimer)
+    timedEndingTimer = null
+  }
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
   stopAudio()
   if (gameState.value === 'playing' && !sessionSaved) {
@@ -649,6 +806,12 @@ const goBack = () => {
 }
 
 const exitGame = () => {
+  invalidateGameRun()
+  timedEndingInProgress = false
+  if (timedEndingTimer) {
+    clearTimeout(timedEndingTimer)
+    timedEndingTimer = null
+  }
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
   stopAudio()
   router.push('/')
@@ -661,6 +824,12 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  invalidateGameRun()
+  timedEndingInProgress = false
+  if (timedEndingTimer) {
+    clearTimeout(timedEndingTimer)
+    timedEndingTimer = null
+  }
   if (rafId) cancelAnimationFrame(rafId)
   stopAudio()
   if (multiplayerSyncTimer) clearInterval(multiplayerSyncTimer)
