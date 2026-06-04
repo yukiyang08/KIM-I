@@ -136,9 +136,6 @@
                class="flex-1 relative overflow-hidden"
            :style="{ background: lane.trackBg, borderRight: li < lanes.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }">
 
-            <!-- Centre guide line -->
-            <div class="absolute left-1/2 top-14 pointer-events-none" style="width:1px; bottom: 18%; background: rgba(255,255,255,0.06);"></div>
-
             <!-- ── Notes ── -->
             <div v-for="note in notesInLane[li]" :key="note.id"
                  class="absolute left-1/2 pointer-events-none z-20"
@@ -165,20 +162,16 @@
             </div>
 
             <!-- Hit zone -->
-              <div class="absolute left-1/2 pointer-events-none z-10 rounded-full"
-                :style="{
-                  top: HIT_ZONE_Y + '%',
-                  width: '136px',
-                  height: '136px',
-                  transform: 'translate(-50%, -50%)',
-                  border: `3px solid ${lane.accent}B5`,
-                  boxShadow: `0 0 18px ${lane.glow}, inset 0 0 16px ${lane.glow}55`,
-                  background: 'rgba(255,255,255,0.04)',
-                }"></div>
             <div class="absolute inset-x-0 pointer-events-none z-10"
-                 :style="{ top: HIT_ZONE_Y + '%', height: '2px', background: `${lane.accent}50` }"></div>
+              :style="{
+                top: HIT_ZONE_Y + '%',
+                height: '4px',
+                transform: 'translateY(-50%)',
+                background: lane.accent,
+                boxShadow: `0 0 10px ${lane.glow}, 0 0 28px ${lane.glow}90`,
+              }"></div>
             <div class="absolute inset-x-0 pointer-events-none z-10"
-                 :style="{ top: (HIT_ZONE_Y - 4) + '%', height: '40px', background: `linear-gradient(to bottom, transparent, ${lane.glow}25, transparent)` }"></div>
+                 :style="{ top: (HIT_ZONE_Y - 5) + '%', height: '52px', background: `linear-gradient(to bottom, transparent, ${lane.glow}28, transparent)` }"></div>
 
             <!-- Lane flash overlay -->
             <transition name="lane-flash">
@@ -196,9 +189,10 @@
             </transition>
 
             <!-- TAP BUTTON -->
-            <button class="absolute bottom-0 inset-x-0 z-20 flex items-center justify-center"
+            <button class="absolute bottom-0 inset-x-0 z-20 flex items-center justify-center outline-none focus:outline-none"
                     :style="{ height: '18%', background: lane.btnBg,
-                              borderTop: `1px solid ${lane.accent}30` }"
+                              borderTop: `1px solid ${lane.accent}30`,
+                              WebkitTapHighlightColor: 'transparent' }"
                     @pointerdown.prevent="onTap(li)"></button>
           </div>
         </div>
