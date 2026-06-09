@@ -233,21 +233,28 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-[520px] px-4">
-          <button v-if="!isMultiplayer" @click="startGame"
-            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
+          <button v-if="isDayFlow" @click="continueStory"
+            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl font-black active:scale-95 transition-transform"
             style="background: linear-gradient(135deg, #D4A020, #8B6000);">
-            再演一曲
+            繼續今天的故事 →
           </button>
-          <button v-else @click="goBack"
-            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
-            style="background: linear-gradient(135deg, #D4A020, #8B6000);">
-            回多人房間
-          </button>
-          <button @click="exitGame"
-            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-white text-xl sm:text-2xl md:text-3xl font-bold active:scale-95 transition-transform"
-            style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
-            {{ isMultiplayer ? '回遊戲大廳' : '離開' }}
-          </button>
+          <template v-else>
+            <button v-if="!isMultiplayer" @click="startGame"
+              class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
+              style="background: linear-gradient(135deg, #D4A020, #8B6000);">
+              再演一曲
+            </button>
+            <button v-else @click="goBack"
+              class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
+              style="background: linear-gradient(135deg, #D4A020, #8B6000);">
+              回多人房間
+            </button>
+            <button @click="exitGame"
+              class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-white text-xl sm:text-2xl md:text-3xl font-bold active:scale-95 transition-transform"
+              style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
+              {{ isMultiplayer ? '回遊戲大廳' : '離開' }}
+            </button>
+          </template>
         </div>
       </div>
 
@@ -271,6 +278,9 @@ import { getRoom, submitRoomScore } from '../utils/multiplayerRoom'
 const router = useRouter()
 const route = useRoute()
 const gameStore = useGameStore()
+
+const isDayFlow = computed(() => route.query.returnTo === 'day')
+const continueStory = () => router.push({ name: 'day', query: { scene: route.query.next || 'ending' } })
 
 // ── Lane definitions ──────────────────────────────────────────
 const ALL_LANES = [

@@ -1,12 +1,13 @@
+
 <template>
   <div class="h-full w-full flex flex-col font-['Outfit',_'Noto_Sans_TC'] overflow-y-auto overflow-x-hidden text-white relative"
-       style="background: radial-gradient(ellipse at top, #2A180B 0%, #140B05 45%, #0B0603 100%);">
+       style="background: radial-gradient(ellipse at top, #221A0E 0%, #130E07 45%, #0A0805 100%);">
 
     <div class="absolute inset-0 opacity-[0.07] pointer-events-none"
          style="background-image: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 44px), repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 44px);"></div>
 
     <header class="px-4 sm:px-6 md:px-10 lg:px-12 py-4 sm:py-6 md:py-8 border-b relative z-10"
-            style="border-color: rgba(255,255,255,0.06); background: rgba(12,8,4,0.62); backdrop-filter: blur(8px);">
+            style="border-color: rgba(255,255,255,0.06); background: rgba(14,10,4,0.68); backdrop-filter: blur(8px);">
       <div class="flex flex-wrap gap-4 sm:gap-6 items-start justify-between">
         <div class="min-w-0">
           <button @click="router.push('/')"
@@ -27,22 +28,22 @@
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 w-full sm:w-auto">
           <div class="rounded-xl px-3 py-2 text-center"
-               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+               style="background: rgba(36,24,10,0.65); border: 1px solid rgba(231,185,96,0.3);">
             <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">關卡</div>
             <div class="text-lg sm:text-2xl font-black tabular-nums">{{ round + 1 }}/{{ totalRounds }}</div>
           </div>
           <div class="rounded-xl px-3 py-2 text-center"
-               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+               style="background: rgba(36,24,10,0.65); border: 1px solid rgba(231,185,96,0.3);">
             <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">正確</div>
             <div class="text-lg sm:text-2xl font-black tabular-nums text-[#7DFFAE]">{{ totalCorrect }}</div>
           </div>
           <div class="rounded-xl px-3 py-2 text-center"
-               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+               style="background: rgba(36,24,10,0.65); border: 1px solid rgba(231,185,96,0.3);">
             <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">失誤</div>
             <div class="text-lg sm:text-2xl font-black tabular-nums text-[#FFB19E]">{{ totalErrors }}</div>
           </div>
           <div class="rounded-xl px-3 py-2 text-center"
-               style="background: rgba(50,32,14,0.65); border: 1px solid rgba(231,185,96,0.3);">
+               style="background: rgba(36,24,10,0.65); border: 1px solid rgba(231,185,96,0.3);">
             <div class="text-[10px] sm:text-xs uppercase tracking-[0.18em] opacity-60">耗時</div>
             <div class="text-lg sm:text-2xl font-black tabular-nums">{{ elapsedTime.toFixed(1) }}s</div>
           </div>
@@ -142,7 +143,12 @@
             </div>
           </div>
 
-          <button @click="resetGame"
+          <button v-if="isDayFlow" @click="continueStory"
+                  class="mt-7 sm:mt-9 px-8 sm:px-12 py-4 sm:py-5 rounded-full text-xl sm:text-2xl font-black active:scale-95 transition-transform w-full"
+                  style="background: linear-gradient(135deg, #E4B84D, #A37212); color:#2A1808; box-shadow: 0 18px 40px rgba(240,165,0,0.3);">
+            繼續今天的故事 →
+          </button>
+          <button v-else @click="resetGame"
                   class="mt-7 sm:mt-9 px-8 sm:px-12 py-4 sm:py-5 rounded-full text-2xl sm:text-3xl font-black active:scale-95 transition-transform"
                   style="background: linear-gradient(135deg, #E4B84D, #A37212); color:#2A1808; box-shadow: 0 18px 40px rgba(240,165,0,0.3);">
             再次挑戰
@@ -156,12 +162,16 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import gsap from 'gsap'
 import { useGameStore } from '../stores/gameStore'
 
 const router = useRouter()
+const route = useRoute()
 const gameStore = useGameStore()
+
+const isDayFlow = computed(() => route.query.returnTo === 'day')
+const continueStory = () => router.push({ name: 'day', query: { scene: route.query.next || 'ending' } })
 
 const allItems = [
   { id: 1, name: '黑松沙士', icon: '🥫' },
