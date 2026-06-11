@@ -65,6 +65,18 @@
                   style="background: rgba(255,245,220,0.95); color:#241305;">
             <option value="music-rhythm2">月亮代表我的心</option>
             <option value="music-rhythm1">愛拚才會贏</option>
+            <option value="music-yijianmei">一剪梅</option>
+            <option value="music-jiahou">家後</option>
+            <option value="music-wowentian">我問天</option>
+            <option value="music-citymoon">城裡的月光</option>
+          </select>
+
+          <label class="block text-sm mt-4 mb-2" style="color: rgba(255,232,188,0.82);">遊玩時長</label>
+          <select v-model="duration" class="w-full px-4 py-3 rounded-xl text-base outline-none"
+                  style="background: rgba(255,245,220,0.95); color:#241305;">
+            <option value="60">1 分鐘</option>
+            <option value="120">2 分鐘</option>
+            <option value="all">完整歌曲</option>
           </select>
 
           <button
@@ -102,7 +114,7 @@
               <div>
                 <div class="font-black tracking-[0.12em]">房號 {{ room.code }}</div>
                 <div class="text-sm opacity-80 mt-1">
-                  {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }} ・ {{ room.players.length }}/{{ room.maxPlayers }} 人
+                  {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }} ・ {{ durationLabel(room.duration) }} ・ {{ room.players.length }}/{{ room.maxPlayers }} 人
                 </div>
               </div>
               <div class="text-sm font-bold px-2.5 py-1 rounded-lg"
@@ -133,6 +145,7 @@ const playerName = ref(storedPlayer.name)
 const joinCode = ref('')
 const mode = ref('co-op')
 const track = ref('music-rhythm2')
+const duration = ref('60')
 const errorText = ref('')
 const rooms = ref([])
 
@@ -149,8 +162,21 @@ const modeLabel = (value) => {
 }
 
 const songLabel = (value) => {
-  if (value === 'music-rhythm1') return '愛拚才會贏'
-  return '月亮代表我的心'
+  const map = {
+    'music-rhythm1': '愛拚才會贏',
+    'music-rhythm2': '月亮代表我的心',
+    'music-yijianmei': '一剪梅',
+    'music-jiahou': '家後',
+    'music-wowentian': '我問天',
+    'music-citymoon': '城裡的月光',
+  }
+  return map[value] || '月亮代表我的心'
+}
+
+const durationLabel = (value) => {
+  if (value === '120') return '2分鐘'
+  if (value === 'all') return '完整'
+  return '1分鐘'
 }
 
 const refreshRooms = () => {
@@ -177,6 +203,7 @@ const createNewRoom = () => {
     hostName: player.name,
     mode: mode.value,
     track: track.value,
+    duration: duration.value,
     maxPlayers: 4,
   })
 

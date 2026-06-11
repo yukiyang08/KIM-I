@@ -1,203 +1,518 @@
 <template>
-  <div class="h-full w-full overflow-y-auto pb-[110px] px-4 sm:px-8 pt-6 font-['Outfit','Noto_Sans_TC']"
-       style="background: #F8F4EE;">
+  <div class="h-full flex overflow-hidden" style="background:#F5F0E8; font-family:'Outfit','Noto Sans TC',sans-serif;">
 
-    <!-- Header -->
-    <header class="flex items-center gap-4 mb-5">
-      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shrink-0"
-           style="background: linear-gradient(135deg, #F5D98A, #C8961E); box-shadow: 0 4px 16px rgba(200,150,30,0.28);">
-        <span class="text-2xl sm:text-3xl">👵</span>
-      </div>
-      <div class="flex-1 min-w-0">
-        <h2 class="font-black tracking-tight truncate" style="font-size: clamp(1.4rem, 5vw, 2.2rem); color:#3D2010;">
-          陳金美 奶奶
-        </h2>
-        <p class="text-sm sm:text-base font-medium mt-0.5" style="color:#9B7040;">
-          {{ hasData ? `上次活動：${lastPlayedLabel}` : '還沒有開始玩遊戲' }}
-        </p>
-      </div>
-      <a href="/dashboard"
-         class="shrink-0 text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full transition-all"
-         style="color:#9B7040; border:1px solid rgba(155,112,64,0.3);"
-         @mouseover="e => e.currentTarget.style.background='rgba(200,150,30,0.08)'"
-         @mouseleave="e => e.currentTarget.style.background='transparent'">
-        機構版 →
-      </a>
-    </header>
+    <!-- ══════════════════════ LEFT SIDEBAR ══════════════════════ -->
+    <aside class="w-[200px] shrink-0 flex flex-col bg-white"
+      style="border-right:1px solid #EDE8E0; box-shadow:2px 0 8px rgba(0,0,0,0.04);">
 
-    <!-- Weekly summary card -->
-    <section class="rounded-2xl p-5 sm:p-6 mb-4 overflow-hidden"
-             style="background: linear-gradient(135deg, #FFF8EC, #FFF3DC);
-                    border: 1.5px solid rgba(200,150,30,0.3);
-                    box-shadow: 0 4px 20px rgba(120,70,20,0.09);">
-      <div class="flex items-start gap-4">
-        <div class="text-4xl sm:text-5xl leading-none shrink-0">{{ weeklyEmoji }}</div>
+      <!-- Logo -->
+      <div class="px-5 pt-6 pb-5 flex items-center gap-3 border-b" style="border-color:#EDE8E0;">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          style="background:linear-gradient(135deg,#FFA040,#E8701A);">
+          <Icon icon="solar:user-heart-bold" width="20" height="20" style="color:white;" />
+        </div>
         <div>
-          <div class="text-xs font-bold uppercase tracking-widest mb-1" style="color:#C8961E;">本週總結</div>
-          <p class="text-base sm:text-lg leading-relaxed font-medium" style="color:#3D2010;">
-            {{ weeklySummary }}
-          </p>
+          <div class="font-black text-[13px] leading-tight" style="color:#2D2010;">我的腦力日記</div>
+          <div class="text-[11px] mt-0.5" style="color:#9B7040;">個人訓練報表</div>
         </div>
       </div>
-    </section>
 
-    <!-- Four key stats -->
-    <div class="grid grid-cols-4 gap-2 sm:gap-3 mb-4">
-      <div v-for="stat in keyStats" :key="stat.label"
-           class="rounded-xl p-3 sm:p-4 text-center"
-           style="background:white; border:1px solid rgba(200,150,30,0.13); box-shadow:0 2px 10px rgba(120,70,20,0.05);">
-        <div class="font-black leading-none mb-1" style="font-size:clamp(1.3rem,4vw,1.9rem);"
-             :style="{ color: stat.color }">
-          {{ stat.value }}<span v-if="stat.unit" class="text-xs font-semibold ml-0.5">{{ stat.unit }}</span>
-        </div>
-        <div class="text-xs font-semibold" style="color:#9B7040;">{{ stat.label }}</div>
-      </div>
-    </div>
-
-    <!-- 7-day activity calendar -->
-    <section class="rounded-2xl p-5 sm:p-6 mb-4"
-             style="background:white; border:1px solid rgba(200,150,30,0.13); box-shadow:0 2px 10px rgba(120,70,20,0.05);">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-base sm:text-lg font-black flex items-center gap-2" style="color:#3D2010;">
-          <span class="w-1 h-4 rounded-full shrink-0 inline-block" style="background:#C8961E;"></span>
-          本週出席紀錄
-        </h3>
-        <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
-              style="background:rgba(200,150,30,0.1); color:#9B7040;">
-          {{ weeklyCount }} / 7 天
-        </span>
-      </div>
-      <div class="grid grid-cols-7 gap-1 sm:gap-1.5">
-        <div v-for="(day, i) in weekDays" :key="i" class="flex flex-col items-center gap-1">
-          <div class="text-[10px] font-semibold" style="color:rgba(155,112,64,0.5);">{{ day.label }}</div>
-          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold transition-all text-sm"
-               :style="day.active
-                 ? 'background:linear-gradient(135deg,#D4A020,#8B6000);color:white;box-shadow:0 3px 10px rgba(200,120,0,0.28);'
-                 : day.isFuture
-                   ? 'background:rgba(200,150,30,0.04);color:rgba(155,112,64,0.15);'
-                   : 'background:rgba(200,150,30,0.08);color:rgba(155,112,64,0.3);'">
-            {{ day.active ? '✓' : day.isFuture ? '' : '·' }}
+      <!-- User card -->
+      <div class="mx-3 mt-4 mb-3 p-3 rounded-2xl" style="background:#FFF8F0; border:1px solid #EDE8E0;">
+        <div class="flex items-center gap-2.5 mb-2">
+          <img :src="defaultAvatar" class="w-10 h-10 rounded-full object-cover shrink-0"
+            style="border:2px solid #E8974A;" />
+          <div class="flex-1 min-w-0">
+            <div class="font-black text-[13px] truncate" style="color:#2D2010;">
+              {{ profileStore.isSetup ? profileStore.name : '您好' }}
+            </div>
+            <div class="text-[10px]" style="color:#9B7040;">{{ greeting }}</div>
           </div>
-          <div v-if="day.isToday" class="text-[9px] font-bold" style="color:#C8961E;">今天</div>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
+          :style="{ background: brainLevel.bg }">
+          <span class="text-[13px]">{{ brainLevel.emoji }}</span>
+          <span class="font-black text-[11px]" :style="{ color: brainLevel.color }">{{ brainLevel.label }}</span>
         </div>
       </div>
-    </section>
 
-    <!-- 五個面向：horizontal progress bars -->
-    <section class="rounded-2xl p-5 sm:p-6 mb-4"
-             style="background:white; border:1px solid rgba(200,150,30,0.13); box-shadow:0 2px 10px rgba(120,70,20,0.05);">
-      <h3 class="text-base sm:text-lg font-black mb-5 flex items-center gap-2" style="color:#3D2010;">
-        <span class="w-1 h-4 rounded-full shrink-0 inline-block" style="background:#C8961E;"></span>
-        腦力狀態一覽
-      </h3>
-      <div class="space-y-3.5">
-        <div v-for="item in dimensionBreakdown" :key="item.key"
-             class="flex items-center gap-2 sm:gap-3">
-          <div class="text-xs sm:text-sm font-bold text-right shrink-0"
-               style="width:3.8rem; color:#7A5030;">{{ item.label }}</div>
-          <div class="flex-1 h-2.5 rounded-full overflow-hidden"
-               style="background:rgba(200,150,30,0.1);">
-            <div class="h-full rounded-full transition-all duration-700"
-                 :style="{ width: item.current + '%', background: dimensionColor(item.trend) }">
+      <!-- Nav -->
+      <nav class="flex-1 px-3 py-1 space-y-0.5 overflow-y-auto">
+        <button v-for="item in navItems" :key="item.key"
+          @click="activeNav = item.key"
+          class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all text-left"
+          :style="activeNav === item.key
+            ? 'background:#FFF1E0; color:#C87820; font-weight:700;'
+            : 'color:#6B5B40;'">
+          <Icon :icon="item.icon" width="17" height="17" class="shrink-0"
+            :style="activeNav === item.key ? 'color:#C87820;' : 'color:#9B7040;'" />
+          <span>{{ item.label }}</span>
+        </button>
+      </nav>
+
+      <!-- Bottom -->
+      <div class="px-4 pb-5 pt-3 border-t space-y-2" style="border-color:#EDE8E0;">
+        <button @click="router.push('/')"
+          class="w-full py-2 rounded-xl text-[12px] font-semibold flex items-center justify-center gap-1.5"
+          style="background:#FFF1E0; color:#C87820; border:1px solid rgba(232,151,74,0.25);">
+          <Icon icon="solar:gamepad-bold" width="14" height="14" />
+          回遊戲大廳
+        </button>
+      </div>
+    </aside>
+
+    <!-- ══════════════════════ MAIN AREA ══════════════════════ -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+      <!-- Top bar -->
+      <header class="shrink-0 px-6 py-4 flex items-center justify-between bg-white"
+        style="border-bottom:1px solid #EDE8E0; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        <div>
+          <h2 class="font-black text-[18px] leading-tight" style="color:#2D2010;">
+            {{ navItems.find(n=>n.key===activeNav)?.label }}
+          </h2>
+          <p class="text-[12px] mt-0.5" style="color:#9B7040;">{{ navItems.find(n=>n.key===activeNav)?.desc }}</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 text-[13px]" style="color:#9B7040;">
+            <Icon icon="solar:calendar-bold" width="16" height="16" />
+            <span>{{ todayLabel }}</span>
+          </div>
+          <button @click="router.push('/')"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-semibold"
+            style="background:#FFF1E0; color:#C87820; border:1px solid rgba(232,151,74,0.3);">
+            <Icon icon="solar:gamepad-bold" width="14" height="14" />
+            去訓練
+          </button>
+        </div>
+      </header>
+
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-4">
+
+        <!-- ══════════════════ 我的概覽 ══════════════════ -->
+        <template v-if="activeNav === 'overview'">
+
+          <!-- KPI cards -->
+          <div class="grid grid-cols-5 gap-3">
+            <div v-for="stat in statCards" :key="stat.label"
+              class="bg-white rounded-2xl p-4 flex flex-col gap-2"
+              style="border:1px solid #EDE8E0; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                  :style="{ background: stat.iconBg }">
+                  <Icon :icon="stat.icon" width="20" height="20" :style="{ color: stat.iconColor }" />
+                </div>
+                <span class="text-[12px] leading-tight" style="color:#9B7040;">{{ stat.label }}</span>
+              </div>
+              <div class="font-black leading-none" style="font-size:26px; color:#2D2010;">
+                {{ stat.value }}<span style="font-size:14px; margin-left:2px; color:#9B7040;">{{ stat.unit }}</span>
+              </div>
+              <div class="text-[11px] font-semibold" :style="{ color: stat.subColor ?? '#9B7040' }">
+                {{ stat.sub }}
+              </div>
+              <div v-if="stat.progress != null" class="h-1.5 rounded-full overflow-hidden" style="background:#F0EBE0;">
+                <div class="h-full rounded-full transition-all" style="background:#E8974A;"
+                  :style="{ width: (stat.progress * 100) + '%' }"></div>
+              </div>
+            </div>
+
+            <!-- 鼓勵卡 -->
+            <div class="bg-white rounded-2xl p-4 flex flex-col justify-center"
+              style="border:1px solid #EDE8E0; background:linear-gradient(135deg,#FFF8F0,#FFECD8);">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center mb-2"
+                style="background:#FFF1E0;">
+                <Icon icon="solar:sun-bold" width="20" height="20" style="color:#E8974A;" />
+              </div>
+              <div class="font-black text-[14px] mb-1" style="color:#2D2010;">{{ encourageTitle }}</div>
+              <div class="text-[11px] leading-relaxed" style="color:#9B7040;">{{ encourageDesc }}</div>
             </div>
           </div>
-          <div class="shrink-0 flex items-center gap-1" style="min-width:4rem; justify-content:flex-end;">
-            <span class="text-xs font-black" :style="{ color: dimensionColor(item.trend) }">
-              {{ item.trend === 'improving' ? '▲' : item.trend === 'declining' ? '▼' : '—' }}
-            </span>
-            <span class="text-xs font-bold px-1.5 py-0.5 rounded-full"
-                  :style="trendBadgeStyle(item.trend)">
-              {{ item.trend === 'improving' ? '進步' : item.trend === 'declining' ? '加強' : '穩定' }}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="flex items-center gap-4 mt-5 pt-4 flex-wrap text-xs"
-           style="border-top:1px solid rgba(200,150,30,0.1); color:#9B7040;">
-        <span>相較上月基準：</span>
-        <span style="color:#1E9E6A;">▲ 進步</span>
-        <span style="color:#C8961E;">— 穩定</span>
-        <span style="color:#C04030;">▼ 需加強</span>
-      </div>
-    </section>
 
-    <!-- 家屬建議 -->
-    <section class="rounded-2xl p-5 sm:p-6 mb-4"
-             style="background:white; border:1px solid rgba(200,150,30,0.13); box-shadow:0 2px 10px rgba(120,70,20,0.05);">
-      <h3 class="text-base sm:text-lg font-black mb-4 flex items-center gap-2" style="color:#3D2010;">
-        <span class="w-1 h-4 rounded-full shrink-0 inline-block" style="background:#C8961E;"></span>
-        家屬可以這樣做
-      </h3>
-      <div class="space-y-3">
-        <div v-for="(s, i) in familySuggestions" :key="i"
-             class="flex items-start gap-3 rounded-xl p-4"
-             style="background:#FAF5ED; border:1px solid rgba(200,150,30,0.1);">
-          <span class="text-2xl shrink-0 leading-none mt-0.5">{{ s.emoji }}</span>
+          <!-- 雷達 ＋ 趨勢 ＋ 本週出席 -->
+          <div class="grid gap-4" style="grid-template-columns:260px 1fr 240px;">
+
+            <!-- 雷達圖 -->
+            <div class="bg-white rounded-2xl p-4 flex flex-col" style="border:1px solid #EDE8E0;">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-black text-[13px]" style="color:#2D2010;">認知能力雷達</h3>
+              </div>
+              <div class="flex items-center gap-4 mb-2" style="color:#9B7040;">
+                <span class="flex items-center gap-1.5 text-[11px]">
+                  <span class="inline-block w-5 h-0.5 rounded" style="background:#E8974A;"></span>本次
+                </span>
+                <span class="flex items-center gap-1.5 text-[11px]">
+                  <span class="inline-block w-5" style="border-top:1.5px dashed #9B9080; margin-top:1px;"></span>上次
+                </span>
+              </div>
+              <div class="flex-1 flex items-center justify-center">
+                <Radar :data="radarData" :options="radarOptions" style="max-height:200px; width:100%;" />
+              </div>
+            </div>
+
+            <!-- 趨勢折線 -->
+            <div class="bg-white rounded-2xl p-4" style="border:1px solid #EDE8E0;">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-black text-[13px]" style="color:#2D2010;">能力趨勢變化</h3>
+                <span class="text-[11px] px-2 py-1 rounded-lg" style="background:#F5F0E8; color:#9B7040;">近 7 天</span>
+              </div>
+              <div class="flex flex-wrap gap-x-3 gap-y-1 mb-3">
+                <span v-for="d in dimMeta" :key="d.key" class="flex items-center gap-1 text-[11px]" style="color:#6B6B6B;">
+                  <span class="w-2 h-2 rounded-full" :style="{ background: d.color }"></span>
+                  {{ d.label }}
+                </span>
+              </div>
+              <div v-if="hasData" style="height:180px;">
+                <Line :data="trendChartData" :options="trendOptions" />
+              </div>
+              <div v-else class="flex flex-col items-center justify-center" style="height:180px;">
+                <Icon icon="solar:graph-up-bold" width="36" height="36" style="color:#EDE8E0;" class="mb-2" />
+                <div class="text-[12px]" style="color:#9B7040;">開始玩遊戲後趨勢圖會出現在這裡</div>
+              </div>
+            </div>
+
+            <!-- 本週出席 -->
+            <div class="bg-white rounded-2xl p-4" style="border:1px solid #EDE8E0;">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-black text-[13px]" style="color:#2D2010;">本週出席</h3>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                  style="background:#FFF1E0; color:#C87820;">{{ weeklyCount }}/7 天</span>
+              </div>
+              <div class="grid grid-cols-7 gap-1.5">
+                <div v-for="(day, i) in weekDays" :key="i" class="flex flex-col items-center gap-1">
+                  <div class="text-[9px] font-semibold" style="color:rgba(155,112,64,0.5);">{{ day.label }}</div>
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-all"
+                    :style="day.active
+                      ? 'background:#E8974A; color:white; box-shadow:0 2px 6px rgba(232,151,74,0.4);'
+                      : day.isFuture
+                        ? 'background:#F5F0E8; color:rgba(155,112,64,0.2);'
+                        : 'background:#F0EBE0; color:rgba(155,112,64,0.35);'">
+                    {{ day.active ? '✓' : '' }}
+                  </div>
+                  <div v-if="day.isToday" class="text-[8px] font-black" style="color:#E8974A;">今</div>
+                </div>
+              </div>
+              <!-- 能力長條 -->
+              <div class="mt-4 space-y-2.5">
+                <div v-for="(item, i) in dimensionBreakdown" :key="item.key" class="flex items-center gap-2">
+                  <div class="text-[10px] shrink-0 w-10 text-right" style="color:#9B7040;">{{ item.label }}</div>
+                  <div class="flex-1 h-1.5 rounded-full relative" style="background:#F0EBE0;">
+                    <div class="h-full rounded-full transition-all duration-700"
+                      :style="{ width: item.current+'%', background: dimMeta[i]?.color ?? '#E8974A' }"></div>
+                  </div>
+                  <div class="shrink-0 text-[10px] font-black w-6 text-right"
+                    :style="{ color: dimensionColor(item.trend) }">{{ item.current }}</div>
+                  <div class="shrink-0 text-[9px] font-black" :style="{ color: dimensionColor(item.trend) }">
+                    {{ item.trend === 'improving' ? '▲' : item.trend === 'declining' ? '▼' : '—' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </template>
+
+        <!-- ══════════════════ 訓練紀錄 ══════════════════ -->
+        <template v-else-if="activeNav === 'records'">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-black text-[17px]" style="color:#2D2010;">訓練紀錄</h2>
+              <p class="text-[12px]" style="color:#9B7040;">所有遊戲訓練歷史</p>
+            </div>
+          </div>
+
+          <!-- 遊戲分類統計 -->
+          <div class="grid grid-cols-6 gap-3">
+            <div v-for="g in gameOverview" :key="g.id"
+              class="bg-white rounded-2xl p-4 text-center" style="border:1px solid #EDE8E0;">
+              <div class="flex justify-center mb-2">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" :style="{ background: g.iconBg }">
+                  <Icon :icon="g.icon" width="20" height="20" :style="{ color: g.iconColor }" />
+                </div>
+              </div>
+              <div class="font-black text-[15px] mb-0.5" style="color:#2D2010;">
+                {{ store.sessions.filter(s=>s.gameId===g.id).length }}
+              </div>
+              <div class="text-[10px] font-semibold mb-1" style="color:#6B6B6B;">{{ g.name }}</div>
+              <div class="text-[10px]" :style="{ color: avgGameScore(g.id) >= 80 ? '#1E9E6A' : '#E8974A' }">
+                均 {{ avgGameScore(g.id) }} 分
+              </div>
+            </div>
+          </div>
+
+          <!-- 紀錄表 -->
+          <div class="bg-white rounded-2xl overflow-hidden" style="border:1px solid #EDE8E0;">
+            <div class="px-4 py-3 border-b" style="border-color:#EDE8E0;">
+              <h3 class="font-black text-[13px]" style="color:#2D2010;">所有訓練記錄</h3>
+            </div>
+            <div v-if="hasData">
+              <table class="w-full">
+                <thead style="background:#FAFAF7;">
+                  <tr class="text-[11px]" style="color:#9B7040;">
+                    <th class="text-left px-4 py-2.5 font-semibold">時間</th>
+                    <th class="text-left px-4 py-2.5 font-semibold">遊戲</th>
+                    <th class="text-center px-3 py-2.5 font-semibold">分數</th>
+                    <th class="text-center px-3 py-2.5 font-semibold">強化維度</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="s in [...store.sessions].reverse().slice(0,20)" :key="s.timestamp"
+                    class="transition-colors" style="border-top:1px solid #EDE8E0;"
+                    :style="hoveredRow === s.timestamp ? 'background:#FFF8F0;' : ''"
+                    @mouseenter="hoveredRow = s.timestamp" @mouseleave="hoveredRow = null">
+                    <td class="px-4 py-3 text-[12px]" style="color:#9B7040;">{{ timeLabel(s.timestamp) }}</td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-2">
+                        <Icon :icon="gameOverview.find(g=>g.id===s.gameId)?.icon || 'solar:gamepad-bold'"
+                          width="14" height="14"
+                          :style="{ color: gameOverview.find(g=>g.id===s.gameId)?.iconColor || '#9B7040' }" />
+                        <span class="text-[13px]" style="color:#2D2010;">{{ gameName[s.gameId] ?? s.gameId }}</span>
+                      </div>
+                    </td>
+                    <td class="text-center px-3 py-3">
+                      <span class="font-black text-[13px]" :style="{ color: scoreColor(s.score) }">{{ s.score }} 分</span>
+                    </td>
+                    <td class="text-center px-3 py-3">
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                        style="background:#EEF4FB; color:#2C7BC8;">{{ dimLabelOf[s.gameId] ?? '—' }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="flex flex-col items-center py-16">
+              <Icon icon="solar:gamepad-bold" width="40" height="40" style="color:#EDE8E0;" class="mb-3" />
+              <div class="text-[13px] font-semibold mb-1" style="color:#9B7040;">還沒有訓練記錄</div>
+              <button @click="router.push('/')" class="mt-2 px-4 py-2 rounded-xl text-[12px] font-semibold text-white"
+                style="background:#E8974A;">去玩遊戲</button>
+            </div>
+          </div>
+        </template>
+
+        <!-- ══════════════════ 成就徽章 ══════════════════ -->
+        <template v-else-if="activeNav === 'achievements'">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-black text-[17px]" style="color:#2D2010;">成就徽章</h2>
+              <p class="text-[12px]" style="color:#9B7040;">已獲得 {{ earnedCount }} / {{ achievements.length }} 個徽章</p>
+            </div>
+          </div>
+
+          <!-- 進度摘要 -->
+          <div class="grid grid-cols-4 gap-3">
+            <div v-for="s in achieveSummary" :key="s.label" class="bg-white rounded-2xl p-4" style="border:1px solid #EDE8E0;">
+              <div class="text-[12px] mb-1" style="color:#9B7040;">{{ s.label }}</div>
+              <div class="font-black text-[22px] leading-none mb-1" :style="{ color: s.color }">{{ s.value }}</div>
+              <div class="text-[11px]" style="color:#9B7040;">{{ s.sub }}</div>
+            </div>
+          </div>
+
+          <!-- 徽章格 -->
+          <div class="grid grid-cols-4 gap-3">
+            <div v-for="badge in achievements" :key="badge.id"
+              class="bg-white rounded-2xl p-4 flex flex-col items-center text-center transition-all"
+              style="border:1px solid #EDE8E0;"
+              :style="badge.earned ? 'box-shadow:0 4px 16px rgba(232,151,74,0.18); border-color:#E8974A;' : ''">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-3"
+                :style="badge.earned
+                  ? 'background:linear-gradient(135deg,#FFE0A0,#E8974A); box-shadow:0 4px 14px rgba(232,151,74,0.3);'
+                  : 'background:#F5F0E8;'">
+                <span :style="badge.earned ? '' : 'filter:grayscale(1) opacity(0.3)'">{{ badge.emoji }}</span>
+              </div>
+              <div class="font-black text-[13px] mb-1" :style="badge.earned ? 'color:#2D2010;' : 'color:#9B7040;'">
+                {{ badge.title }}</div>
+              <div v-if="badge.earned" class="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                style="background:#E8F5EF; color:#1E9E6A;">已獲得</div>
+              <div v-else-if="badge.progress != null" class="w-full mt-2">
+                <div class="h-1.5 rounded-full overflow-hidden" style="background:#F0EBE0;">
+                  <div class="h-full rounded-full" style="background:#E8974A;"
+                    :style="{ width: (badge.progress * 100) + '%' }"></div>
+                </div>
+                <div class="text-[10px] mt-1" style="color:#9B7040;">{{ badge.progressLabel }}</div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- ══════════════════ 訓練建議 ══════════════════ -->
+        <template v-else-if="activeNav === 'suggest'">
           <div>
-            <div class="text-sm sm:text-base font-bold mb-0.5" style="color:#3D2010;">{{ s.title }}</div>
-            <div class="text-xs sm:text-sm leading-relaxed" style="color:#7A5030;">{{ s.desc }}</div>
+            <h2 class="font-black text-[17px]" style="color:#2D2010;">訓練建議</h2>
+            <p class="text-[12px]" style="color:#9B7040;">根據你的表現，為你量身推薦</p>
           </div>
-        </div>
+
+          <!-- 能力分析 -->
+          <div class="bg-white rounded-2xl p-5" style="border:1px solid #EDE8E0;">
+            <h3 class="font-black text-[13px] mb-4" style="color:#2D2010;">五大能力現況</h3>
+            <div class="space-y-4">
+              <div v-for="(item, i) in dimensionBreakdown" :key="item.key">
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                      :style="{ background: dimMeta[i]?.color+'22' }">
+                      <Icon :icon="dimIcons[i]" width="14" height="14" :style="{ color: dimMeta[i]?.color }" />
+                    </div>
+                    <span class="font-semibold text-[13px]" style="color:#2D2010;">{{ item.label }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-black text-[15px]" :style="{ color: dimMeta[i]?.color }">{{ item.current }}</span>
+                    <span class="text-[11px] font-bold px-1.5 py-0.5 rounded-full"
+                      :style="item.trend==='improving'
+                        ? 'background:#E8F5EF; color:#1E9E6A;'
+                        : item.trend==='declining'
+                          ? 'background:#FEF0F0; color:#C04030;'
+                          : 'background:#F5F0E8; color:#9B7040;'">
+                      {{ item.trend==='improving'?'↑ 進步中':item.trend==='declining'?'↓ 需加強':'→ 持平' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="h-2 rounded-full relative" style="background:#F0EBE0;">
+                  <div class="h-full rounded-full transition-all duration-700"
+                    :style="{ width: item.current+'%', background: dimMeta[i]?.color }"></div>
+                  <div class="absolute top-0 h-full w-0.5 rounded"
+                    :style="{ left: item.baseline+'%', background: 'rgba(0,0,0,0.2)' }"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 建議卡片 -->
+          <div class="grid grid-cols-3 gap-4">
+            <div v-for="rec in recommendations" :key="rec.gameId"
+              class="bg-white rounded-2xl p-5" style="border:1px solid #EDE8E0;">
+              <div class="text-2xl mb-3">{{ rec.icon }}</div>
+              <div class="font-black text-[14px] mb-2" style="color:#2D2010;">{{ rec.title }}</div>
+              <div class="text-[12px] leading-relaxed mb-4" style="color:#9B7040;">{{ rec.desc }}</div>
+              <button @click="router.push({ name: rec.gameId })"
+                class="w-full py-2 rounded-xl text-[13px] font-semibold text-white"
+                style="background:#E8974A;">
+                開始訓練 →
+              </button>
+            </div>
+          </div>
+        </template>
+
       </div>
-    </section>
-
-    <!-- 最近遊玩紀錄 -->
-    <section v-if="hasData" class="rounded-2xl p-5 sm:p-6 mb-4"
-             style="background:white; border:1px solid rgba(200,150,30,0.13); box-shadow:0 2px 10px rgba(120,70,20,0.05);">
-      <h3 class="text-base sm:text-lg font-black mb-4 flex items-center gap-2" style="color:#3D2010;">
-        <span class="w-1 h-4 rounded-full shrink-0 inline-block" style="background:#C8961E;"></span>
-        最近玩了什麼
-      </h3>
-      <div>
-        <div v-for="s in recentSessions" :key="s.timestamp"
-             class="flex items-center gap-3 py-3 border-b last:border-0"
-             style="border-color:rgba(200,150,30,0.1);">
-          <span class="text-xl sm:text-2xl shrink-0">{{ gameEmoji[s.gameId] ?? '🎮' }}</span>
-          <span class="flex-1 text-sm sm:text-base font-semibold" style="color:#3D2010;">
-            {{ gameName[s.gameId] ?? s.gameId }}
-          </span>
-          <span class="text-lg shrink-0">{{ scoreEmoji(s.score) }}</span>
-          <span class="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
-                :style="scoreStyle(s.score)">
-            {{ scoreFeeling(s.score) }}
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <!-- No data -->
-    <section v-if="!hasData" class="rounded-2xl p-8 text-center"
-             style="background:white; border:1px solid rgba(200,150,30,0.13);">
-      <div class="text-5xl mb-4">🌻</div>
-      <p class="text-lg sm:text-xl font-bold mb-1" style="color:#7A5030;">奶奶還沒開始玩遊戲</p>
-      <p class="text-sm sm:text-base" style="color:#B89060;">陪她玩一局，數據就會出現囉！</p>
-    </section>
-
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { Icon } from '@iconify/vue'
+import { Radar, Line } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  Filler,
+  Tooltip,
+  Legend,
+} from 'chart.js'
 import { useGameStore } from '../stores/gameStore'
+import { useProfileStore } from '../stores/profileStore'
+import av1 from '../assets/avatars/avatar-1-grandma-traditional.jpg'
+import av2 from '../assets/avatars/avatar-2-grandpa-shirt.jpg'
+import av3 from '../assets/avatars/avatar-3-grandma-floral.jpg'
+import av4 from '../assets/avatars/avatar-4-grandpa-polo.jpg'
+import av5 from '../assets/avatars/avatar-5-grandma-bun.jpg'
+import av6 from '../assets/avatars/avatar-6-grandpa-tang.jpg'
 
-const store = useGameStore()
+ChartJS.register(RadialLinearScale, PointElement, LineElement, CategoryScale, LinearScale, Filler, Tooltip, Legend)
 
-const hasData         = computed(() => store.hasData)
-const recentSessions  = computed(() => store.recentSessions)
+const store        = useGameStore()
+const profileStore = useProfileStore()
+const router       = useRouter()
+
+// ── Nav ───────────────────────────────────────────────────────
+const activeNav = ref('overview')
+const navItems = [
+  { key:'overview',     icon:'solar:home-2-bold',            label:'我的概覽',   desc:'整體認知能力概況' },
+  { key:'records',      icon:'solar:clipboard-list-bold',    label:'訓練紀錄',   desc:'所有遊戲訓練歷史' },
+  { key:'achievements', icon:'solar:medal-ribbons-star-bold',label:'成就徽章',   desc:'解鎖的訓練成就' },
+  { key:'suggest',      icon:'solar:lightbulb-bold',         label:'訓練建議',   desc:'根據表現量身推薦' },
+]
+
+const hoveredRow = ref(null)
+
+// ── Game overview ─────────────────────────────────────────────
+const gameOverview = [
+  { id:'music',    name:'懷舊音樂', icon:'solar:music-note-bold',   iconColor:'#2C7BC8', iconBg:'#EEF4FB' },
+  { id:'shopping', name:'柑仔店採買', icon:'solar:bag-2-bold',       iconColor:'#C87820', iconBg:'#FEF3E8' },
+  { id:'cooking',  name:'阿嬤家常菜', icon:'solar:cup-hot-bold',     iconColor:'#1E9E6A', iconBg:'#E8F5EF' },
+  { id:'puppet',   name:'廟口布袋戲', icon:'solar:masks-theatre-bold',iconColor:'#7B4EA0', iconBg:'#F5EEF8' },
+  { id:'riddle',   name:'老歌猜謎',  icon:'solar:star-bold',         iconColor:'#E8974A', iconBg:'#FEF0D8' },
+  { id:'puzzle',   name:'廟口大拼圖', icon:'solar:widget-2-bold',    iconColor:'#C04030', iconBg:'#FEF0F0' },
+]
+
+const avgGameScore = (gameId) => {
+  const s = store.sessions.filter(s => s.gameId === gameId)
+  if (!s.length) return 0
+  return Math.round(s.reduce((sum, s) => sum + s.score, 0) / s.length)
+}
+
+// ── Dim icons ─────────────────────────────────────────────────
+const dimIcons = [
+  'solar:brain-bold',
+  'solar:eye-bold',
+  'solar:bolt-bold',
+  'solar:layers-bold',
+  'solar:stopwatch-bold',
+]
+
+// 根據使用者名字穩定分配一張預設頭像，名字相同永遠顯示同一張
+const AVATARS = [av1, av2, av3, av4, av5, av6]
+const defaultAvatar = computed(() => {
+  const name = profileStore.name || ''
+  const idx = name.split('').reduce((s, c) => s + c.charCodeAt(0), 0) % AVATARS.length
+  return AVATARS[idx]
+})
+
+const hasData            = computed(() => store.hasData)
+const recentSessions     = computed(() => store.recentSessions)
 const dimensionBreakdown = computed(() => store.dimensionBreakdown)
+
+// ── Dimension metadata ────────────────────────────────────────
+const dimMeta = [
+  { key: 'memory',       label: '記憶力', icon: '🧺', color: '#E8834A' },
+  { key: 'attention',    label: '注意力', icon: '🎯', color: '#6B8DE8' },
+  { key: 'execution',    label: '執行力', icon: '⚡', color: '#4CBF7A' },
+  { key: 'visual',       label: '視覺空間', icon: '👁', color: '#A67BDB' },
+  { key: 'reactionSpeed',label: '反應力', icon: '🎵', color: '#F06080' },
+]
+
+const dimOf = {
+  music: 'reactionSpeed', shopping: 'memory', cooking: 'execution',
+  puppet: 'attention', riddle: 'memory', puzzle: 'visual',
+}
+
+const dimLabelOf = {
+  music: '反應力', shopping: '記憶力', cooking: '執行力',
+  puppet: '注意力', riddle: '記憶力', puzzle: '視覺空間',
+}
 
 const gameEmoji = { music:'🎵', shopping:'🥫', cooking:'🍲', puppet:'🎭', riddle:'🎶', puzzle:'🧩' }
 const gameName  = { music:'懷舊音樂', shopping:'柑仔店採買', cooking:'阿嬤家常菜', puppet:'廟口布袋戲', riddle:'老歌猜謎', puzzle:'廟口大拼圖' }
 
-const lastPlayedLabel = computed(() => {
-  if (!store.recentSessions.length) return ''
-  const diff = Date.now() - store.recentSessions[0].timestamp
-  if (diff < 60000)    return '剛才'
-  if (diff < 3600000)  return `${Math.floor(diff / 60000)} 分鐘前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小時前`
-  return `${Math.floor(diff / 86400000)} 天前`
+// ── Greeting / date ───────────────────────────────────────────
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  return h < 12 ? '早安' : h < 18 ? '午安' : '晚安'
 })
 
+const todayLabel = computed(() => {
+  const d = new Date()
+  const days = ['日','一','二','三','四','五','六']
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `今天是 ${d.getFullYear()}/${m}/${day} (${days[d.getDay()]})`
+})
+
+// ── Stats ─────────────────────────────────────────────────────
 const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
 const todaySessions = computed(() => store.sessions.filter(s => s.timestamp >= todayStart.getTime()))
 const gameDuration  = { music:1, shopping:2, cooking:2, puppet:3, riddle:3, puzzle:4 }
@@ -208,12 +523,9 @@ const weeklyCount = computed(() => {
   return store.sessions.filter(s => s.timestamp >= cutoff).length
 })
 
-const favoriteGameEmoji = computed(() => {
-  if (!store.sessions.length) return '🎮'
-  const freq = {}
-  store.sessions.forEach(s => { freq[s.gameId] = (freq[s.gameId] ?? 0) + 1 })
-  return gameEmoji[Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0]] ?? '🎮'
-})
+const totalMinutes = computed(() =>
+  store.sessions.reduce((sum, s) => sum + (gameDuration[s.gameId] ?? 3), 0)
+)
 
 const streak = computed(() => {
   if (!store.sessions.length) return 0
@@ -232,14 +544,60 @@ const streak = computed(() => {
   return count
 })
 
-const keyStats = computed(() => [
-  { label: '本週場次', value: weeklyCount.value,  unit: '',  color: '#C8961E' },
-  { label: '最愛遊戲', value: favoriteGameEmoji.value, unit: '', color: '#3D2010' },
-  { label: '今日時長', value: todayMinutes.value,  unit: '分', color: '#1E9E6A' },
-  { label: '連續打卡', value: streak.value || 0,   unit: streak.value ? '天' : '',  color: '#C8961E' },
+// overall score = average of all dimensions
+const overallScore = computed(() => {
+  const scores = dimensionBreakdown.value.map(d => d.current)
+  return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+})
+
+const statCards = computed(() => [
+  {
+    label: '認知總分',
+    icon: 'solar:star-bold', iconColor:'#7B4EA0', iconBg:'#F0EBF8',
+    value: overallScore.value, unit: '分',
+    sub: `${dimensionBreakdown.value.filter(d => d.trend === 'improving').length} 項進步中`,
+    subColor: '#1E9E6A',
+  },
+  {
+    label: '本週訓練',
+    icon: 'solar:calendar-bold', iconColor:'#2C7BC8', iconBg:'#EEF4FB',
+    value: weeklyCount.value, unit: '天',
+    sub: `目標 ${weeklyCount.value}/7 天`,
+    progress: Math.min(weeklyCount.value / 7, 1),
+  },
+  {
+    label: '訓練時間',
+    icon: 'solar:stopwatch-bold', iconColor:'#1E9E6A', iconBg:'#E8F5EF',
+    value: totalMinutes.value, unit: '分鐘',
+    sub: `今日 +${todayMinutes.value} 分鐘`,
+    subColor: '#C8961E',
+  },
+  {
+    label: '完成關卡',
+    icon: 'solar:gamepad-bold', iconColor:'#C87820', iconBg:'#FEF0D8',
+    value: store.sessions.length, unit: '關',
+    sub: streak.value ? `連續打卡 ${streak.value} 天` : '快來挑戰吧！',
+    subColor: streak.value >= 3 ? '#C04030' : '#9B7040',
+  },
 ])
 
-// Mon–Sun calendar for current week
+const encourageTitle = computed(() => {
+  if (!hasData.value) return '今天來玩一局吧！'
+  const improving = dimensionBreakdown.value.filter(d => d.trend === 'improving')
+  if (improving.length >= 3) return '太棒了！'
+  if (streak.value >= 3) return `連續 ${streak.value} 天，很厲害！`
+  if (weeklyCount.value >= 5) return '這週很積極！'
+  return '繼續加油！'
+})
+
+const encourageDesc = computed(() => {
+  if (!hasData.value) return '動動腦，一天更有活力，選個喜歡的遊戲試試看！'
+  const improving = dimensionBreakdown.value.filter(d => d.trend === 'improving')
+  if (improving.length > 0) return `${improving[0].label}有在進步，持續保持這個好習慣！`
+  return '每天玩一局，讓大腦越來越靈活！'
+})
+
+// ── Weekly calendar ───────────────────────────────────────────
 const weekDays = computed(() => {
   const LABELS = ['一','二','三','四','五','六','日']
   const today = new Date(); today.setHours(0, 0, 0, 0)
@@ -259,49 +617,266 @@ const weekDays = computed(() => {
   })
 })
 
-const weeklyEmoji = computed(() => {
-  if (!hasData.value) return '💤'
-  const c = weeklyCount.value
-  if (c >= 5) return '🌟'
-  if (c >= 3) return '😊'
-  if (c >= 1) return '🌱'
-  return '😴'
+// ── Radar chart ───────────────────────────────────────────────
+const radarData = computed(() => ({
+  labels: ['記憶力', '注意力', '執行力', '視覺空間', '反應力'],
+  datasets: [
+    {
+      label: '上次表現',
+      data: store.radarBaseline,
+      backgroundColor: 'rgba(200,150,30,0.06)',
+      borderColor: 'rgba(200,150,30,0.3)',
+      borderWidth: 1.5,
+      borderDash: [5, 4],
+      pointRadius: 0,
+      fill: true,
+    },
+    {
+      label: '本次表現',
+      data: store.radarCurrent,
+      backgroundColor: 'rgba(200,150,30,0.2)',
+      borderColor: '#C8961E',
+      borderWidth: 2.5,
+      pointBackgroundColor: '#C8961E',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      fill: true,
+    },
+  ],
+}))
+
+const radarOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: true,
+  scales: {
+    r: {
+      min: 0,
+      max: 100,
+      ticks: { stepSize: 25, display: false },
+      grid: { color: 'rgba(200,150,30,0.15)' },
+      angleLines: { color: 'rgba(200,150,30,0.22)' },
+      pointLabels: {
+        font: { size: 12, weight: 'bold', family: "'Noto Sans TC', sans-serif" },
+        color: '#7A5030',
+        callback: (label, index) => {
+          const score = store.radarCurrent[index]
+          return [label, String(score)]
+        },
+      },
+    },
+  },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: { label: (ctx) => ` ${ctx.dataset.label}：${ctx.raw} 分` },
+    },
+  },
+}))
+
+// ── 7-day trend line chart ────────────────────────────────────
+const trendDayLabels = computed(() => {
+  const labels = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0)
+    labels.push(`${d.getMonth() + 1}/${d.getDate()}`)
+  }
+  return labels
 })
 
-const weeklySummary = computed(() => {
-  const c = weeklyCount.value
-  if (!hasData.value) return '奶奶這週還沒有玩遊戲。可以陪她一起玩一局，讓她感受看看！'
-  if (c >= 5) return `這週玩了 ${c} 場，狀態非常積極！記憶和反應都有穩定的練習，繼續保持！`
-  if (c >= 3) return `這週玩了 ${c} 場，頻率不錯。有幾項面向持續在進步中，家屬可以多給鼓勵。`
-  if (c >= 1) return `這週玩了 ${c} 場，有開始就很好。如果能每天玩一場，效果會更明顯喔。`
-  return '這週還沒有遊玩紀錄。試著每天陪奶奶玩一局，動腦最重要！'
+const trendChartData = computed(() => {
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (6 - i)); d.setHours(0, 0, 0, 0)
+    return d.getTime()
+  })
+
+  const datasets = dimMeta.map(meta => {
+    const data = days.map(dayMs => {
+      const daySessions = store.sessions.filter(s => {
+        const sd = new Date(s.timestamp); sd.setHours(0, 0, 0, 0)
+        return sd.getTime() === dayMs && dimOf[s.gameId] === meta.key
+      })
+      if (!daySessions.length) return null
+      return Math.round(daySessions.reduce((sum, s) => sum + s.score, 0) / daySessions.length)
+    })
+    return {
+      label: meta.label,
+      data,
+      borderColor: meta.color,
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: meta.color,
+      tension: 0.35,
+      spanGaps: true,
+    }
+  })
+
+  return { labels: trendDayLabels.value, datasets }
 })
 
-const familySuggestions = computed(() => {
-  const declining = dimensionBreakdown.value.filter(d => d.trend === 'declining').map(d => d.label)
+const trendOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: {
+      min: 0,
+      max: 100,
+      ticks: { stepSize: 25, font: { size: 10 }, color: '#B89060' },
+      grid: { color: 'rgba(200,150,30,0.1)' },
+      border: { display: false },
+    },
+    x: {
+      ticks: { font: { size: 10 }, color: '#B89060' },
+      grid: { display: false },
+      border: { display: false },
+    },
+  },
+  plugins: {
+    legend: { display: false },
+    tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}：${ctx.raw ?? '—'} 分` } },
+  },
+}
+
+// ── Recommendations ───────────────────────────────────────────
+const recommendations = computed(() => {
   const list = []
-  if (weeklyCount.value < 3)
-    list.push({ emoji:'📅', title:'固定時間一起玩', desc:'每天飯後安排 10 分鐘，陪奶奶玩一局採買或烹飪遊戲，讓她有期待感。' })
-  if (declining.includes('記憶力'))
-    list.push({ emoji:'🧺', title:'多玩採買記憶遊戲', desc:'「柑仔店採買記」對記憶力很有幫助。難度可以從「簡單」開始，讓奶奶有成就感。' })
-  else if (declining.includes('反應力'))
-    list.push({ emoji:'🎵', title:'試試懷舊音樂節拍', desc:'跟著老歌的節奏打拍子，既能訓練反應速度，又能喚起美好的回憶。' })
-  else
-    list.push({ emoji:'🏆', title:'稱讚她的進步', desc:`${dimensionBreakdown.value.find(d => d.trend === 'improving')?.label ?? '整體表現'}有在進步，記得告訴奶奶她做得很棒！` })
-  list.push({ emoji:'💬', title:'遊戲後問她感受', desc:'每次玩完遊戲，問她「有沒有想起什麼老故事？」——這些對話本身就是最好的認知刺激。' })
+  const declining = dimensionBreakdown.value.filter(d => d.trend === 'declining')
+  const low = dimensionBreakdown.value.filter(d => d.current < 70)
+
+  const push = (gameId, icon, title, desc) => {
+    if (list.length < 3 && !list.find(r => r.gameId === gameId))
+      list.push({ gameId, icon, title, desc })
+  }
+
+  declining.forEach(d => {
+    if (d.key === 'memory')       push('shopping', '🧺', '加強記憶力訓練', '「柑仔店採買記」有助提升記憶力，從簡單難度開始試試看。')
+    if (d.key === 'attention')    push('puppet',   '🎭', '加強注意力訓練', '「廟口布袋戲」能訓練注意力，專注看戲中細節。')
+    if (d.key === 'execution')    push('cooking',  '🍲', '挑戰執行力遊戲', '「阿嬤家常菜」考驗步驟規劃能力，突破自我！')
+    if (d.key === 'visual')       push('puzzle',   '🧩', '視覺空間來挑戰', '「廟口大拼圖」訓練視覺空間感，難度可以自選。')
+    if (d.key === 'reactionSpeed') push('music',   '🎵', '音樂節拍訓練反應', '跟著懷舊老歌打拍子，輕鬆又有趣！')
+  })
+
+  low.forEach(d => {
+    if (d.key === 'memory' && !list.find(r => r.gameId === 'riddle'))
+      push('riddle', '🎶', '老歌猜謎練記憶', '「老歌猜謎」喚起熟悉旋律，同時鍛鍊長期記憶。')
+  })
+
+  if (list.length < 3) push('music',    '🎵', '維持音樂節拍練習', '定期跟老歌打拍子，維持反應速度！')
+  if (list.length < 3) push('shopping', '🧺', '多玩採買鞏固記憶', '每次採買都是一次記憶力的小測驗。')
+  if (list.length < 3) push('puzzle',   '🧩', '拼圖來放鬆動腦', '輕鬆又有挑戰性，每天來一局！')
+
   return list.slice(0, 3)
 })
 
-const dimensionColor   = (t) => t === 'improving' ? '#1E9E6A' : t === 'declining' ? '#C04030' : '#C8961E'
-const trendBadgeStyle  = (t) => {
-  if (t === 'improving') return 'background:rgba(30,158,106,0.12);color:#1E6A4E;'
-  if (t === 'declining') return 'background:rgba(200,80,70,0.12);color:#9A3328;'
-  return 'background:rgba(200,150,30,0.12);color:#7A5000;'
+// ── Achievements ──────────────────────────────────────────────
+const totalSessions = computed(() => store.sessions.length)
+
+const achievements = computed(() => [
+  {
+    id: 'first_game',
+    emoji: '🌱',
+    title: '初次嘗試',
+    earned: totalSessions.value >= 1,
+    progress: Math.min(totalSessions.value, 1),
+    progressLabel: `0/1`,
+  },
+  {
+    id: 'streak_3',
+    emoji: '🔥',
+    title: '三天連續',
+    earned: streak.value >= 3,
+    progress: Math.min(streak.value / 3, 1),
+    progressLabel: `${streak.value}/3天`,
+  },
+  {
+    id: 'streak_7',
+    emoji: '👑',
+    title: '週週出席',
+    earned: streak.value >= 7,
+    progress: Math.min(streak.value / 7, 1),
+    progressLabel: `${streak.value}/7天`,
+  },
+  {
+    id: 'play_10',
+    emoji: '🎮',
+    title: '遊戲達人',
+    earned: totalSessions.value >= 10,
+    progress: Math.min(totalSessions.value / 10, 1),
+    progressLabel: `${totalSessions.value}/10關`,
+  },
+  {
+    id: 'music_fan',
+    emoji: '🎵',
+    title: '音樂愛好者',
+    earned: store.sessions.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length >= 5,
+    progress: Math.min(store.sessions.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length / 5, 1),
+    progressLabel: `${store.sessions.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length}/5次`,
+  },
+  {
+    id: 'memory_master',
+    emoji: '🧺',
+    title: '採買高手',
+    earned: store.sessions.some(s => s.gameId === 'shopping' && s.score >= 80),
+    progress: null,
+  },
+  {
+    id: 'all_games',
+    emoji: '🌈',
+    title: '全場體驗',
+    earned: ['music','shopping','cooking','puppet','riddle','puzzle'].every(g =>
+      store.sessions.some(s => s.gameId === g)
+    ),
+    progress: Math.min(['music','shopping','cooking','puppet','riddle','puzzle'].filter(g =>
+      store.sessions.some(s => s.gameId === g)
+    ).length / 6, 1),
+    progressLabel: `${['music','shopping','cooking','puppet','riddle','puzzle'].filter(g =>
+      store.sessions.some(s => s.gameId === g)).length}/6種`,
+  },
+  {
+    id: 'top_score',
+    emoji: '💎',
+    title: '滿分達人',
+    earned: store.sessions.some(s => s.score >= 95),
+    progress: null,
+  },
+])
+
+const earnedCount = computed(() => achievements.value.filter(a => a.earned).length)
+
+const achieveSummary = computed(() => [
+  { label:'已獲得徽章', value:earnedCount.value,                   color:'#E8974A', sub:`共 ${achievements.value.length} 個` },
+  { label:'連續打卡',   value:streak.value + ' 天',                color:'#1E9E6A', sub: streak.value>=3?'持續保持！':'加油繼續！' },
+  { label:'完成遊戲種',  value:gameOverview.filter(g=>store.sessions.some(s=>s.gameId===g.id)).length + ' 種', color:'#7B4EA0', sub:'共 6 種遊戲' },
+  { label:'最高分',     value:store.sessions.length ? Math.max(...store.sessions.map(s=>s.score)) + ' 分' : '—', color:'#2C7BC8', sub:'單局最佳成績' },
+])
+
+// ── Brain level ───────────────────────────────────────────────
+const brainLevel = computed(() => {
+  const n = earnedCount.value
+  if (n >= 6) return { label: '金冠腦王', emoji: '👑', color: '#8B5E00', bg: 'rgba(200,150,30,0.18)' }
+  if (n >= 4) return { label: '銀杯腦力', emoji: '🏆', color: '#5A6A80', bg: 'rgba(100,130,170,0.14)' }
+  if (n >= 2) return { label: '銅牌探索', emoji: '🥉', color: '#7A5030', bg: 'rgba(180,120,60,0.14)' }
+  if (n >= 1) return { label: '腦力新星', emoji: '🌱', color: '#2E7D32', bg: 'rgba(46,125,50,0.13)' }
+  return         { label: '待啟動',   emoji: '💤', color: '#9B7040', bg: 'rgba(155,112,64,0.1)' }
+})
+
+// ── Helpers ───────────────────────────────────────────────────
+const dimensionColor = (t) => t === 'improving' ? '#1E9E6A' : t === 'declining' ? '#C04030' : '#C8961E'
+
+const scoreColor = (s) => s >= 80 ? '#1E9E6A' : s >= 60 ? '#C8961E' : '#C04030'
+
+const timeLabel = (ts) => {
+  const diff = Date.now() - ts
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分鐘前`
+  if (diff < 86400000) return '今天'
+  if (diff < 172800000) return '昨天'
+  return `${Math.floor(diff / 86400000)} 天前`
 }
-const scoreEmoji   = (s) => s >= 80 ? '😄' : s >= 60 ? '🙂' : '😤'
-const scoreFeeling = (s) => s >= 80 ? '很順手' : s >= 60 ? '還不錯' : '努力中'
-const scoreStyle   = (s) => s >= 80
-  ? 'background:rgba(30,158,106,0.12);color:#1E6A4E;'
-  : s >= 60 ? 'background:rgba(200,150,30,0.12);color:#7A5000;'
-  : 'background:rgba(200,80,70,0.12);color:#9A3328;'
+
+const lastPlayedLabel = computed(() => {
+  if (!recentSessions.value.length) return ''
+  return timeLabel(recentSessions.value[0].timestamp)
+})
 </script>

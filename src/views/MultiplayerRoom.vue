@@ -11,7 +11,7 @@
               多人房間 {{ room.code }}
             </h1>
             <p class="mt-1 text-sm sm:text-base" style="color: rgba(255,232,188,0.8);">
-              {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }}
+              {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }} ・ {{ durationLabel(room.duration) }}
             </p>
           </div>
           <div class="text-sm px-3 py-1.5 rounded-lg font-bold"
@@ -21,7 +21,39 @@
         </div>
       </header>
 
-      <section class="rounded-2xl p-5 border"
+      <!-- Playing: live progress panel -->
+      <section v-if="room.status === 'playing'" class="rounded-2xl p-5 border"
+               style="border-color: rgba(96,190,112,0.3); background: rgba(14,28,16,0.75);">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-2.5 h-2.5 rounded-full" style="background:#6ABE50; box-shadow:0 0 8px rgba(100,190,80,0.7); animation: pulse 1.4s ease-in-out infinite;"></div>
+          <h2 class="text-xl font-black" style="color:#D0FFD8;">遊戲進行中</h2>
+          <span class="text-sm ml-auto" style="color: rgba(180,240,190,0.55);">已進行 {{ elapsedText }}</span>
+        </div>
+
+        <div class="grid gap-2">
+          <div v-for="player in sortedPlayers" :key="player.id"
+               class="px-4 py-3 rounded-xl flex items-center justify-between gap-3"
+               :style="Number.isFinite(player.score)
+                 ? 'background: rgba(40,72,38,0.5); border: 1px solid rgba(100,190,80,0.22);'
+                 : 'background: rgba(30,20,8,0.45); border: 1px solid rgba(200,148,40,0.12);'">
+            <div class="font-bold text-sm truncate" style="color:#FFE8BA;">
+              {{ player.name }}
+              <span v-if="player.id === room.hostId" class="text-xs ml-1.5 opacity-60">房主</span>
+              <span v-if="player.id === currentPlayer.id" class="text-xs ml-1.5" style="color:rgba(208,255,216,0.7);">（你）</span>
+            </div>
+            <div v-if="Number.isFinite(player.score)" class="font-black text-base shrink-0"
+                 style="color:#D0FFD8;">{{ player.score }} 分 ✓</div>
+            <div v-else class="text-xs font-semibold shrink-0 flex items-center gap-1.5"
+                 style="color: rgba(255,220,150,0.55);">
+              <span class="inline-block w-1.5 h-1.5 rounded-full" style="background:currentColor; opacity:0.7; animation:pulse 1s ease-in-out infinite;"></span>
+              遊戲中
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Waiting: player list with ready status -->
+      <section v-if="room.status !== 'playing'" class="rounded-2xl p-5 border"
                style="border-color: rgba(236,196,122,0.2); background: rgba(24,14,8,0.72);">
         <div class="flex items-center justify-between gap-3 mb-4">
           <h2 class="text-xl font-black" style="color:#F2CF86;">玩家名單</h2>
@@ -66,18 +98,19 @@
         </div>
       </section>
 
-      <section class="rounded-2xl p-5 border"
+      <!-- Room settings (waiting state only) -->
+      <section v-if="room.status === 'waiting'" class="rounded-2xl p-5 border"
                style="border-color: rgba(236,196,122,0.2); background: rgba(24,14,8,0.72);">
         <h2 class="text-xl font-black mb-3" style="color:#F2CF86;">房間設定</h2>
 
-        <div class="grid gap-4 sm:grid-cols-2">
+        <div class="grid gap-4 sm:grid-cols-3">
           <div>
             <label class="block text-sm mb-2" style="color: rgba(255,232,188,0.82);">模式</label>
             <select
               :value="room.mode"
-              :disabled="!isHost || room.status !== 'waiting'"
+              :disabled="!isHost"
               @change="onModeChange"
-              class="w-full px-4 py-3 rounded-xl text-base outline-none disabled:opacity-70"
+              class="w-full px-4 py-3 rounded-xl text-base outline-none disabled:opacity-50"
               style="background: rgba(255,245,220,0.95); color:#241305;"
             >
               <option value="co-op">合作模式</option>
@@ -90,20 +123,38 @@
             <label class="block text-sm mb-2" style="color: rgba(255,232,188,0.82);">曲目</label>
             <select
               :value="room.track"
-              :disabled="!isHost || room.status !== 'waiting'"
+              :disabled="!isHost"
               @change="onTrackChange"
-              class="w-full px-4 py-3 rounded-xl text-base outline-none disabled:opacity-70"
+              class="w-full px-4 py-3 rounded-xl text-base outline-none disabled:opacity-50"
               style="background: rgba(255,245,220,0.95); color:#241305;"
             >
               <option value="music-rhythm2">月亮代表我的心</option>
               <option value="music-rhythm1">愛拚才會贏</option>
+              <option value="music-yijianmei">一剪梅</option>
+              <option value="music-jiahou">家後</option>
+              <option value="music-wowentian">我問天</option>
+              <option value="music-citymoon">城裡的月光</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm mb-2" style="color: rgba(255,232,188,0.82);">時長</label>
+            <select
+              :value="room.duration || '60'"
+              :disabled="!isHost"
+              @change="onDurationChange"
+              class="w-full px-4 py-3 rounded-xl text-base outline-none disabled:opacity-50"
+              style="background: rgba(255,245,220,0.95); color:#241305;"
+            >
+              <option value="60">1 分鐘</option>
+              <option value="120">2 分鐘</option>
+              <option value="all">完整歌曲</option>
             </select>
           </div>
         </div>
 
         <div class="mt-5 flex flex-wrap gap-3">
           <button
-            v-if="room.status === 'waiting'"
             @click="toggleMyReady"
             class="px-5 py-3 rounded-xl text-base font-black"
             :style="myReady ? stopReadyStyle : setReadyStyle"
@@ -112,37 +163,54 @@
           </button>
 
           <button
-            v-if="room.status === 'waiting' && isHost"
+            v-if="isHost"
             @click="startGame"
             class="px-6 py-3 rounded-xl text-base font-black"
             style="background: linear-gradient(135deg,#E4B84D,#A37212); color:#2A1808;"
           >
             開始多人遊戲
           </button>
-
-          <button
-            v-if="room.status === 'finished' && isHost"
-            @click="restartRoom"
-            class="px-6 py-3 rounded-xl text-base font-black"
-            style="background: rgba(222,186,105,0.25); color:#FFE8BA; border:1px solid rgba(236,196,122,0.4);"
-          >
-            再來一局
-          </button>
         </div>
 
         <p v-if="errorText" class="mt-3 text-sm" style="color:#FFB9A5;">{{ errorText }}</p>
       </section>
 
+      <!-- Finished: ranking -->
       <section v-if="room.status === 'finished'" class="rounded-2xl p-5 border"
                style="border-color: rgba(236,196,122,0.2); background: rgba(24,14,8,0.72);">
-        <h2 class="text-xl font-black mb-3" style="color:#F2CF86;">本局排名</h2>
-        <ol class="space-y-2">
+        <h2 class="text-xl font-black mb-4" style="color:#F2CF86;">本局排名</h2>
+        <ol class="space-y-2 mb-5">
           <li v-for="(player, index) in ranking" :key="player.id"
-              class="px-4 py-3 rounded-xl"
-              style="background: rgba(60,36,14,0.52); color:#FFE8BA;">
-            {{ index + 1 }}. {{ player.name }} - {{ Number.isFinite(player.score) ? player.score : 0 }} 分
+              class="px-4 py-3 rounded-xl flex items-center justify-between"
+              :style="index === 0
+                ? 'background: rgba(200,150,30,0.22); border: 1px solid rgba(220,180,60,0.3);'
+                : 'background: rgba(60,36,14,0.52);'">
+            <div class="flex items-center gap-3">
+              <span class="font-black text-lg w-6 text-center" style="color:rgba(255,220,150,0.6);">{{ index + 1 }}</span>
+              <span class="font-bold" style="color:#FFE8BA;">
+                {{ player.name }}
+                <span v-if="player.id === currentPlayer.id" class="text-xs ml-1.5 opacity-60">（你）</span>
+              </span>
+              <span v-if="index === 0" class="text-base">🏆</span>
+            </div>
+            <span class="font-black text-lg tabular-nums" style="color:#F0C040;">
+              {{ Number.isFinite(player.score) ? player.score : 0 }} 分
+            </span>
           </li>
         </ol>
+
+        <div class="flex flex-wrap gap-3">
+          <button v-if="isHost" @click="restartRoom"
+                  class="px-6 py-3 rounded-xl text-base font-black"
+                  style="background: linear-gradient(135deg,#E4B84D,#A37212); color:#2A1808;">
+            再來一局
+          </button>
+          <button @click="leaveCurrentRoom"
+                  class="px-6 py-3 rounded-xl text-base font-bold"
+                  style="background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.14); color:rgba(255,231,186,0.75);">
+            離開房間
+          </button>
+        </div>
       </section>
     </div>
 
@@ -176,6 +244,7 @@ const roomId = computed(() => String(route.params.roomId || ''))
 
 const room = ref(null)
 const errorText = ref('')
+const nowMs = ref(Date.now())
 const currentPlayer = getOrCreateLocalPlayer('玩家')
 
 let syncTimer = null
@@ -209,6 +278,15 @@ const ranking = computed(() => {
   })
 })
 
+const elapsedText = computed(() => {
+  if (!room.value?.startedAt) return ''
+  const elapsed = Math.floor((nowMs.value - room.value.startedAt) / 1000)
+  if (elapsed < 0) return '0 秒'
+  const m = Math.floor(elapsed / 60)
+  const s = elapsed % 60
+  return m > 0 ? `${m}:${String(s).padStart(2, '0')}` : `${s} 秒`
+})
+
 const modeLabel = (value) => {
   if (value === 'versus') return '輕競賽模式'
   if (value === 'assist') return '陪玩模式'
@@ -228,13 +306,27 @@ const statusPillStyle = (status) => {
 }
 
 const songLabel = (track) => {
-  if (track === 'music-rhythm1') return '愛拚才會贏'
-  return '月亮代表我的心'
+  const map = {
+    'music-rhythm1': '愛拚才會贏',
+    'music-rhythm2': '月亮代表我的心',
+    'music-yijianmei': '一剪梅',
+    'music-jiahou': '家後',
+    'music-wowentian': '我問天',
+    'music-citymoon': '城裡的月光',
+  }
+  return map[track] || '月亮代表我的心'
+}
+
+const durationLabel = (value) => {
+  if (value === '120') return '2 分鐘'
+  if (value === 'all') return '完整歌曲'
+  return '1 分鐘'
 }
 
 const refreshRoom = () => {
   const latest = getRoom(roomId.value)
   room.value = latest
+  nowMs.value = Date.now()
   if (!latest) return
 
   const isMember = (latest.players || []).some((player) => player.id === currentPlayer.id)
@@ -251,6 +343,7 @@ const refreshRoom = () => {
         mp: '1',
         roomId: latest.id,
         playerId: currentPlayer.id,
+        duration: latest.duration || '60',
       },
     })
   }
@@ -263,6 +356,11 @@ const onTrackChange = (event) => {
 
 const onModeChange = (event) => {
   updateRoomConfig(roomId.value, { mode: event.target.value })
+  refreshRoom()
+}
+
+const onDurationChange = (event) => {
+  updateRoomConfig(roomId.value, { duration: event.target.value })
   refreshRoom()
 }
 
@@ -303,3 +401,10 @@ onUnmounted(() => {
   if (syncTimer) clearInterval(syncTimer)
 })
 </script>
+
+<style scoped>
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+</style>

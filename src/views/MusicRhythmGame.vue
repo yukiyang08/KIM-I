@@ -52,8 +52,43 @@
     <!-- Main game area -->
     <main class="flex-1 relative overflow-y-auto overflow-x-hidden">
 
+      <!-- ── MP COUNTDOWN (auto-start) ── -->
+      <div v-if="gameState === 'idle' && isMultiplayer"
+           class="absolute inset-0 flex flex-col items-center justify-center z-30"
+           style="background: radial-gradient(ellipse at center, rgba(22,10,4,0.97), rgba(6,3,1,0.99));">
+        <p class="text-sm sm:text-base tracking-[0.2em] uppercase font-semibold mb-6"
+           style="color:rgba(255,220,150,0.55);">多人遊戲 ・ {{ selectedSong.name }}</p>
+
+        <!-- Countdown number -->
+        <transition name="count-pop" mode="out-in">
+          <div v-if="mpCountdown !== null" :key="mpCountdown"
+               class="font-black tabular-nums mb-6"
+               style="font-size: clamp(5rem, 20vw, 9rem); color:#F0C040; text-shadow: 0 0 60px rgba(240,192,64,0.5); line-height:1;">
+            {{ mpCountdown }}
+          </div>
+          <div v-else key="loading"
+               class="font-black mb-6"
+               style="font-size:clamp(1.5rem,5vw,2.2rem); color:rgba(255,220,150,0.7);">
+            分析節奏中...
+          </div>
+        </transition>
+
+        <p class="text-base sm:text-lg mb-8" style="color:rgba(255,231,186,0.5);">準備好了嗎？</p>
+
+        <!-- Players in room -->
+        <div v-if="multiplayerRoom" class="flex flex-wrap gap-2 justify-center px-6">
+          <span v-for="p in multiplayerRoom.players" :key="p.id"
+                class="px-3 py-1.5 rounded-lg text-sm font-bold"
+                :style="p.id === multiplayerPlayerId
+                  ? 'background:rgba(218,164,44,0.28);color:#F8D894;border:1px solid rgba(220,180,60,0.3);'
+                  : 'background:rgba(50,28,10,0.6);color:#FFE8BA;border:1px solid rgba(200,148,40,0.15);'">
+            {{ p.name }}{{ p.id === multiplayerPlayerId ? '（你）' : '' }}
+          </span>
+        </div>
+      </div>
+
       <!-- ── IDLE ── -->
-      <div v-if="gameState === 'idle'"
+      <div v-if="gameState === 'idle' && !isMultiplayer"
            class="absolute inset-0 flex flex-col items-center justify-center z-20"
            style="background: radial-gradient(ellipse at center, rgba(30,15,5,0.95), rgba(8,5,2,0.98));">
 
@@ -194,6 +229,27 @@
                               borderTop: `1px solid ${lane.accent}30`,
                               WebkitTapHighlightColor: 'transparent' }"
                     @pointerdown.prevent="onTap(li)"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MP Live Scoreboard (playing) ── -->
+      <div v-if="isMultiplayer && gameState === 'playing' && mpOtherPlayers.length > 0"
+           class="absolute bottom-[19%] left-2 z-[25] pointer-events-none">
+        <div class="px-3 py-2.5 rounded-xl"
+             style="background:rgba(10,6,2,0.78);border:1px solid rgba(200,148,40,0.22);backdrop-filter:blur(4px);">
+          <div class="text-[9px] mb-1.5 tracking-[0.14em] uppercase font-bold"
+               style="color:rgba(255,220,150,0.38);">對手</div>
+          <div v-for="p in mpOtherPlayers" :key="p.id" class="flex items-center gap-2 py-0.5">
+            <span class="text-[11px] font-bold" style="max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,231,186,0.8);">{{ p.name }}</span>
+            <span class="text-[11px] font-black tabular-nums shrink-0"
+                  :style="Number.isFinite(p.score) ? 'color:#D0FFD8;' : 'color:rgba(240,192,64,0.5);'">
+              {{ Number.isFinite(p.score) ? p.score + ' ✓' : '—' }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2 pt-1.5 mt-0.5 border-t" style="border-color:rgba(200,148,40,0.18);">
+            <span class="text-[11px] font-bold" style="color:rgba(240,192,64,0.9);">你</span>
+            <span class="text-[11px] font-black tabular-nums" style="color:#F0C040;">{{ score }}</span>
           </div>
         </div>
       </div>
@@ -450,6 +506,28 @@ let gameRunToken = 0
 let timedEndingInProgress = false
 let timedEndingTimer = null
 let audioFadeRafId = null
+let mpCountdownTimer = null
+
+const mpCountdown = ref(null)
+
+const mpOtherPlayers = computed(() => {
+  if (!isMultiplayer.value || !multiplayerRoom.value) return []
+  return (multiplayerRoom.value.players || []).filter(p => p.id !== multiplayerPlayerId.value)
+})
+
+const startMpCountdown = () => {
+  mpCountdown.value = 3
+  const tick = () => {
+    if (mpCountdown.value <= 1) {
+      mpCountdown.value = null
+      startGame()
+    } else {
+      mpCountdown.value--
+      mpCountdownTimer = setTimeout(tick, 1000)
+    }
+  }
+  mpCountdownTimer = setTimeout(tick, 1000)
+}
 
 const multiplayerRoom = ref(null)
 
@@ -790,10 +868,8 @@ const finishEarly = () => {
 const goBack = () => {
   invalidateGameRun()
   timedEndingInProgress = false
-  if (timedEndingTimer) {
-    clearTimeout(timedEndingTimer)
-    timedEndingTimer = null
-  }
+  if (timedEndingTimer) { clearTimeout(timedEndingTimer); timedEndingTimer = null }
+  if (mpCountdownTimer) { clearTimeout(mpCountdownTimer); mpCountdownTimer = null }
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
   stopAudio()
   if (gameState.value === 'playing' && !sessionSaved) {
@@ -812,10 +888,8 @@ const goBack = () => {
 const exitGame = () => {
   invalidateGameRun()
   timedEndingInProgress = false
-  if (timedEndingTimer) {
-    clearTimeout(timedEndingTimer)
-    timedEndingTimer = null
-  }
+  if (timedEndingTimer) { clearTimeout(timedEndingTimer); timedEndingTimer = null }
+  if (mpCountdownTimer) { clearTimeout(mpCountdownTimer); mpCountdownTimer = null }
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
   stopAudio()
   router.push('/')
@@ -824,7 +898,11 @@ const exitGame = () => {
 onMounted(() => {
   if (!isMultiplayer.value) return
   syncMultiplayerRoom()
-  multiplayerSyncTimer = setInterval(syncMultiplayerRoom, 1000)
+  multiplayerSyncTimer = setInterval(syncMultiplayerRoom, 800)
+  // Pre-warm beat detection during countdown so game starts immediately after
+  ensureAudio()
+  detectSongRhythm().catch(() => {})
+  startMpCountdown()
 })
 
 onUnmounted(() => {
@@ -834,6 +912,10 @@ onUnmounted(() => {
     clearTimeout(timedEndingTimer)
     timedEndingTimer = null
   }
+  if (mpCountdownTimer) {
+    clearTimeout(mpCountdownTimer)
+    mpCountdownTimer = null
+  }
   if (rafId) cancelAnimationFrame(rafId)
   stopAudio()
   if (multiplayerSyncTimer) clearInterval(multiplayerSyncTimer)
@@ -841,6 +923,15 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* MP countdown pop */
+.count-pop-enter-active { animation: countpop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.count-pop-leave-active { transition: opacity 0.15s ease, transform 0.15s ease; }
+.count-pop-leave-to { opacity: 0; transform: scale(1.4); }
+@keyframes countpop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
 /* Vinyl spin */
 .vinyl-spin {
   animation: vspin 4s linear infinite;

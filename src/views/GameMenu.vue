@@ -183,12 +183,12 @@ import DifficultySelector from '../components/DifficultySelector.vue'
 import SongSelector from '../components/SongSelector.vue'
 import { useProfileStore } from '../stores/profileStore'
 import vintageBackground from '../assets/懷舊背景3.png'
-import game1Poster from '../assets/Game1.png'
-import game2Poster from '../assets/Game2.png'
-import game3Poster from '../assets/Game3.png'
-import game4Poster from '../assets/Game4.png'
-import game5Poster from '../assets/Game5.png'
-import game6Poster from '../assets/Game6.png'
+import game1Poster from '../assets/generated-posters/game1-music.jpg'
+import game2Poster from '../assets/generated-posters/game2-shopping.jpg'
+import game3Poster from '../assets/generated-posters/game3-cooking.jpg'
+import game4Poster from '../assets/generated-posters/game4-puppet.jpg'
+import game5Poster from '../assets/generated-posters/game5-riddle.jpg'
+import game6Poster from '../assets/generated-posters/game6-puzzle.jpg'
 
 const router = useRouter()
 const profileStore = useProfileStore()
