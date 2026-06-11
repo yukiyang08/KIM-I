@@ -69,34 +69,7 @@
       </div>
     </header>
 
-    <!-- ── Today's Day Banner ── -->
-    <div class="shrink-0 px-3 sm:px-4 md:px-6 lg:px-10 pt-2 sm:pt-4 relative z-10"
-         style="max-width: 1400px; margin: 0 auto; width: 100%;">
-      <button @click="router.push('/day')"
-              class="w-full rounded-[12px] md:rounded-[18px] px-4 sm:px-8 py-3 sm:py-5 flex items-center gap-3 sm:gap-6 group active:scale-[0.99] transition-transform overflow-hidden relative"
-              style="background: linear-gradient(105deg, rgba(38,28,12,0.95) 0%, rgba(26,18,6,0.98) 100%);
-                     border: 2px solid rgba(200,148,40,0.55);
-                     box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,210,100,0.12);">
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-             style="background: radial-gradient(ellipse at 30% 50%, rgba(220,168,60,0.12), transparent 60%);"></div>
-        <div class="text-2xl sm:text-4xl shrink-0 leading-none">🌅</div>
-        <div class="flex-1 text-left min-w-0">
-          <div class="font-black tracking-wide leading-tight"
-               style="font-family: 'Noto Serif TC', serif; font-size: clamp(0.9rem, 3vw, 1.35rem); color: #F2CF86;">
-            今天的一天
-          </div>
-          <div class="text-[0.72rem] sm:text-sm mt-0.5 truncate"
-               style="color: rgba(255,215,150,0.5);">
-            採買 · 煮飯 · 聽歌，走過一整天的故事
-          </div>
-        </div>
-        <div class="shrink-0 text-xs sm:text-sm font-bold tracking-widest px-3 sm:px-4 py-1.5 sm:py-2 rounded-full"
-             style="background: linear-gradient(135deg, #C88C18, #7A5000); color: #FFF3CC;
-                    box-shadow: 0 4px 14px rgba(200,120,0,0.3);">
-          開始
-        </div>
-      </button>
-    </div>
+    
 
     <!-- ── Game Grid (2-col mobile / 3-col tablet+) ── -->
     <main class="shrink-0 px-3 sm:px-4 md:px-6 lg:px-10 py-2 sm:py-4 md:py-6 grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4 md:gap-5 relative z-10"

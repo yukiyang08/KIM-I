@@ -125,7 +125,11 @@ export const useProfileStore = defineStore('profile', () => {
   }
 
   const logout = async () => {
-    await supabase.auth.signOut()
+    const { error } = await supabase.auth.signOut()
+    if (!error) {
+      authUser.value = null
+    }
+    return { error }
   }
 
   // ── Auth state listener ───────────────────────────────────────

@@ -1,9 +1,14 @@
 <template>
-  <div class="h-full flex overflow-hidden" style="background:#F5F0E8; font-family:'Outfit','Noto Sans TC',sans-serif;">
+  <div class="family-root">
+
+    <!-- Mobile sidebar overlay -->
+    <transition name="overlay-fade">
+      <div v-if="mobileSidebarOpen" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+        @click="mobileSidebarOpen = false"></div>
+    </transition>
 
     <!-- ══════════════════════ LEFT SIDEBAR ══════════════════════ -->
-    <aside class="w-[200px] shrink-0 flex flex-col bg-white"
-      style="border-right:1px solid #EDE8E0; box-shadow:2px 0 8px rgba(0,0,0,0.04);">
+    <aside class="sidebar-panel flex flex-col bg-white" :class="{ 'mobile-open': mobileSidebarOpen }">
 
       <!-- Logo -->
       <div class="px-5 pt-6 pb-5 flex items-center gap-3 border-b" style="border-color:#EDE8E0;">
@@ -39,7 +44,7 @@
       <!-- Nav -->
       <nav class="flex-1 px-3 py-1 space-y-0.5 overflow-y-auto">
         <button v-for="item in navItems" :key="item.key"
-          @click="activeNav = item.key"
+          @click="activeNav = item.key; mobileSidebarOpen = false"
           class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all text-left"
           :style="activeNav === item.key
             ? 'background:#FFF1E0; color:#C87820; font-weight:700;'
@@ -62,11 +67,17 @@
     </aside>
 
     <!-- ══════════════════════ MAIN AREA ══════════════════════ -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden main-panel">
 
       <!-- Top bar -->
       <header class="shrink-0 px-6 py-4 flex items-center justify-between bg-white"
         style="border-bottom:1px solid #EDE8E0; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+        <button class="mobile-menu-btn shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+          :style="mobileSidebarOpen ? 'background:#FFF1E0;' : 'background:#F5F0E8;'"
+          @click="mobileSidebarOpen = !mobileSidebarOpen">
+          <Icon :icon="mobileSidebarOpen ? 'solar:close-bold' : 'solar:hamburger-menu-bold'"
+            width="18" height="18" style="color:#9B7040;" />
+        </button>
         <div>
           <h2 class="font-black text-[18px] leading-tight" style="color:#2D2010;">
             {{ navItems.find(n=>n.key===activeNav)?.label }}
@@ -94,7 +105,7 @@
         <template v-if="activeNav === 'overview'">
 
           <!-- KPI cards -->
-          <div class="grid grid-cols-5 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
             <div v-for="stat in statCards" :key="stat.label"
               class="bg-white rounded-2xl p-4 flex flex-col gap-2"
               style="border:1px solid #EDE8E0; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
@@ -130,7 +141,7 @@
           </div>
 
           <!-- 雷達 ＋ 趨勢 ＋ 本週出席 -->
-          <div class="grid gap-4" style="grid-template-columns:260px 1fr 240px;">
+              <div class="charts-layout">
 
             <!-- 雷達圖 -->
             <div class="bg-white rounded-2xl p-4 flex flex-col" style="border:1px solid #EDE8E0;">
@@ -226,7 +237,7 @@
           </div>
 
           <!-- 遊戲分類統計 -->
-          <div class="grid grid-cols-6 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
             <div v-for="g in gameOverview" :key="g.id"
               class="bg-white rounded-2xl p-4 text-center" style="border:1px solid #EDE8E0;">
               <div class="flex justify-center mb-2">
@@ -235,7 +246,7 @@
                 </div>
               </div>
               <div class="font-black text-[15px] mb-0.5" style="color:#2D2010;">
-                {{ store.sessions.filter(s=>s.gameId===g.id).length }}
+                {{ sessionsSource.filter(s=>s.gameId===g.id).length }}
               </div>
               <div class="text-[10px] font-semibold mb-1" style="color:#6B6B6B;">{{ g.name }}</div>
               <div class="text-[10px]" :style="{ color: avgGameScore(g.id) >= 80 ? '#1E9E6A' : '#E8974A' }">
@@ -260,7 +271,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="s in [...store.sessions].reverse().slice(0,20)" :key="s.timestamp"
+                  <tr v-for="s in [...sessionsSource.value].reverse().slice(0,20)" :key="s.timestamp"
                     class="transition-colors" style="border-top:1px solid #EDE8E0;"
                     :style="hoveredRow === s.timestamp ? 'background:#FFF8F0;' : ''"
                     @mouseenter="hoveredRow = s.timestamp" @mouseleave="hoveredRow = null">
@@ -303,7 +314,7 @@
           </div>
 
           <!-- 進度摘要 -->
-          <div class="grid grid-cols-4 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div v-for="s in achieveSummary" :key="s.label" class="bg-white rounded-2xl p-4" style="border:1px solid #EDE8E0;">
               <div class="text-[12px] mb-1" style="color:#9B7040;">{{ s.label }}</div>
               <div class="font-black text-[22px] leading-none mb-1" :style="{ color: s.color }">{{ s.value }}</div>
@@ -381,7 +392,7 @@
           </div>
 
           <!-- 建議卡片 -->
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <div v-for="rec in recommendations" :key="rec.gameId"
               class="bg-white rounded-2xl p-5" style="border:1px solid #EDE8E0;">
               <div class="text-2xl mb-3">{{ rec.icon }}</div>
@@ -434,6 +445,7 @@ const router       = useRouter()
 
 // ── Nav ───────────────────────────────────────────────────────
 const activeNav = ref('overview')
+const mobileSidebarOpen = ref(false)
 const navItems = [
   { key:'overview',     icon:'solar:home-2-bold',            label:'我的概覽',   desc:'整體認知能力概況' },
   { key:'records',      icon:'solar:clipboard-list-bold',    label:'訓練紀錄',   desc:'所有遊戲訓練歷史' },
@@ -454,7 +466,7 @@ const gameOverview = [
 ]
 
 const avgGameScore = (gameId) => {
-  const s = store.sessions.filter(s => s.gameId === gameId)
+  const s = sessionsSource.value.filter(s => s.gameId === gameId)
   if (!s.length) return 0
   return Math.round(s.reduce((sum, s) => sum + s.score, 0) / s.length)
 }
@@ -476,9 +488,6 @@ const defaultAvatar = computed(() => {
   return AVATARS[idx]
 })
 
-const hasData            = computed(() => store.hasData)
-const recentSessions     = computed(() => store.recentSessions)
-const dimensionBreakdown = computed(() => store.dimensionBreakdown)
 
 // ── Dimension metadata ────────────────────────────────────────
 const dimMeta = [
@@ -502,6 +511,49 @@ const dimLabelOf = {
 const gameEmoji = { music:'🎵', shopping:'🥫', cooking:'🍲', puppet:'🎭', riddle:'🎶', puzzle:'🧩' }
 const gameName  = { music:'懷舊音樂', shopping:'柑仔店採買', cooking:'阿嬤家常菜', puppet:'廟口布袋戲', riddle:'老歌猜謎', puzzle:'廟口大拼圖' }
 
+const sampleSessions = [
+  { gameId:'music', score: 85, timestamp: Date.now() - 1 * 3600000, difficulty:'normal' },
+  { gameId:'shopping', score: 78, timestamp: Date.now() - 2 * 3600000, difficulty:'normal' },
+  { gameId:'cooking', score: 72, timestamp: Date.now() - 3 * 3600000, difficulty:'normal' },
+  { gameId:'puppet', score: 88, timestamp: Date.now() - 24 * 3600000, difficulty:'normal' },
+  { gameId:'riddle', score: 81, timestamp: Date.now() - 2 * 24 * 3600000, difficulty:'normal' },
+  { gameId:'puzzle', score: 75, timestamp: Date.now() - 3 * 24 * 3600000, difficulty:'normal' },
+  { gameId:'music', score: 90, timestamp: Date.now() - 4 * 24 * 3600000, difficulty:'normal' },
+]
+
+const sessionsSource = computed(() => profileStore.isLoggedIn ? store.sessions : sampleSessions)
+
+const hasData = computed(() => sessionsSource.value.length > 0)
+const recentSessions = computed(() => [...sessionsSource.value].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5))
+
+const dimensionOrder = ['memory', 'attention', 'execution', 'visual', 'reactionSpeed']
+const dimensionLabel = {
+  memory: '記憶力', attention: '注意力', execution: '執行力', visual: '視覺空間', reactionSpeed: '反應力',
+}
+
+const getDimensionData = (dim) => {
+  const related = sessionsSource.value.filter(s => dimOf[s.gameId] === dim)
+  if (!related.length) return { current: 0, baseline: 0, delta: 0, trend: 'stuck', sessionsCount: 0 }
+  const current = Math.round(related.slice(-3).reduce((sum, s) => sum + s.score, 0) / Math.min(3, related.length))
+  const previous = related.slice(0, -1).slice(-3)
+  const baseline = previous.length
+    ? Math.round(previous.reduce((sum, s) => sum + s.score, 0) / previous.length)
+    : current
+  const delta = current - baseline
+  const trend = delta >= 5 ? 'improving' : delta <= -5 ? 'declining' : 'stuck'
+  return { current, baseline, delta, trend, sessionsCount: related.length }
+}
+
+const displayRadarCurrent = computed(() => dimensionOrder.map(dim => getDimensionData(dim).current))
+const displayRadarBaseline = computed(() => dimensionOrder.map(dim => getDimensionData(dim).baseline))
+const dimensionBreakdown = computed(() =>
+  dimensionOrder.map(dim => ({
+    key: dim,
+    label: dimensionLabel[dim],
+    ...getDimensionData(dim),
+  }))
+)
+
 // ── Greeting / date ───────────────────────────────────────────
 const greeting = computed(() => {
   const h = new Date().getHours()
@@ -518,26 +570,26 @@ const todayLabel = computed(() => {
 
 // ── Stats ─────────────────────────────────────────────────────
 const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0)
-const todaySessions = computed(() => store.sessions.filter(s => s.timestamp >= todayStart.getTime()))
+const todaySessions = computed(() => sessionsSource.value.filter(s => s.timestamp >= todayStart.getTime()))
 const gameDuration  = { music:1, shopping:2, cooking:2, puppet:3, riddle:3, puzzle:4 }
 const todayMinutes  = computed(() => todaySessions.value.reduce((sum, s) => sum + (gameDuration[s.gameId] ?? 3), 0))
 
 const weeklyCount = computed(() => {
   const cutoff = Date.now() - 7 * 86400000
-  return store.sessions.filter(s => s.timestamp >= cutoff).length
+  return sessionsSource.value.filter(s => s.timestamp >= cutoff).length
 })
 
 const totalMinutes = computed(() =>
-  store.sessions.reduce((sum, s) => sum + (gameDuration[s.gameId] ?? 3), 0)
+  sessionsSource.value.reduce((sum, s) => sum + (gameDuration[s.gameId] ?? 3), 0)
 )
 
 const streak = computed(() => {
-  if (!store.sessions.length) return 0
+  if (!sessionsSource.value.length) return 0
   let count = 0
   const check = new Date(); check.setHours(0, 0, 0, 0)
   while (true) {
     const ms = check.getTime()
-    const played = store.sessions.some(s => {
+    const played = sessionsSource.value.some(s => {
       const d = new Date(s.timestamp); d.setHours(0, 0, 0, 0)
       return d.getTime() === ms
     })
@@ -579,7 +631,7 @@ const statCards = computed(() => [
   {
     label: '完成關卡',
     icon: 'solar:gamepad-bold', iconColor:'#C87820', iconBg:'#FEF0D8',
-    value: store.sessions.length, unit: '關',
+    value: sessionsSource.value.length, unit: '關',
     sub: streak.value ? `連續打卡 ${streak.value} 天` : '快來挑戰吧！',
     subColor: streak.value >= 3 ? '#C04030' : '#9B7040',
   },
@@ -613,7 +665,7 @@ const weekDays = computed(() => {
     const dateMs = date.getTime()
     const isFuture = dateMs > today.getTime()
     const isToday  = dateMs === today.getTime()
-    const active   = !isFuture && store.sessions.some(s => {
+    const active   = !isFuture && sessionsSource.value.some(s => {
       const sd = new Date(s.timestamp); sd.setHours(0, 0, 0, 0)
       return sd.getTime() === dateMs
     })
@@ -627,7 +679,7 @@ const radarData = computed(() => ({
   datasets: [
     {
       label: '上次表現',
-      data: store.radarBaseline,
+      data: displayRadarBaseline.value,
       backgroundColor: 'rgba(200,150,30,0.06)',
       borderColor: 'rgba(200,150,30,0.3)',
       borderWidth: 1.5,
@@ -637,7 +689,7 @@ const radarData = computed(() => ({
     },
     {
       label: '本次表現',
-      data: store.radarCurrent,
+      data: displayRadarCurrent.value,
       backgroundColor: 'rgba(200,150,30,0.2)',
       borderColor: '#C8961E',
       borderWidth: 2.5,
@@ -665,7 +717,7 @@ const radarOptions = computed(() => ({
         font: { size: 12, weight: 'bold', family: "'Noto Sans TC', sans-serif" },
         color: '#7A5030',
         callback: (label, index) => {
-          const score = store.radarCurrent[index]
+          const score = displayRadarCurrent.value[index]
           return [label, String(score)]
         },
       },
@@ -697,7 +749,7 @@ const trendChartData = computed(() => {
 
   const datasets = dimMeta.map(meta => {
     const data = days.map(dayMs => {
-      const daySessions = store.sessions.filter(s => {
+      const daySessions = sessionsSource.value.filter(s => {
         const sd = new Date(s.timestamp); sd.setHours(0, 0, 0, 0)
         return sd.getTime() === dayMs && dimOf[s.gameId] === meta.key
       })
@@ -775,7 +827,7 @@ const recommendations = computed(() => {
 })
 
 // ── Achievements ──────────────────────────────────────────────
-const totalSessions = computed(() => store.sessions.length)
+const totalSessions = computed(() => sessionsSource.value.length)
 
 const achievements = computed(() => [
   {
@@ -814,15 +866,15 @@ const achievements = computed(() => [
     id: 'music_fan',
     emoji: '🎵',
     title: '音樂愛好者',
-    earned: store.sessions.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length >= 5,
-    progress: Math.min(store.sessions.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length / 5, 1),
-    progressLabel: `${store.sessions.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length}/5次`,
+    earned: sessionsSource.value.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length >= 5,
+    progress: Math.min(sessionsSource.value.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length / 5, 1),
+    progressLabel: `${sessionsSource.value.filter(s => s.gameId === 'music' || s.gameId === 'riddle').length}/5次`,
   },
   {
     id: 'memory_master',
     emoji: '🧺',
     title: '採買高手',
-    earned: store.sessions.some(s => s.gameId === 'shopping' && s.score >= 80),
+    earned: sessionsSource.value.some(s => s.gameId === 'shopping' && s.score >= 80),
     progress: null,
   },
   {
@@ -830,19 +882,19 @@ const achievements = computed(() => [
     emoji: '🌈',
     title: '全場體驗',
     earned: ['music','shopping','cooking','puppet','riddle','puzzle'].every(g =>
-      store.sessions.some(s => s.gameId === g)
+      sessionsSource.value.some(s => s.gameId === g)
     ),
     progress: Math.min(['music','shopping','cooking','puppet','riddle','puzzle'].filter(g =>
-      store.sessions.some(s => s.gameId === g)
+      sessionsSource.value.some(s => s.gameId === g)
     ).length / 6, 1),
     progressLabel: `${['music','shopping','cooking','puppet','riddle','puzzle'].filter(g =>
-      store.sessions.some(s => s.gameId === g)).length}/6種`,
+      sessionsSource.value.some(s => s.gameId === g)).length}/6種`,
   },
   {
     id: 'top_score',
     emoji: '💎',
     title: '滿分達人',
-    earned: store.sessions.some(s => s.score >= 95),
+    earned: sessionsSource.value.some(s => s.score >= 95),
     progress: null,
   },
 ])
@@ -852,8 +904,8 @@ const earnedCount = computed(() => achievements.value.filter(a => a.earned).leng
 const achieveSummary = computed(() => [
   { label:'已獲得徽章', value:earnedCount.value,                   color:'#E8974A', sub:`共 ${achievements.value.length} 個` },
   { label:'連續打卡',   value:streak.value + ' 天',                color:'#1E9E6A', sub: streak.value>=3?'持續保持！':'加油繼續！' },
-  { label:'完成遊戲種',  value:gameOverview.filter(g=>store.sessions.some(s=>s.gameId===g.id)).length + ' 種', color:'#7B4EA0', sub:'共 6 種遊戲' },
-  { label:'最高分',     value:store.sessions.length ? Math.max(...store.sessions.map(s=>s.score)) + ' 分' : '—', color:'#2C7BC8', sub:'單局最佳成績' },
+  { label:'完成遊戲種',  value:gameOverview.filter(g=>sessionsSource.value.some(s=>s.gameId===g.id)).length + ' 種', color:'#7B4EA0', sub:'共 6 種遊戲' },
+  { label:'最高分',     value:sessionsSource.value.length ? Math.max(...sessionsSource.value.map(s=>s.score)) + ' 分' : '—', color:'#2C7BC8', sub:'單局最佳成績' },
 ])
 
 // ── Brain level ───────────────────────────────────────────────
@@ -884,3 +936,81 @@ const lastPlayedLabel = computed(() => {
   return timeLabel(recentSessions.value[0].timestamp)
 })
 </script>
+
+<style scoped>
+.family-root {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background: #F5F0E8;
+  font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+}
+
+.sidebar-panel {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-right: 1px solid #EDE8E0;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), width 0.28s ease;
+  z-index: 50;
+}
+
+.main-panel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+
+.charts-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .charts-layout { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1280px) {
+  .charts-layout { grid-template-columns: 260px 1fr 240px; }
+}
+
+@media (max-width: 1023px) {
+  .sidebar-panel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    width: 260px;
+    box-shadow: none;
+  }
+  .sidebar-panel.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 30px rgba(0,0,0,0.15);
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-menu-btn { display: none !important; }
+}
+
+.overlay-fade-enter-active,
+.overlay-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.overlay-fade-enter-from,
+.overlay-fade-leave-to {
+  opacity: 0;
+}
+</style>

@@ -376,7 +376,12 @@ const isHost = computed(() => room.value?.hostId === currentPlayer.id)
 // Invite QR code: scanning opens the deployed multiplayer lobby.
 const qrDataUrl = ref('')
 const inviteCopied = ref(false)
-const inviteUrl = computed(() => 'https://kim-i.vercel.app/multiplayer')
+const inviteUrl = computed(() => {
+  if (room.value?.code) {
+    return `https://kim-i.vercel.app/multiplayer?code=${room.value.code}`
+  }
+  return 'https://kim-i.vercel.app/multiplayer'
+})
 
 watch(inviteUrl, async (url) => {
   if (!url) { qrDataUrl.value = ''; return }
