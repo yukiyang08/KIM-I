@@ -38,10 +38,11 @@
             />
             <button
               @click="joinRoom"
-              class="px-5 py-3 rounded-xl font-bold"
+              :disabled="joining"
+              class="px-5 py-3 rounded-xl font-bold disabled:opacity-60"
               style="background: linear-gradient(135deg,#D8A42C,#8B6000); color:#2A1808;"
             >
-              加入
+              {{ joining ? '…' : '加入' }}
             </button>
           </div>
 
@@ -79,13 +80,28 @@
             <option value="all">完整歌曲</option>
           </select>
 
+          <label class="block text-sm mt-4 mb-2" style="color: rgba(255,232,188,0.82);">最多人數</label>
+          <select v-model="maxPlayers" class="w-full px-4 py-3 rounded-xl text-base outline-none"
+                  style="background: rgba(255,245,220,0.95); color:#241305;">
+            <option :value="4">4 人</option>
+            <option :value="6">6 人</option>
+            <option :value="8">8 人</option>
+            <option :value="10">10 人</option>
+            <option :value="15">15 人</option>
+            <option :value="20">20 人</option>
+            <option :value="30">30 人</option>
+          </select>
+
           <button
             @click="createNewRoom"
-            class="mt-5 w-full py-3 rounded-xl text-lg font-black"
+            :disabled="creating"
+            class="mt-5 w-full py-3 rounded-xl text-lg font-black disabled:opacity-60"
             style="background: linear-gradient(135deg,#E4B84D,#A37212); color:#2A1808;"
           >
-            建立多人房間
+            {{ creating ? '建立中…' : '建立多人房間' }}
           </button>
+
+          <p v-if="errorText" class="mt-3 text-sm" style="color:#FFB9A5;">{{ errorText }}</p>
         </div>
       </section>
 
@@ -146,7 +162,10 @@ const joinCode = ref('')
 const mode = ref('co-op')
 const track = ref('music-rhythm2')
 const duration = ref('60')
+const maxPlayers = ref(4)
 const errorText = ref('')
+const creating = ref(false)
+const joining = ref(false)
 const rooms = ref([])
 
 let refreshTimer = null
@@ -179,8 +198,8 @@ const durationLabel = (value) => {
   return '1分鐘'
 }
 
-const refreshRooms = () => {
-  rooms.value = listRooms()
+const refreshRooms = async () => {
+  rooms.value = await listRooms()
 }
 
 const ensureName = () => {
@@ -195,47 +214,56 @@ const ensureName = () => {
   return player
 }
 
-const createNewRoom = () => {
+const createNewRoom = async () => {
   const player = ensureName()
   if (!player) return
-
-  const { room } = createRoom({
-    hostName: player.name,
-    mode: mode.value,
-    track: track.value,
-    duration: duration.value,
-    maxPlayers: 4,
-  })
-
-  router.push({ name: 'multiplayer-room', params: { roomId: room.id } })
-}
-
-const joinRoom = () => {
-  const player = ensureName()
-  if (!player) return
-
-  const result = joinRoomByCode({
-    code: joinCode.value,
-    playerName: player.name,
-  })
-
-  if (result.error) {
-    errorText.value = result.error
-    return
+  if (creating.value) return
+  creating.value = true
+  try {
+    const result = await createRoom({
+      hostName: player.name,
+      mode: mode.value,
+      track: track.value,
+      duration: duration.value,
+      maxPlayers: maxPlayers.value,
+    })
+    if (result.error) { errorText.value = result.error; return }
+    router.push({ name: 'multiplayer-room', params: { roomId: result.room.id } })
+  } catch (err) {
+    errorText.value = `建立失敗：${err?.message || '網路錯誤，請重試。'}`
+  } finally {
+    creating.value = false
   }
-
-  errorText.value = ''
-  router.push({ name: 'multiplayer-room', params: { roomId: result.room.id } })
 }
 
-const quickJoin = (code) => {
+const joinRoom = async () => {
+  const player = ensureName()
+  if (!player) return
+  if (joining.value) return
+  joining.value = true
+  try {
+    const result = await joinRoomByCode({
+      code: joinCode.value,
+      playerName: player.name,
+    })
+    if (result.error) { errorText.value = result.error; return }
+    errorText.value = ''
+    router.push({ name: 'multiplayer-room', params: { roomId: result.room.id } })
+  } catch (err) {
+    errorText.value = `加入失敗：${err?.message || '網路錯誤，請重試。'}`
+  } finally {
+    joining.value = false
+  }
+}
+
+const quickJoin = async (code) => {
   joinCode.value = code
-  joinRoom()
+  await joinRoom()
 }
 
 onMounted(() => {
   refreshRooms()
-  refreshTimer = setInterval(refreshRooms, 1200)
+  refreshTimer = setInterval(refreshRooms, 5000)
 })
 
 onUnmounted(() => {

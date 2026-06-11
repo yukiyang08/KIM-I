@@ -1,233 +1,141 @@
 <template>
   <template v-if="showNav">
-  <!-- Hamburger Button -->
-  <button
-    @click="isOpen = !isOpen"
-    class="fixed top-3 right-3 sm:top-4 sm:right-4 z-[100] w-14 h-14 sm:w-16 sm:h-16 flex flex-col items-center justify-center gap-2 transition-all duration-300 group"
-    style="background: linear-gradient(135deg, rgba(242,196,78,0.96), rgba(184,128,12,0.96));
-            border: 2px solid rgba(255,229,160,0.75);
-            border-radius: 14px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 12px 34px rgba(200,150,30,0.35), 0 0 0 1px rgba(255,244,209,0.28);">
-    <!-- Profile not set indicator -->
-    <span v-if="!profileStore.isSetup"
-          class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black z-10"
-          style="background: #E84040; color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.4);">!</span>
-    <span :class="[
-      'w-7 sm:w-8 h-1 rounded-full transition-all duration-300 origin-center',
-      isOpen ? 'rotate-45 translate-y-3 bg-[#3A2408]' : 'bg-[#3A2408] group-hover:bg-[#2A1605]'
-    ]"></span>
-    <span :class="[
-      'w-7 sm:w-8 h-1 rounded-full transition-all duration-300',
-      isOpen ? 'opacity-0' : 'opacity-100 bg-[#3A2408] group-hover:bg-[#2A1605]'
-    ]"></span>
-    <span :class="[
-      'w-7 sm:w-8 h-1 rounded-full transition-all duration-300 origin-center',
-      isOpen ? '-rotate-45 -translate-y-3 bg-[#3A2408]' : 'bg-[#3A2408] group-hover:bg-[#2A1605]'
-    ]"></span>
-  </button>
 
-  <!-- Sidebar Overlay -->
-  <transition name="sidebar-fade">
-    <div
-      v-if="isOpen"
-      @click="isOpen = false"
-      class="fixed inset-0 backdrop-blur-sm z-[80]"
-      style="background: rgba(0,0,0,0.38);"
-    ></div>
-  </transition>
+    <!-- ── Circular Seal Button ───────────────────────────── -->
+    <button
+      @click="isOpen = !isOpen"
+      :aria-label="isOpen ? '關閉選單' : '開啟選單'"
+      :aria-expanded="isOpen"
+      class="seal-btn"
+      :class="{ 'seal-btn--open': isOpen }"
+    >
+      <span v-if="!profileStore.isSetup" class="seal-alert">
+        <span class="seal-alert__ring"></span>
+      </span>
+      <span v-else-if="showNewDot && !isOpen" class="seal-new-dot">
+        <span class="seal-new-dot__ring"></span>
+      </span>
+      <span class="seal-bar seal-bar--a"></span>
+      <span class="seal-bar seal-bar--b"></span>
+      <span class="seal-bar seal-bar--c"></span>
+    </button>
 
-  <!-- Sidebar Menu -->
-  <transition name="sidebar-slide">
-    <div
-      v-if="isOpen"
-      class="fixed top-0 right-0 h-full w-[78vw] max-w-[320px] z-[90] overflow-y-auto flex flex-col"
-      style="background: linear-gradient(180deg, #1E1608 0%, #140E05 100%);
-             border-left: 1px solid rgba(200,148,40,0.28);
-             box-shadow: -8px 0 40px rgba(0,0,0,0.55);">
+    <!-- ── Backdrop ───────────────────────────────────────── -->
+    <transition name="bd">
+      <div v-if="isOpen" class="panel-backdrop" @click="isOpen = false"></div>
+    </transition>
 
-      <!-- Film strip decoration -->
-      <div class="h-2 flex shrink-0" style="background: #130F08;">
-        <div v-for="i in 24" :key="i" class="flex-1 my-0.5 mx-px rounded-sm"
-             style="background: rgba(0,0,0,0.65);"></div>
-      </div>
+    <!-- ── Side Panel ─────────────────────────────────────── -->
+    <transition name="panel">
+      <div v-if="isOpen" class="side-panel" role="dialog" aria-modal="true" aria-label="導覽選單">
 
-      <!-- Menu content -->
-      <div class="flex-1 pt-20 px-5 pb-8 flex flex-col gap-1">
+        <!-- Decorative left stripe -->
+        <div class="panel-spine"></div>
 
-        <!-- Brand -->
-        <div class="text-center mb-5 pb-5 border-b" style="border-color: rgba(200,148,40,0.2);">
-          <img
-            src="../assets/KIM-I_LOGO.png"
-            alt="KIM-I"
-            style="width: 110px; height: 44px; object-fit: contain;
-                   transform: rotate(90deg);
-                   margin-top: 33px; margin-bottom: 33px;
-                   display: block; margin-left: auto; margin-right: auto;"
-          />
-          <h2 class="font-black tracking-[0.1em]"
-              style="font-family:'Noto Serif TC',serif; font-size:1.6rem; color:#F2CF86; text-shadow:0 2px 12px rgba(0,0,0,0.5);">
-            金憶 KIM-I
-          </h2>
-        </div>
+        <div class="panel-body">
 
-        <!-- Profile item -->
-        <router-link
-          to="/profile"
-          class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 active:scale-[0.98]"
-          :class="route.path === '/profile' ? '' : 'hover:bg-white/[0.06]'"
-          :style="route.path === '/profile'
-            ? 'background: rgba(200,150,30,0.15); border: 1px solid rgba(200,148,40,0.35);'
-            : !profileStore.isSetup
-              ? 'background: rgba(200,148,40,0.14); border: 1px solid rgba(200,148,40,0.4);'
-              : 'border: 1px solid transparent;'"
-          @click="isOpen = false">
-          <span class="text-xl leading-none shrink-0">{{ profileStore.isSetup ? '👵' : '👤' }}</span>
-          <div class="flex-1 min-w-0">
-            <div class="font-bold text-sm leading-tight"
-                 :style="{ color: profileStore.isSetup ? 'rgba(255,231,186,0.9)' : '#F2CF86' }">
-              {{ profileStore.isSetup ? (profileStore.name || '個人資料') : '設定個人資料' }}
+          <!-- ── Header ── -->
+          <header class="panel-header">
+            <div class="cloud-band">
+              <span v-for="n in 14" :key="n" class="cloud-puff"></span>
             </div>
-            <div class="text-xs mt-0.5 leading-tight"
-                 style="color: rgba(255,215,150,0.45);">
-              {{ profileStore.isSetup ? (profileStore.eraLabel + '・' + profileStore.regionLabel) : '讓故事變成你自己的' }}
+            <img src="../assets/KIM-I_LOGO.png" alt="KIM-I" class="brand-logo" />
+            <h1 class="brand-name">金憶 KIM-I</h1>
+            <p class="brand-tagline">腦力永保 · 認知訓練</p>
+            <div class="ornament">
+              <span class="ornament__line"></span>
+              <span class="ornament__gem">◈</span>
+              <span class="ornament__line"></span>
             </div>
-          </div>
-          <span v-if="!profileStore.isSetup" class="text-xs font-black shrink-0" style="color:#C8961E;">!</span>
-        </router-link>
+          </header>
 
-        <div class="mt-3 mb-1 px-1 text-xs tracking-[0.16em] uppercase font-semibold"
-             style="color: rgba(255,255,255,0.28);">遊戲</div>
+          <!-- ── Profile ── -->
+          <router-link
+            to="/profile"
+            class="nav-item nav-item--profile"
+            :class="{ 'nav-item--active': route.path === '/profile', 'nav-item--unset': !profileStore.isSetup }"
+            @click="isOpen = false"
+          >
+            <span class="ni-icon">{{ profileStore.isSetup ? '👵' : '👤' }}</span>
+            <div class="ni-body">
+              <div class="ni-name">{{ profileStore.isSetup ? (profileStore.name || '個人資料') : '設定個人資料' }}</div>
+              <div class="ni-sub">{{ profileStore.isSetup ? (profileStore.eraLabel + '・' + profileStore.regionLabel) : '讓故事變成你自己的' }}</div>
+            </div>
+          </router-link>
 
-        <!-- 遊戲大廳 -->
-        <router-link
-          to="/"
-          class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200"
-          :class="route.path === '/' ? '' : 'hover:bg-white/[0.06]'"
-          :style="route.path === '/'
-            ? 'background: rgba(200,150,30,0.12); border:1px solid rgba(200,148,40,0.28);'
-            : 'border:1px solid transparent;'"
-          @click="isOpen = false"
-          :style-color="route.path === '/' ? '#F7D58A' : 'rgba(255,244,220,0.88)'">
-          <span class="text-xl leading-none shrink-0">🎮</span>
-          <span class="font-bold text-sm"
-                :style="{ color: route.path === '/' ? '#F2CF86' : 'rgba(255,231,186,0.82)' }">遊戲大廳</span>
-        </router-link>
+          <!-- ── Section: 遊戲 ── -->
+          <div class="section-label">遊　戲</div>
 
-        <!-- 今天的一天 -->
-        <router-link
-          to="/day"
-          class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200"
-          :class="route.path === '/day' ? '' : 'hover:bg-white/[0.06]'"
-          :style="route.path === '/day'
-            ? 'background: rgba(200,150,30,0.12); border:1px solid rgba(200,148,40,0.28);'
-            : 'border:1px solid transparent;'"
-          @click="isOpen = false">
-          <span class="text-xl leading-none shrink-0">🌅</span>
-          <span class="font-bold text-sm"
-                :style="{ color: route.path === '/day' ? '#F2CF86' : 'rgba(255,231,186,0.82)' }">今天的一天</span>
-        </router-link>
+          <router-link to="/" class="nav-item" :class="{ 'nav-item--active': route.path === '/' }" @click="isOpen = false">
+            <span class="ni-icon">🎮</span>
+            <span class="ni-name">遊戲大廳</span>
+          </router-link>
 
-        <!-- 多人模式 -->
-        <router-link
-          to="/multiplayer"
-          class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200"
-          :class="route.path.startsWith('/multiplayer') ? '' : 'hover:bg-white/[0.06]'"
-          :style="route.path.startsWith('/multiplayer')
-            ? 'background: rgba(200,150,30,0.12); border:1px solid rgba(200,148,40,0.28);'
-            : 'border:1px solid transparent;'"
-          @click="isOpen = false">
-          <span class="text-xl leading-none shrink-0">👥</span>
-          <span class="font-bold text-sm"
-                :style="{ color: route.path.startsWith('/multiplayer') ? '#F2CF86' : 'rgba(255,231,186,0.82)' }">多人模式</span>
-        </router-link>
+          <router-link to="/day" class="nav-item" :class="{ 'nav-item--active': route.path === '/day' }" @click="isOpen = false">
+            <span class="ni-icon">🌅</span>
+            <span class="ni-name">今天的一天</span>
+          </router-link>
 
-        <div class="mt-3 mb-1 px-1 text-xs tracking-[0.16em] uppercase font-semibold"
-             style="color: rgba(255,255,255,0.28);">報表</div>
+          <router-link to="/multiplayer" class="nav-item" :class="{ 'nav-item--active': route.path.startsWith('/multiplayer') }" @click="isOpen = false">
+            <span class="ni-icon">👥</span>
+            <span class="ni-name">多人模式</span>
+          </router-link>
 
-        <!-- 家屬報表 -->
-        <router-link
-          to="/dashboard/family"
-          class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200"
-          :class="route.path === '/dashboard/family' ? '' : 'hover:bg-white/[0.06]'"
-          :style="route.path === '/dashboard/family'
-            ? 'background: rgba(200,150,30,0.12); border:1px solid rgba(200,148,40,0.28);'
-            : 'border:1px solid transparent;'"
-          @click="isOpen = false">
-          <span class="text-xl leading-none shrink-0">🏆</span>
-          <div class="flex-1 min-w-0">
-            <div class="font-bold text-sm"
-                 :style="{ color: route.path === '/dashboard/family' ? '#F2CF86' : 'rgba(255,231,186,0.82)' }">我的成就</div>
-            <div class="text-xs mt-0.5" style="color: rgba(255,215,150,0.4);">查看您的腦力狀態</div>
-          </div>
-        </router-link>
+          <!-- ── Section: 報表 ── -->
+          <div class="section-label">報　表</div>
 
-        <!-- 照顧單位報表 -->
-        <router-link
-          to="/dashboard"
-          class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200"
-          :class="route.path === '/dashboard' ? '' : 'hover:bg-white/[0.06]'"
-          :style="route.path === '/dashboard'
-            ? 'background: rgba(200,150,30,0.12); border:1px solid rgba(200,148,40,0.28);'
-            : 'border:1px solid transparent;'"
-          @click="isOpen = false">
-          <span class="text-xl leading-none shrink-0">🏥</span>
-          <div class="flex-1 min-w-0">
-            <div class="font-bold text-sm"
-                 :style="{ color: route.path === '/dashboard' ? '#F2CF86' : 'rgba(255,231,186,0.82)' }">照顧單位報表</div>
-            <div class="text-xs mt-0.5" style="color: rgba(255,215,150,0.4);">日照中心、照顧機構使用</div>
-          </div>
-        </router-link>
+          <router-link to="/dashboard/family" class="nav-item" :class="{ 'nav-item--active': route.path === '/dashboard/family' }" @click="isOpen = false">
+            <span class="ni-icon">🏆</span>
+            <div class="ni-body">
+              <div class="ni-name">我的成就</div>
+              <div class="ni-sub">查看您的腦力狀態</div>
+            </div>
+          </router-link>
 
-        <!-- Auth -->
-        <div class="mt-auto pt-5 border-t" style="border-color: rgba(200,148,40,0.15);">
-          <!-- Logged in -->
-          <div v-if="profileStore.isLoggedIn" class="flex items-center justify-between px-4 py-2.5 rounded-xl mb-2"
-               style="background: rgba(255,255,255,0.04); border: 1px solid rgba(200,148,40,0.15);">
-            <div>
-              <div class="text-xs font-bold" style="color: rgba(255,231,186,0.7);">已登入</div>
-              <div class="text-[11px] truncate max-w-[160px]" style="color: rgba(255,215,150,0.38);">
-                {{ profileStore.authUser?.email }}
+          <router-link to="/dashboard" class="nav-item" :class="{ 'nav-item--active': route.path === '/dashboard' }" @click="isOpen = false">
+            <span class="ni-icon">🏥</span>
+            <div class="ni-body">
+              <div class="ni-name">照顧單位報表</div>
+              <div class="ni-sub">日照中心、照顧機構使用</div>
+            </div>
+          </router-link>
+
+          <!-- ── Auth ── -->
+          <div class="auth-section">
+            <template v-if="profileStore.isLoggedIn">
+              <div class="auth-row">
+                <div class="auth-info">
+                  <div class="auth-label">已登入</div>
+                  <div class="auth-email">{{ profileStore.authUser?.email }}</div>
+                </div>
+                <button @click="handleLogout" class="btn-logout">登出</button>
               </div>
-            </div>
-            <button @click="handleLogout"
-                    class="text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95"
-                    style="color: rgba(255,130,100,0.8); background: rgba(255,80,60,0.1); border: 1px solid rgba(255,80,60,0.2);">
-              登出
+            </template>
+            <button v-else @click="showAuth = true; isOpen = false" class="btn-login">
+              🔑&ensp;登入 / 建立帳號
             </button>
           </div>
-          <!-- Guest -->
-          <button v-else
-                  @click="showAuth = true; isOpen = false"
-                  class="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] mb-2"
-                  style="background: rgba(200,148,40,0.1);
-                         border: 1px solid rgba(200,148,40,0.3);
-                         color: #C8961E;">
-            <span>🔑</span> 登入 / 建立帳號
-          </button>
-        </div>
 
-        <!-- Version -->
-        <div class="pb-2 text-center" style="color: rgba(255,237,198,0.4);">
-          <p class="text-xs">v0.0.0 · 認知訓練平台</p>
+          <footer class="panel-footer">v0.0.0 · 認知訓練平台</footer>
         </div>
       </div>
-    </div>
-  </transition>
+    </transition>
+
   </template>
 
   <AuthModal v-model="showAuth" />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProfileStore } from '../stores/profileStore'
 import AuthModal from './AuthModal.vue'
 
-const isOpen   = ref(false)
-const showAuth = ref(false)
-const route = useRoute()
+const isOpen      = ref(false)
+const showAuth    = ref(false)
+const showNewDot  = ref(!localStorage.getItem('kim-i-menu-seen'))
+const route       = useRoute()
 const profileStore = useProfileStore()
 
 const handleLogout = async () => {
@@ -235,7 +143,24 @@ const handleLogout = async () => {
   isOpen.value = false
 }
 
-// Hide during active gameplay — those screens have their own "← 離開" button
+const handleKeydown = (e) => {
+  if (e.key === 'Escape' && isOpen.value) isOpen.value = false
+}
+
+watch(isOpen, (val) => {
+  document.body.style.overflow = val ? 'hidden' : ''
+  if (val && showNewDot.value) {
+    showNewDot.value = false
+    localStorage.setItem('kim-i-menu-seen', '1')
+  }
+})
+
+onMounted(() => window.addEventListener('keydown', handleKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  document.body.style.overflow = ''
+})
+
 const showNav = computed(() =>
   !route.path.startsWith('/game/') &&
   !route.path.startsWith('/multiplayer/room') &&
@@ -244,21 +169,485 @@ const showNav = computed(() =>
 </script>
 
 <style scoped>
-.sidebar-fade-enter-active,
-.sidebar-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.sidebar-fade-enter-from,
-.sidebar-fade-leave-to {
-  opacity: 0;
+/* ──────────────────────────────────────────────────────────
+   SEAL BUTTON
+────────────────────────────────────────────────────────── */
+.seal-btn {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 100;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255, 230, 130, 0.52);
+  background:
+    radial-gradient(ellipse at 38% 32%, rgba(255,248,200,0.18) 0%, transparent 55%),
+    conic-gradient(from 150deg, #F0C040, #D49018, #F4CA50, #C88018, #F0C040);
+  box-shadow:
+    0 0 0 4px rgba(200,140,20,0.14),
+    0 8px 24px rgba(0,0,0,0.52),
+    inset 0 2px 5px rgba(255,255,180,0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  transition:
+    transform  0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease,
+    background 0.35s ease;
 }
 
-.sidebar-slide-enter-active,
-.sidebar-slide-leave-active {
-  transition: transform 0.3s ease;
+/* Inner decorative ring */
+.seal-btn::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 250, 210, 0.22);
+  pointer-events: none;
+  transition: border-color 0.35s;
 }
-.sidebar-slide-enter-from,
-.sidebar-slide-leave-to {
-  transform: translateX(100%);
+
+.seal-btn:hover  { transform: scale(1.1) rotate(6deg); }
+.seal-btn:active { transform: scale(0.94); transition-duration: 0.12s; }
+
+.seal-btn--open {
+  background: radial-gradient(circle at 40% 38%, #4A2E0A 0%, #1C1004 100%);
+  border-color: rgba(200, 148, 40, 0.45);
+  box-shadow:
+    0 0 0 4px rgba(200, 148, 40, 0.2),
+    0 8px 24px rgba(0,0,0,0.62);
 }
+.seal-btn--open::before { border-color: rgba(200, 148, 40, 0.28); }
+
+@media (min-width: 640px) {
+  .seal-btn { width: 62px; height: 62px; top: 16px; right: 16px; }
+}
+
+/* ── Alert badge ── */
+.seal-alert {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #E84040;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+}
+.seal-alert__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #E84040;
+  animation: badge-ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes badge-ping {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  75%, 100% { transform: scale(2.3); opacity: 0; }
+}
+
+/* ── New-user dot (first-visit only) ── */
+.seal-new-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #E84040;
+  border: 2px solid rgba(30,12,2,0.8);
+}
+.seal-new-dot__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #E84040;
+  animation: badge-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ── Bars (hamburger → X) ── */
+.seal-bar {
+  display: block;
+  width: 22px;
+  height: 2.5px;
+  border-radius: 3px;
+  background: #2A1605;
+  transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity   0.28s ease,
+              background 0.35s ease,
+              width      0.3s ease;
+  transform-origin: center;
+  position: relative;
+}
+
+.seal-btn--open .seal-bar { background: #F2C94C; }
+.seal-btn--open .seal-bar--a { transform: translateY(8.5px) rotate(45deg);  width: 24px; }
+.seal-btn--open .seal-bar--b { opacity: 0; transform: scaleX(0); }
+.seal-btn--open .seal-bar--c { transform: translateY(-8.5px) rotate(-45deg); width: 24px; }
+
+
+/* ──────────────────────────────────────────────────────────
+   BACKDROP
+────────────────────────────────────────────────────────── */
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(3px);
+}
+.bd-enter-active { transition: opacity 0.3s ease; }
+.bd-leave-active { transition: opacity 0.22s ease; }
+.bd-enter-from, .bd-leave-to { opacity: 0; }
+
+
+/* ──────────────────────────────────────────────────────────
+   SIDE PANEL
+────────────────────────────────────────────────────────── */
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 90;
+  width: 78vw;
+  max-width: 320px;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  background: linear-gradient(175deg, #2E2010 0%, #221808 50%, #1A1205 100%);
+  border-left: 1px solid rgba(200, 148, 40, 0.22);
+  box-shadow: -12px 0 60px rgba(0,0,0,0.65), -1px 0 0 rgba(200,148,40,0.12);
+  will-change: transform;
+}
+
+/* Panel open / close animation */
+.panel-enter-active { transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease; }
+.panel-leave-active { transition: transform 0.28s cubic-bezier(0.4, 0, 1, 1),  opacity 0.22s ease; }
+.panel-enter-from, .panel-leave-to { transform: translateX(100%); opacity: 0.6; }
+
+/* ── Left spine stripe ── */
+.panel-spine {
+  width: 5px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg,
+    #C8861A 0%,
+    #F2C94C 20%,
+    #C8861A 45%,
+    #8B5E10 70%,
+    #C8861A 85%,
+    #F2C94C 100%
+  );
+  box-shadow: 2px 0 12px rgba(200, 140, 20, 0.25);
+}
+
+/* ── Scrollable body ── */
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  scrollbar-width: none;
+}
+.panel-body::-webkit-scrollbar { display: none; }
+
+
+/* ──────────────────────────────────────────────────────────
+   HEADER
+────────────────────────────────────────────────────────── */
+.panel-header {
+  padding: 0 0 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Cloud band at very top */
+.cloud-band {
+  display: flex;
+  height: 18px;
+  background: #1E1508;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+.cloud-puff {
+  flex: 1;
+  margin: 3px 2px;
+  border-radius: 50%;
+  background: rgba(200, 148, 40, 0.12);
+  box-shadow: 0 0 4px rgba(200, 148, 40, 0.08);
+}
+.cloud-puff:nth-child(even) {
+  background: rgba(200, 148, 40, 0.07);
+  transform: translateY(2px) scaleX(0.8);
+}
+
+/* Reserve space for button at top-right */
+.brand-logo {
+  width: 96px;
+  height: 40px;
+  object-fit: contain;
+  transform: rotate(90deg);
+  margin: 42px auto 30px;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(200,140,20,0.3));
+}
+
+.brand-name {
+  font-family: 'Noto Serif TC', 'Noto Sans TC', serif;
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #F2CF86;
+  text-shadow: 0 2px 16px rgba(200,140,20,0.4);
+  margin: 0 0 4px;
+}
+
+.brand-tagline {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: rgba(242, 215, 150, 0.42);
+  margin: 0 0 16px;
+}
+
+/* Ornament divider */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+}
+.ornament__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,148,40,0.35), transparent);
+  border: none;
+}
+.ornament__gem {
+  font-size: 0.6rem;
+  color: rgba(200, 148, 40, 0.55);
+  flex-shrink: 0;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   SECTION LABELS
+────────────────────────────────────────────────────────── */
+.section-label {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: rgba(200, 148, 40, 0.45);
+  padding: 14px 20px 6px;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   NAV ITEMS
+────────────────────────────────────────────────────────── */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px 14px 20px;
+  margin: 2px 12px 2px 0;
+  border-radius: 0 16px 16px 0;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.2s ease;
+  position: relative;
+  min-height: 58px;
+}
+.nav-item:hover {
+  background: rgba(200, 148, 40, 0.07);
+  transform: translateX(2px);
+}
+.nav-item:active { transform: scale(0.98) translateX(2px); }
+
+/* Active state */
+.nav-item--active {
+  background: rgba(200, 148, 40, 0.13);
+  border-left-color: #C8961E;
+  box-shadow: inset 0 0 20px rgba(200,140,20,0.08);
+}
+.nav-item--active .ni-name { color: #F2CF86 !important; }
+
+/* Profile alert state */
+.nav-item--unset {
+  background: rgba(200, 148, 40, 0.1);
+  border-left-color: rgba(200, 148, 40, 0.5);
+}
+
+/* Icon */
+.ni-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
+}
+
+/* Text block */
+.ni-body { flex: 1; min-width: 0; }
+
+.ni-name {
+  font-family: 'Noto Sans TC', 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(242, 228, 184, 0.95);
+  line-height: 1.3;
+  transition: color 0.22s;
+}
+
+.ni-sub {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.7rem;
+  color: rgba(242, 215, 150, 0.52);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+/* Badge */
+.ni-badge {
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: #C8961E;
+  flex-shrink: 0;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Profile item icon is slightly larger */
+.nav-item--profile .ni-icon { font-size: 1.5rem; }
+
+
+/* ──────────────────────────────────────────────────────────
+   AUTH SECTION
+────────────────────────────────────────────────────────── */
+.auth-section {
+  margin-top: auto;
+  padding: 20px 14px 6px;
+  border-top: 1px solid rgba(200, 148, 40, 0.12);
+}
+
+.auth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(200, 148, 40, 0.14);
+  gap: 12px;
+}
+
+.auth-info { min-width: 0; flex: 1; }
+
+.auth-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(242, 228, 184, 0.65);
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.auth-email {
+  font-size: 0.68rem;
+  color: rgba(242, 215, 150, 0.35);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  font-family: 'Outfit', monospace;
+}
+
+.btn-logout {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: rgba(255, 80, 60, 0.1);
+  border: 1px solid rgba(255, 80, 60, 0.22);
+  color: rgba(255, 130, 100, 0.85);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.btn-logout:hover  { background: rgba(255, 80, 60, 0.18); }
+.btn-logout:active { transform: scale(0.95); }
+
+.btn-login {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: rgba(200, 148, 40, 0.09);
+  border: 1px solid rgba(200, 148, 40, 0.3);
+  color: #C8961E;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.btn-login:hover  { background: rgba(200, 148, 40, 0.15); transform: translateY(-1px); }
+.btn-login:active { transform: scale(0.98); }
+
+
+/* ──────────────────────────────────────────────────────────
+   FOOTER
+────────────────────────────────────────────────────────── */
+.panel-footer {
+  text-align: center;
+  font-size: 0.65rem;
+  color: rgba(242, 220, 170, 0.28);
+  padding: 12px 0 20px;
+  font-family: 'Outfit', monospace;
+  letter-spacing: 0.06em;
+}
+
+
+/* ──────────────────────────────────────────────────────────
+   STAGGER ANIMATION — items cascade in as panel opens
+────────────────────────────────────────────────────────── */
+@keyframes item-appear {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.panel-body > * {
+  animation: item-appear 0.48s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.panel-body > *:nth-child(1)  { animation-delay: 0.06s; }
+.panel-body > *:nth-child(2)  { animation-delay: 0.11s; }
+.panel-body > *:nth-child(3)  { animation-delay: 0.16s; }
+.panel-body > *:nth-child(4)  { animation-delay: 0.21s; }
+.panel-body > *:nth-child(5)  { animation-delay: 0.26s; }
+.panel-body > *:nth-child(6)  { animation-delay: 0.30s; }
+.panel-body > *:nth-child(7)  { animation-delay: 0.34s; }
+.panel-body > *:nth-child(8)  { animation-delay: 0.38s; }
+.panel-body > *:nth-child(9)  { animation-delay: 0.41s; }
+.panel-body > *:nth-child(10) { animation-delay: 0.44s; }
+.panel-body > *:nth-child(11) { animation-delay: 0.47s; }
 </style>

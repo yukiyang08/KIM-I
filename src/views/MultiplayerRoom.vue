@@ -14,9 +14,18 @@
               {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }} ・ {{ durationLabel(room.duration) }}
             </p>
           </div>
-          <div class="text-sm px-3 py-1.5 rounded-lg font-bold"
-               :style="statusPillStyle(room.status)">
-            {{ statusLabel(room.status) }}
+          <div class="flex items-center gap-2">
+            <div class="text-sm px-3 py-1.5 rounded-lg font-bold"
+                 :style="statusPillStyle(room.status)">
+              {{ statusLabel(room.status) }}
+            </div>
+            <button
+              @click="leaveCurrentRoom"
+              class="text-sm font-bold px-3 py-1.5 rounded-lg"
+              style="background: rgba(105,45,25,0.62); color:#FFD7C6;"
+            >
+              離開房間
+            </button>
           </div>
         </div>
       </header>
@@ -28,6 +37,13 @@
           <div class="w-2.5 h-2.5 rounded-full" style="background:#6ABE50; box-shadow:0 0 8px rgba(100,190,80,0.7); animation: pulse 1.4s ease-in-out infinite;"></div>
           <h2 class="text-xl font-black" style="color:#D0FFD8;">遊戲進行中</h2>
           <span class="text-sm ml-auto" style="color: rgba(180,240,190,0.55);">已進行 {{ elapsedText }}</span>
+          <button
+            @click="leaveCurrentRoom"
+            class="text-xs font-bold px-2.5 py-1.5 rounded-lg shrink-0"
+            style="background: rgba(105,45,25,0.55); color:#FFD7C6;"
+          >
+            離開
+          </button>
         </div>
 
         <div class="grid gap-2">
@@ -57,13 +73,6 @@
                style="border-color: rgba(236,196,122,0.2); background: rgba(24,14,8,0.72);">
         <div class="flex items-center justify-between gap-3 mb-4">
           <h2 class="text-xl font-black" style="color:#F2CF86;">玩家名單</h2>
-          <button
-            @click="leaveCurrentRoom"
-            class="text-sm font-bold px-3 py-1.5 rounded-lg"
-            style="background: rgba(105,45,25,0.62); color:#FFD7C6;"
-          >
-            離開房間
-          </button>
         </div>
 
         <div class="grid gap-3">
@@ -234,7 +243,9 @@ import {
   leaveRoom,
   resetRoomToWaiting,
   startRoomGame,
+  subscribeToRoom,
   toggleReady,
+  unsubscribeFromRoom,
   updateRoomConfig,
 } from '../utils/multiplayerRoom'
 
@@ -247,7 +258,7 @@ const errorText = ref('')
 const nowMs = ref(Date.now())
 const currentPlayer = getOrCreateLocalPlayer('玩家')
 
-let syncTimer = null
+let clockTimer = null
 
 const readyStyle = { background: 'rgba(96,170,112,0.26)', color: '#D0FFD8' }
 const waitingStyle = { background: 'rgba(130,95,40,0.28)', color: '#FFE1A8' }
@@ -323,82 +334,76 @@ const durationLabel = (value) => {
   return '1 分鐘'
 }
 
-const refreshRoom = () => {
-  const latest = getRoom(roomId.value)
+const applyRoom = (latest) => {
   room.value = latest
   nowMs.value = Date.now()
   if (!latest) return
 
   const isMember = (latest.players || []).some((player) => player.id === currentPlayer.id)
-  if (!isMember) {
-    errorText.value = '你已不在此房間。'
-    return
-  }
+  if (!isMember) { errorText.value = '你已不在此房間。'; return }
 
   if (latest.status === 'playing') {
-    router.push({
-      name: 'music',
-      query: {
-        track: latest.track,
-        mp: '1',
-        roomId: latest.id,
-        playerId: currentPlayer.id,
-        duration: latest.duration || '60',
-      },
-    })
+    const me = (latest.players || []).find((p) => p.id === currentPlayer.id)
+    if (!me?.finishedAt) {
+      router.push({
+        name: 'music',
+        query: {
+          track: latest.track, mp: '1',
+          roomId: latest.id, playerId: currentPlayer.id,
+          duration: latest.duration || '60',
+        },
+      })
+    }
   }
 }
 
-const onTrackChange = (event) => {
-  updateRoomConfig(roomId.value, { track: event.target.value })
-  refreshRoom()
+const refreshRoom = async () => {
+  applyRoom(await getRoom(roomId.value))
 }
 
-const onModeChange = (event) => {
-  updateRoomConfig(roomId.value, { mode: event.target.value })
-  refreshRoom()
+const onTrackChange = async (event) => {
+  await updateRoomConfig(roomId.value, { track: event.target.value })
 }
 
-const onDurationChange = (event) => {
-  updateRoomConfig(roomId.value, { duration: event.target.value })
-  refreshRoom()
+const onModeChange = async (event) => {
+  await updateRoomConfig(roomId.value, { mode: event.target.value })
 }
 
-const toggleMyReady = () => {
+const onDurationChange = async (event) => {
+  await updateRoomConfig(roomId.value, { duration: event.target.value })
+}
+
+const toggleMyReady = async () => {
   if (!room.value || room.value.status !== 'waiting') return
-  toggleReady(room.value.id, currentPlayer.id, !myReady.value)
-  refreshRoom()
+  await toggleReady(room.value.id, currentPlayer.id, !myReady.value)
 }
 
-const startGame = () => {
+const startGame = async () => {
   if (!room.value) return
-  const result = startRoomGame(room.value.id, currentPlayer.id)
-  if (result?.error) {
-    errorText.value = result.error
-    return
-  }
+  const result = await startRoomGame(room.value.id, currentPlayer.id)
+  if (result?.error) { errorText.value = result.error; return }
   errorText.value = ''
-  refreshRoom()
 }
 
-const restartRoom = () => {
+const restartRoom = async () => {
   if (!room.value) return
-  resetRoomToWaiting(room.value.id, currentPlayer.id)
-  refreshRoom()
+  await resetRoomToWaiting(room.value.id, currentPlayer.id)
 }
 
-const leaveCurrentRoom = () => {
-  leaveRoom(roomId.value, currentPlayer.id)
+const leaveCurrentRoom = async () => {
+  await leaveRoom(roomId.value, currentPlayer.id)
   router.push({ name: 'multiplayer-lobby' })
 }
 
-onMounted(() => {
-  refreshRoom()
-  syncTimer = setInterval(refreshRoom, 800)
+onMounted(async () => {
+  await refreshRoom()
+  subscribeToRoom(roomId.value, applyRoom)
+  clockTimer = setInterval(() => { nowMs.value = Date.now() }, 1000)
 })
 
 onUnmounted(() => {
-  if (syncTimer) clearInterval(syncTimer)
+  unsubscribeFromRoom(roomId.value)
+  if (clockTimer) clearInterval(clockTimer)
 })
 </script>
 

@@ -12,6 +12,7 @@ import MultiplayerRoom from '../views/MultiplayerRoom.vue'
 import DayScene from '../views/DayScene.vue'
 import FamilyDashboard from '../views/FamilyDashboard.vue'
 import UserProfile from '../views/UserProfile.vue'
+import LoginPage from '../views/LoginPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +28,7 @@ const router = createRouter({
     { path: '/dashboard',        name: 'dashboard',        component: CaregiverDashboard },
     { path: '/dashboard/family', name: 'dashboard-family', component: FamilyDashboard },
     { path: '/profile',          name: 'profile',          component: UserProfile },
+    { path: '/login',            name: 'login',            component: LoginPage },
     { path: '/multiplayer',    name: 'multiplayer-lobby', component: MultiplayerLobby },
     { path: '/multiplayer/room/:roomId', name: 'multiplayer-room', component: MultiplayerRoom },
   ],

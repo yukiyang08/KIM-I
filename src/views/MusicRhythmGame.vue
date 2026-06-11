@@ -303,7 +303,7 @@
             <button v-else @click="goBack"
               class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
               style="background: linear-gradient(135deg, #D4A020, #8B6000);">
-              回多人房間
+              {{ mpRedirectCountdown !== null ? `前往排名 (${mpRedirectCountdown})` : '回多人房間' }}
             </button>
             <button @click="exitGame"
               class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-white text-xl sm:text-2xl md:text-3xl font-bold active:scale-95 transition-transform"
@@ -507,8 +507,10 @@ let timedEndingInProgress = false
 let timedEndingTimer = null
 let audioFadeRafId = null
 let mpCountdownTimer = null
+let mpAutoRedirectTimer = null
 
 const mpCountdown = ref(null)
+const mpRedirectCountdown = ref(null)
 
 const mpOtherPlayers = computed(() => {
   if (!isMultiplayer.value || !multiplayerRoom.value) return []
@@ -543,9 +545,9 @@ const multiplayerStatusText = computed(() => {
   return '對局進行中'
 })
 
-const syncMultiplayerRoom = () => {
+const syncMultiplayerRoom = async () => {
   if (!isMultiplayer.value) return
-  multiplayerRoom.value = getRoom(multiplayerRoomId.value)
+  multiplayerRoom.value = await getRoom(multiplayerRoomId.value)
 }
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -831,7 +833,7 @@ const onTap = (li) => {
   setTimeout(() => { laneResult[li] = null }, 520)
 }
 
-const endGame = ({ stopMusic = true } = {}) => {
+const endGame = async ({ stopMusic = true } = {}) => {
   timedEndingInProgress = false
   if (timedEndingTimer) {
     clearTimeout(timedEndingTimer)
@@ -853,8 +855,19 @@ const endGame = ({ stopMusic = true } = {}) => {
   }
 
   if (isMultiplayer.value && multiplayerRoomId.value && multiplayerPlayerId.value) {
-    submitRoomScore(multiplayerRoomId.value, multiplayerPlayerId.value, score.value)
-    syncMultiplayerRoom()
+    await submitRoomScore(multiplayerRoomId.value, multiplayerPlayerId.value, score.value)
+    await syncMultiplayerRoom()
+    // Auto-redirect to room ranking after 4 seconds
+    mpRedirectCountdown.value = 4
+    mpAutoRedirectTimer = setInterval(() => {
+      mpRedirectCountdown.value--
+      if (mpRedirectCountdown.value <= 0) {
+        clearInterval(mpAutoRedirectTimer)
+        mpAutoRedirectTimer = null
+        mpRedirectCountdown.value = null
+        router.push({ name: 'multiplayer-room', params: { roomId: multiplayerRoomId.value } })
+      }
+    }, 1000)
   }
 
   gameState.value = 'finished'
@@ -870,6 +883,8 @@ const goBack = () => {
   timedEndingInProgress = false
   if (timedEndingTimer) { clearTimeout(timedEndingTimer); timedEndingTimer = null }
   if (mpCountdownTimer) { clearTimeout(mpCountdownTimer); mpCountdownTimer = null }
+  if (mpAutoRedirectTimer) { clearInterval(mpAutoRedirectTimer); mpAutoRedirectTimer = null }
+  mpRedirectCountdown.value = null
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
   stopAudio()
   if (gameState.value === 'playing' && !sessionSaved) {
@@ -890,6 +905,8 @@ const exitGame = () => {
   timedEndingInProgress = false
   if (timedEndingTimer) { clearTimeout(timedEndingTimer); timedEndingTimer = null }
   if (mpCountdownTimer) { clearTimeout(mpCountdownTimer); mpCountdownTimer = null }
+  if (mpAutoRedirectTimer) { clearInterval(mpAutoRedirectTimer); mpAutoRedirectTimer = null }
+  mpRedirectCountdown.value = null
   if (rafId) { cancelAnimationFrame(rafId); rafId = null }
   stopAudio()
   router.push('/')
@@ -915,6 +932,10 @@ onUnmounted(() => {
   if (mpCountdownTimer) {
     clearTimeout(mpCountdownTimer)
     mpCountdownTimer = null
+  }
+  if (mpAutoRedirectTimer) {
+    clearInterval(mpAutoRedirectTimer)
+    mpAutoRedirectTimer = null
   }
   if (rafId) cancelAnimationFrame(rafId)
   stopAudio()
