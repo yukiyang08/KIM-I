@@ -17,7 +17,22 @@
 </template>
 
 <script setup>
+import { onMounted, watch } from 'vue'
 import SidebarNav from './components/SidebarNav.vue'
+import { useGameStore } from './stores/gameStore'
+import { useProfileStore } from './stores/profileStore'
+
+const gameStore = useGameStore()
+const profileStore = useProfileStore()
+
+onMounted(() => {
+  gameStore.loadSessions()
+})
+
+// Reload sessions whenever userId changes (guest → logged in, or logout)
+watch(() => profileStore.userId, () => {
+  gameStore.loadSessions()
+})
 </script>
 
 <style scoped>

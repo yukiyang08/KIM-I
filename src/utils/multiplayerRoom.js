@@ -56,7 +56,7 @@ export const listRooms = () => {
 
 export const getRoom = (roomId) => listRooms().find((room) => room.id === roomId) || null
 
-export const createRoom = ({ hostName, mode = 'co-op', track = 'music-rhythm2', maxPlayers = 4 }) => {
+export const createRoom = ({ hostName, mode = 'co-op', track = 'music-rhythm2', maxPlayers = 4, duration = '60' }) => {
   const player = updateLocalPlayerName(hostName)
   const rooms = readRooms()
   const existingCodes = new Set(rooms.map((room) => room.code))
@@ -69,6 +69,7 @@ export const createRoom = ({ hostName, mode = 'co-op', track = 'music-rhythm2', 
     maxPlayers,
     hostId: player.id,
     status: 'waiting',
+    duration,
     createdAt: now(),
     updatedAt: now(),
     startedAt: null,
@@ -146,6 +147,7 @@ export const updateRoomConfig = (roomId, config) => {
 
   if (config.track) room.track = config.track
   if (config.mode) room.mode = config.mode
+  if (config.duration) room.duration = config.duration
   room.updatedAt = now()
   writeRooms(rooms)
   return room

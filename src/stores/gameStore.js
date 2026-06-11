@@ -1,41 +1,73 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { supabase } from '../lib/supabase'
+import { useProfileStore } from './profileStore'
 
 export const useGameStore = defineStore('game', () => {
-  // Difficulty setting: 'easy', 'normal', 'hard'
   const difficulty = ref('normal')
 
-  // Set difficulty level
   const setDifficulty = (level) => {
-    if (['easy', 'normal', 'hard'].includes(level)) {
-      difficulty.value = level
-    }
+    if (['easy', 'normal', 'hard'].includes(level)) difficulty.value = level
   }
 
-  // Each session: { gameId, score (0–100), timestamp, difficulty, ...detail }
+  // Each session: { gameId, score, timestamp, difficulty, ...detail }
   const sessions = ref([])
 
-  const addSession = (gameId, score, detail = {}) => {
-    sessions.value.push({
+  const addSession = async (gameId, score, detail = {}) => {
+    const session = {
       gameId,
       score: Math.min(100, Math.max(0, Math.round(score))),
       timestamp: Date.now(),
       difficulty: difficulty.value,
       ...detail,
-    })
+    }
+    sessions.value.push(session)
+
+    const profile = useProfileStore()
+    if (profile.userId) {
+      await supabase.from('game_sessions').insert({
+        user_id: profile.userId,
+        game_id: gameId,
+        score: session.score,
+        difficulty: difficulty.value,
+        detail: detail,
+        played_at: new Date(session.timestamp).toISOString(),
+      })
+    }
+  }
+
+  // Load all sessions for the current user from DB
+  const loadSessions = async () => {
+    const profile = useProfileStore()
+    if (!profile.userId) return
+
+    const { data, error } = await supabase
+      .from('game_sessions')
+      .select('*')
+      .eq('user_id', profile.userId)
+      .order('played_at', { ascending: true })
+
+    if (!error && data) {
+      sessions.value = data.map(row => ({
+        gameId: row.game_id,
+        score: row.score,
+        timestamp: new Date(row.played_at).getTime(),
+        difficulty: row.difficulty,
+        ...row.detail,
+      }))
+    }
   }
 
   // gameId → cognitive dimension
   const dimensionOf = {
-    music:    'reactionSpeed', // rhythm timing ≈ reaction/processing speed
+    music:    'reactionSpeed',
     shopping: 'memory',
     cooking:  'execution',
     puppet:   'attention',
-    riddle:   'memory',        // long-term memory (averaged with shopping)
-    puzzle:   'visual',        // visual-spatial reasoning
+    riddle:   'memory',
+    puzzle:   'visual',
   }
 
-  // Most recent score per dimension
   const latestByDimension = computed(() => {
     const result = {}
     ;[...sessions.value].reverse().forEach(s => {
@@ -45,10 +77,8 @@ export const useGameStore = defineStore('game', () => {
     return result
   })
 
-  // Baseline (上月) — static reference
   const baseline = { memory: 82, attention: 65, execution: 88, visual: 75, reactionSpeed: 70 }
 
-  // Live radar data: [記憶力, 注意力, 執行力, 視覺空間, 反應力]
   const radarCurrent = computed(() => {
     const d = latestByDimension.value
     return [
@@ -67,7 +97,6 @@ export const useGameStore = defineStore('game', () => {
 
   const hasData = computed(() => sessions.value.length > 0)
 
-  // Dynamic alert: check if reaction speed dropped vs baseline
   const alertMessage = computed(() => {
     const music = sessions.value.filter(s => s.gameId === 'music')
     if (music.length === 0) return null
@@ -109,7 +138,6 @@ export const useGameStore = defineStore('game', () => {
 
       const base = baseline[dim]
       const delta = current - base
-
       let trend = 'stuck'
       if (delta >= 5) trend = 'improving'
       else if (delta <= -5) trend = 'declining'
@@ -129,6 +157,7 @@ export const useGameStore = defineStore('game', () => {
   return {
     sessions,
     addSession,
+    loadSessions,
     difficulty,
     setDifficulty,
     radarCurrent,

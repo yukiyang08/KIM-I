@@ -25,3 +25,11 @@ dist-ssr
 
 # MCP config (contains API keys)
 .mcp.json
+
+# Environment variables (contains Supabase keys)
+.env
+.env.*
+!.env.example
+
+# Generated assets
+src/assets/generated-posters/

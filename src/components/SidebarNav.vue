@@ -57,6 +57,14 @@
 
         <!-- Brand -->
         <div class="text-center mb-5 pb-5 border-b" style="border-color: rgba(200,148,40,0.2);">
+          <img
+            src="../assets/KIM-I_LOGO.png"
+            alt="KIM-I"
+            style="width: 110px; height: 44px; object-fit: contain;
+                   transform: rotate(90deg);
+                   margin-top: 33px; margin-bottom: 33px;
+                   display: block; margin-left: auto; margin-right: auto;"
+          />
           <h2 class="font-black tracking-[0.1em]"
               style="font-family:'Noto Serif TC',serif; font-size:1.6rem; color:#F2CF86; text-shadow:0 2px 12px rgba(0,0,0,0.5);">
             金憶 KIM-I
@@ -146,11 +154,11 @@
             ? 'background: rgba(200,150,30,0.12); border:1px solid rgba(200,148,40,0.28);'
             : 'border:1px solid transparent;'"
           @click="isOpen = false">
-          <span class="text-xl leading-none shrink-0">👨‍👩‍👧</span>
+          <span class="text-xl leading-none shrink-0">🏆</span>
           <div class="flex-1 min-w-0">
             <div class="font-bold text-sm"
-                 :style="{ color: route.path === '/dashboard/family' ? '#F2CF86' : 'rgba(255,231,186,0.82)' }">家屬報表</div>
-            <div class="text-xs mt-0.5" style="color: rgba(255,215,150,0.4);">適合家人與長輩使用</div>
+                 :style="{ color: route.path === '/dashboard/family' ? '#F2CF86' : 'rgba(255,231,186,0.82)' }">我的成就</div>
+            <div class="text-xs mt-0.5" style="color: rgba(255,215,150,0.4);">查看您的腦力狀態</div>
           </div>
         </router-link>
 
@@ -171,28 +179,67 @@
           </div>
         </router-link>
 
+        <!-- Auth -->
+        <div class="mt-auto pt-5 border-t" style="border-color: rgba(200,148,40,0.15);">
+          <!-- Logged in -->
+          <div v-if="profileStore.isLoggedIn" class="flex items-center justify-between px-4 py-2.5 rounded-xl mb-2"
+               style="background: rgba(255,255,255,0.04); border: 1px solid rgba(200,148,40,0.15);">
+            <div>
+              <div class="text-xs font-bold" style="color: rgba(255,231,186,0.7);">已登入</div>
+              <div class="text-[11px] truncate max-w-[160px]" style="color: rgba(255,215,150,0.38);">
+                {{ profileStore.authUser?.email }}
+              </div>
+            </div>
+            <button @click="handleLogout"
+                    class="text-xs font-bold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                    style="color: rgba(255,130,100,0.8); background: rgba(255,80,60,0.1); border: 1px solid rgba(255,80,60,0.2);">
+              登出
+            </button>
+          </div>
+          <!-- Guest -->
+          <button v-else
+                  @click="showAuth = true; isOpen = false"
+                  class="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98] mb-2"
+                  style="background: rgba(200,148,40,0.1);
+                         border: 1px solid rgba(200,148,40,0.3);
+                         color: #C8961E;">
+            <span>🔑</span> 登入 / 建立帳號
+          </button>
+        </div>
+
         <!-- Version -->
-        <div class="mt-auto pt-6 border-t text-center" style="color: rgba(255,237,198,0.4); border-color: rgba(200,148,40,0.15);">
+        <div class="pb-2 text-center" style="color: rgba(255,237,198,0.4);">
           <p class="text-xs">v0.0.0 · 認知訓練平台</p>
         </div>
       </div>
     </div>
   </transition>
   </template>
+
+  <AuthModal v-model="showAuth" />
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProfileStore } from '../stores/profileStore'
+import AuthModal from './AuthModal.vue'
 
-const isOpen = ref(false)
+const isOpen   = ref(false)
+const showAuth = ref(false)
 const route = useRoute()
 const profileStore = useProfileStore()
 
+const handleLogout = async () => {
+  await profileStore.logout()
+  isOpen.value = false
+}
+
 // Hide during active gameplay — those screens have their own "← 離開" button
 const showNav = computed(() =>
-  !route.path.startsWith('/game/') && !route.path.startsWith('/multiplayer/room')
+  !route.path.startsWith('/game/') &&
+  !route.path.startsWith('/multiplayer/room') &&
+  !route.path.startsWith('/dashboard')
 )
 </script>
 

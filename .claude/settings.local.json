@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "mcp__fal-ai__get_pricing",
+      "mcp__fal-ai__run_model",
+      "mcp__fal-ai__submit_job",
+      "mcp__fal-ai__check_job",
+      "mcp__fal-ai__get_job_result",
+      "Bash(cd \"/c/Users/Timothy/Desktop/My Project/KIM-I/kim-i-app\" && cat package.json | grep -E '\"\\(chart|echarts|d3|apexcharts|recharts|vue-chart\\)\"')",
+      "Read(//c/c/Users/Timothy/Desktop/My Project/KIM-I/kim-i-app/**)",
+      "mcp__supabase__list_tables"
     ]
   }
 }
