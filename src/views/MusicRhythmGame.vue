@@ -233,8 +233,33 @@
         </div>
       </div>
 
-      <!-- ── MP Live Scoreboard (playing) ── -->
-      <div v-if="isMultiplayer && gameState === 'playing' && mpOtherPlayers.length > 0"
+      <!-- ── MP Live Scoreboard: battle mode ── -->
+      <div v-if="isMultiplayer && isBattleMode && gameState === 'playing' && battleRankings.length > 0"
+           class="absolute bottom-[19%] left-2 z-[25] pointer-events-none">
+        <div class="px-3 py-2.5 rounded-xl"
+             style="background:rgba(18,5,2,0.88);border:1px solid rgba(255,100,50,0.32);backdrop-filter:blur(4px);">
+          <div class="text-[9px] mb-2 tracking-[0.14em] uppercase font-black"
+               style="color:rgba(255,140,80,0.7);">⚔️ 即時排名</div>
+          <div v-for="(p, idx) in battleRankings" :key="p.id" class="flex items-center gap-1.5 py-0.5">
+            <span class="text-[10px] font-black w-4 text-center shrink-0"
+                  :style="idx === 0 ? 'color:#F0C040;' : 'color:rgba(255,180,100,0.4);'">
+              {{ idx === 0 ? '👑' : idx + 1 }}
+            </span>
+            <span class="text-[11px] font-bold truncate"
+                  style="max-width:60px;"
+                  :style="p.isMe ? 'color:#D0FFD8;' : 'color:rgba(255,231,186,0.75);'">
+              {{ p.isMe ? '你' : p.name }}
+            </span>
+            <span class="text-[11px] font-black tabular-nums shrink-0 ml-auto"
+                  :style="Number.isFinite(p.score) ? 'color:#A0FFB0;' : p.isMe ? 'color:#F0C040;' : 'color:rgba(240,192,64,0.55);'">
+              {{ Number.isFinite(p.score) ? p.score + '✓' : p.displayScore }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MP Live Scoreboard: non-battle ── -->
+      <div v-if="isMultiplayer && !isBattleMode && gameState === 'playing' && mpOtherPlayers.length > 0"
            class="absolute bottom-[19%] left-2 z-[25] pointer-events-none">
         <div class="px-3 py-2.5 rounded-xl"
              style="background:rgba(10,6,2,0.78);border:1px solid rgba(200,148,40,0.22);backdrop-filter:blur(4px);">
@@ -289,12 +314,7 @@
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-[520px] px-4">
-          <button v-if="isDayFlow" @click="continueStory"
-            class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl font-black active:scale-95 transition-transform"
-            style="background: linear-gradient(135deg, #D4A020, #8B6000);">
-            繼續今天的故事 →
-          </button>
-          <template v-else>
+          <template>
             <button v-if="!isMultiplayer" @click="startGame"
               class="px-10 sm:px-14 py-4 sm:py-6 rounded-full text-black text-xl sm:text-2xl md:text-3xl font-black active:scale-95 transition-transform"
               style="background: linear-gradient(135deg, #D4A020, #8B6000);">
@@ -329,14 +349,12 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useGameStore } from '../stores/gameStore'
 import { guess } from 'web-audio-beat-detector'
-import { getRoom, submitRoomScore } from '../utils/multiplayerRoom'
+import { broadcastBattleScore, getRoom, submitRoomScore } from '../utils/multiplayerRoom'
 
 const router = useRouter()
 const route = useRoute()
 const gameStore = useGameStore()
 
-const isDayFlow = computed(() => route.query.returnTo === 'day')
-const continueStory = () => router.push({ name: 'day', query: { scene: route.query.next || 'ending' } })
 
 // ── Lane definitions ──────────────────────────────────────────
 const ALL_LANES = [
@@ -417,6 +435,13 @@ const selectedSong = computed(() => SONG_LIBRARY[selectedSongKey.value])
 const isMultiplayer = computed(() => route.query.mp === '1' && typeof route.query.roomId === 'string')
 const multiplayerRoomId = computed(() => String(route.query.roomId || ''))
 const multiplayerPlayerId = computed(() => String(route.query.playerId || ''))
+const isBattleMode = computed(() => route.query.mode === 'battle')
+
+// Multiplayer: everyone plays at the room's difficulty (set by the host)
+if (route.query.mp === '1' && ['easy', 'normal', 'hard'].includes(route.query.difficulty)) {
+  gameStore.setDifficulty(route.query.difficulty)
+}
+
 const NOTE_DURATION = 2600 // ms to traverse full height
 
 const HIT_ZONE_Y = 76      // % from top — center of hit window
@@ -502,6 +527,7 @@ let analysisPromise = null
 let analyzedRhythm = getFallbackRhythm()
 let chart = []
 let multiplayerSyncTimer = null
+let battleBroadcastTimer = null
 let gameRunToken = 0
 let timedEndingInProgress = false
 let timedEndingTimer = null
@@ -515,6 +541,17 @@ const mpRedirectCountdown = ref(null)
 const mpOtherPlayers = computed(() => {
   if (!isMultiplayer.value || !multiplayerRoom.value) return []
   return (multiplayerRoom.value.players || []).filter(p => p.id !== multiplayerPlayerId.value)
+})
+
+const battleRankings = computed(() => {
+  if (!isMultiplayer.value || !multiplayerRoom.value) return []
+  return [...(multiplayerRoom.value.players || [])]
+    .map(p => ({
+      ...p,
+      displayScore: p.id === multiplayerPlayerId.value ? score.value : (p.liveScore ?? p.score ?? 0),
+      isMe: p.id === multiplayerPlayerId.value,
+    }))
+    .sort((a, b) => b.displayScore - a.displayScore)
 })
 
 const startMpCountdown = () => {
@@ -916,6 +953,12 @@ onMounted(() => {
   if (!isMultiplayer.value) return
   syncMultiplayerRoom()
   multiplayerSyncTimer = setInterval(syncMultiplayerRoom, 800)
+  if (isBattleMode.value) {
+    battleBroadcastTimer = setInterval(async () => {
+      if (gameState.value === 'playing')
+        await broadcastBattleScore(multiplayerRoomId.value, multiplayerPlayerId.value, score.value)
+    }, 3000)
+  }
   // Pre-warm beat detection during countdown so game starts immediately after
   ensureAudio()
   detectSongRhythm().catch(() => {})
@@ -940,6 +983,7 @@ onUnmounted(() => {
   if (rafId) cancelAnimationFrame(rafId)
   stopAudio()
   if (multiplayerSyncTimer) clearInterval(multiplayerSyncTimer)
+  if (battleBroadcastTimer) { clearInterval(battleBroadcastTimer); battleBroadcastTimer = null }
 })
 </script>
 

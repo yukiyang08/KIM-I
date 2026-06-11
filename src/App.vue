@@ -16,11 +16,13 @@
   </div>
 </template>
 
+
 <script setup>
 import { onMounted, watch } from 'vue'
 import SidebarNav from './components/SidebarNav.vue'
 import { useGameStore } from './stores/gameStore'
 import { useProfileStore } from './stores/profileStore'
+import { useRouter } from 'vue-router'
 
 const gameStore = useGameStore()
 const profileStore = useProfileStore()
@@ -28,6 +30,8 @@ const profileStore = useProfileStore()
 onMounted(() => {
   gameStore.loadSessions()
 })
+
+const router = useRouter()
 
 // Reload sessions whenever userId changes (guest → logged in, or logout)
 watch(() => profileStore.userId, () => {

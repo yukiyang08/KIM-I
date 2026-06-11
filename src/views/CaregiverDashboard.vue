@@ -221,7 +221,7 @@
                         <Doughnut :data="statusDonutData" :options="donutChartOptions" />
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                           <div class="text-[11px]" style="color:#9B7040;">總計</div>
-                          <div class="font-black text-[18px] leading-tight" style="color:#2D2010;">{{ patients.length }}</div>
+                          <div class="font-black text-[18px] leading-tight" style="color:#2D2010;">{{ DISPLAY_TOTAL_PATIENTS }}</div>
                           <div class="text-[11px]" style="color:#9B7040;">位</div>
                         </div>
                       </div>
@@ -465,7 +465,7 @@
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 class="font-black text-[17px]" style="color:#2D2010;">長者管理</h2>
-              <p class="text-[12px]" style="color:#9B7040;">共 {{ patients.length }} 位長者</p>
+              <p class="text-[12px]" style="color:#9B7040;">共 {{ DISPLAY_TOTAL_PATIENTS }} 位長者</p>
             </div>
             <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
               style="background:#E8974A; box-shadow:0 2px 8px rgba(232,151,74,0.35);"
@@ -797,7 +797,7 @@
                   <span style="color:#9B7040;">資料儲存</span><span class="font-semibold" style="color:#0891B2;">正常</span>
                 </div>
                 <div class="flex justify-between py-2">
-                  <span style="color:#9B7040;">長者總數</span><span class="font-semibold" style="color:#2D2010;">{{ patients.length }} 位</span>
+                  <span style="color:#9B7040;">長者總數</span><span class="font-semibold" style="color:#2D2010;">{{ DISPLAY_TOTAL_PATIENTS }} 位</span>
                 </div>
               </div>
               <button class="w-full mt-4 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
@@ -1056,6 +1056,8 @@ const STATIC_PATIENTS = [
   { id:'s6', name:'張奶奶', age:76, avatarId:6, weeklyCount:3, lastActiveDays:1, dimensions:[70,65,72,68,62], weekDelta:0,  weekScore:67, statusLabel:'近期較少參與', totalSessions:11 },
 ]
 
+const DISPLAY_TOTAL_PATIENTS = 80
+
 const AVATAR_IMAGES = { 1:avatar1, 2:avatar2, 3:avatar3, 4:avatar4, 5:avatar5, 6:avatar6 }
 const avatarSrc = (p) => AVATAR_IMAGES[p?.avatarId] || avatar1
 
@@ -1110,10 +1112,14 @@ const kpiCards = computed(() => {
 
 const STATUS_COLORS = { '穩定表現':'#0891B2','持續進步':'#7C3AED','建議加強':'#D97706','近期較少參與':'#DC2626' }
 const statusDistribution = computed(() => {
-  const total = patients.value.length
-  const counts = { '穩定表現':0,'持續進步':0,'建議加強':0,'近期較少參與':0 }
-  patients.value.forEach(p => { counts[p.statusLabel] = (counts[p.statusLabel]||0)+1 })
-  return Object.entries(counts).map(([label,count]) => ({ label, count, color:STATUS_COLORS[label], pct:Math.round(count/total*100) }))
+  const rawCounts = { '穩定表現':0,'持續進步':0,'建議加強':0,'近期較少參與':0 }
+  patients.value.forEach(p => { rawCounts[p.statusLabel] = (rawCounts[p.statusLabel]||0)+1 })
+  const rawTotal = patients.value.length
+  const scaledCounts = Object.fromEntries(Object.entries(rawCounts).map(([k,v]) => [k, Math.round(v/rawTotal*DISPLAY_TOTAL_PATIENTS)]))
+  const scaledTotal = Object.values(scaledCounts).reduce((a,b)=>a+b,0)
+  const diff = DISPLAY_TOTAL_PATIENTS - scaledTotal
+  if (diff !== 0) scaledCounts['穩定表現'] = (scaledCounts['穩定表現']||0) + diff
+  return Object.entries(scaledCounts).map(([label,count]) => ({ label, count, color:STATUS_COLORS[label], pct:Math.round(count/DISPLAY_TOTAL_PATIENTS*100) }))
 })
 const statusDonutData = computed(() => ({
   labels: statusDistribution.value.map(s => s.label),
@@ -1152,7 +1158,7 @@ const radarChartOptions = {
 
 const trendLineData = computed(() => {
   const labels=[]; for(let i=29;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); labels.push(`${d.getMonth()+1}/${d.getDate()}`) }
-  const seed=(base,offset,trend)=>Array.from({length:30},(_,i)=>Math.min(100,Math.round(base+trend*i+Math.sin(i+offset)*2.5)))
+  const seed=(base,offset,trend)=>Array.from({length:30},(_,i)=>Math.min(100,Math.round(base+trend*i+((i*7+offset*13)%5-2)*0.3)))
   const series=[
     {label:'記憶力',  data:seed(66,0,0.38),color:'#E8974A'},
     {label:'注意力',  data:seed(61,1,0.33),color:'#0891B2'},

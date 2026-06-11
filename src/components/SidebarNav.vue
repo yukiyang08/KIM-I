@@ -41,7 +41,7 @@
             </div>
             <img src="../assets/KIM-I_LOGO.png" alt="KIM-I" class="brand-logo" />
             <h1 class="brand-name">金憶 KIM-I</h1>
-            <p class="brand-tagline">腦力永保 · 認知訓練</p>
+            <p class="brand-tagline">為您的認知健康助力</p>
             <div class="ornament">
               <span class="ornament__line"></span>
               <span class="ornament__gem">◈</span>
@@ -71,14 +71,14 @@
             <span class="ni-name">遊戲大廳</span>
           </router-link>
 
-          <router-link to="/day" class="nav-item" :class="{ 'nav-item--active': route.path === '/day' }" @click="isOpen = false">
-            <span class="ni-icon">🌅</span>
-            <span class="ni-name">今天的一天</span>
-          </router-link>
-
           <router-link to="/multiplayer" class="nav-item" :class="{ 'nav-item--active': route.path.startsWith('/multiplayer') }" @click="isOpen = false">
             <span class="ni-icon">👥</span>
             <span class="ni-name">多人模式</span>
+          </router-link>
+
+          <router-link to="/outdoor" class="nav-item" :class="{ 'nav-item--active': route.path === '/outdoor' }" @click="isOpen = false">
+            <span class="ni-icon">🗺️</span>
+            <span class="ni-name">金憶街區</span>
           </router-link>
 
           <!-- ── Section: 報表 ── -->

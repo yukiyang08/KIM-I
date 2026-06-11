@@ -146,7 +146,7 @@ const SCENE_DATA = computed(() => [
     timeLabel: '清晨',
     timeEmoji: '🌅',
     bg: 'radial-gradient(ellipse at 50% 0%, #221A0C 0%, #130E06 55%, #0A0804 100%)',
-    title: '今天的一天',
+    title: '故事模式',
     narration: `天才剛亮，${morningWakeup.value}把${n.value}叫醒。空氣裡帶著早晨的清涼，今天，還有幾件事要做。`,
     ctaLabel: '出門去',
     next: 'morning',

@@ -9,16 +9,16 @@ import RiddleGame from '../views/RiddleGame.vue'
 import PuzzleGame from '../views/PuzzleGame.vue'
 import MultiplayerLobby from '../views/MultiplayerLobby.vue'
 import MultiplayerRoom from '../views/MultiplayerRoom.vue'
-import DayScene from '../views/DayScene.vue'
 import FamilyDashboard from '../views/FamilyDashboard.vue'
 import UserProfile from '../views/UserProfile.vue'
 import LoginPage from '../views/LoginPage.vue'
+import OutdoorMap from '../views/OutdoorMap.vue'
+import VoiceSetup from '../views/VoiceSetup.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/',               name: 'lobby',    component: GameMenu },
-    { path: '/day',            name: 'day',      component: DayScene },
     { path: '/game/music',     name: 'music',    component: MusicRhythmGame },
     { path: '/game/shopping',  name: 'shopping', component: ShoppingGame },
     { path: '/game/cooking',   name: 'cooking',  component: CookingGame },
@@ -29,6 +29,8 @@ const router = createRouter({
     { path: '/dashboard/family', name: 'dashboard-family', component: FamilyDashboard },
     { path: '/profile',          name: 'profile',          component: UserProfile },
     { path: '/login',            name: 'login',            component: LoginPage },
+    { path: '/outdoor',          name: 'outdoor',          component: OutdoorMap },
+    { path: '/voice-setup',      name: 'voice-setup',      component: VoiceSetup },
     { path: '/multiplayer',    name: 'multiplayer-lobby', component: MultiplayerLobby },
     { path: '/multiplayer/room/:roomId', name: 'multiplayer-room', component: MultiplayerRoom },
   ],

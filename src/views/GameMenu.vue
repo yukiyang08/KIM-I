@@ -1,8 +1,7 @@
 <template>
-  <div class="h-full w-full flex flex-col overflow-y-auto pb-[90px] font-['Outfit','Noto_Sans_TC'] relative select-none"
+  <div class="game-menu-root h-full w-full flex flex-col overflow-y-auto pb-[90px] font-['Outfit','Noto_Sans_TC'] relative select-none"
        :style="{
-         background: `url('${vintageBackground}') center/cover fixed, linear-gradient(135deg, #110E08 0%, #1C170E 100%)`,
-         backgroundAttachment: 'fixed, scroll',
+         background: `url('${vintageBackground}') center/cover, linear-gradient(135deg, #110E08 0%, #1C170E 100%)`,
          backgroundPosition: 'center, 0 0',
          backgroundSize: 'cover, auto'
        }">
@@ -28,7 +27,7 @@
 
     <!-- Coming soon toast -->
     <transition name="toast-fade">
-      <div v-if="comingSoon" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 px-10 py-4 rounded-full font-bold text-2xl shadow-2xl text-white"
+      <div v-if="comingSoon" class="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-50 px-5 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-2xl shadow-2xl text-white whitespace-nowrap"
            style="background:rgba(28,20,8,0.94);border:1px solid rgba(200,150,30,0.4);backdrop-filter:blur(12px);">
         【{{ comingSoon }}】積極開發中，敬請期待！
       </div>
@@ -50,19 +49,19 @@
     />
 
     <!-- ── Header ── -->
-    <header class="shrink-0 px-4 sm:px-6 md:px-8 lg:px-12 pt-6 sm:pt-8 md:pt-10 pb-4 sm:pb-6 md:pb-8 relative z-20 border-b"
+    <header class="shrink-0 px-4 sm:px-6 md:px-8 lg:px-12 pt-4 sm:pt-8 md:pt-10 pb-3 sm:pb-6 md:pb-8 relative z-20 border-b"
             style="border-color:rgba(255,255,255,0.05); background: rgba(16,12,6,0.58); backdrop-filter: blur(8px);">
 
       <div class="flex items-center gap-3 sm:gap-4 md:gap-6">
         <!-- Accent bar -->
         <div class="w-1.5 sm:w-2 rounded-full shrink-0"
-             style="height:clamp(3rem, 5vw, 5rem);background:linear-gradient(to bottom,#C8961E,#8B6000);box-shadow:0 0 20px rgba(200,150,30,0.5);"></div>
+             style="height:clamp(2.4rem, 5vw, 5rem);background:linear-gradient(to bottom,#C8961E,#8B6000);box-shadow:0 0 20px rgba(200,150,30,0.5);"></div>
 
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 sm:gap-3 md:gap-4 mb-1 sm:mb-2">
+          <div class="flex items-center gap-2 sm:gap-3 md:gap-4 mb-0.5 sm:mb-2">
             <div class="truncate leading-none">
               <h1 class="kimi-brand-title truncate">金憶 KIM-I</h1>
-              <p class="mt-1 text-[1rem] sm:text-[0.9rem] md:text-[1.15rem] lg:text-[1.25rem] tracking-[0.08em] text-[#E7D4A3] truncate opacity-95">為樂齡者打造的認知訓練平台</p>
+              <p class="mt-0.5 sm:mt-1 text-[0.78rem] sm:text-[0.9rem] md:text-[1.15rem] lg:text-[1.25rem] tracking-[0.08em] text-[#E7D4A3] truncate opacity-95">為樂齡者打造的認知訓練平台</p>
             </div>
           </div>
         </div>
@@ -71,27 +70,27 @@
     </header>
 
     <!-- ── Today's Day Banner ── -->
-    <div class="shrink-0 px-3 sm:px-4 md:px-6 lg:px-10 pt-3 sm:pt-4 relative z-10"
+    <div class="shrink-0 px-3 sm:px-4 md:px-6 lg:px-10 pt-2 sm:pt-4 relative z-10"
          style="max-width: 1400px; margin: 0 auto; width: 100%;">
       <button @click="router.push('/day')"
-              class="w-full rounded-[14px] md:rounded-[18px] px-5 sm:px-8 py-4 sm:py-5 flex items-center gap-4 sm:gap-6 group active:scale-[0.99] transition-transform overflow-hidden relative"
+              class="w-full rounded-[12px] md:rounded-[18px] px-4 sm:px-8 py-3 sm:py-5 flex items-center gap-3 sm:gap-6 group active:scale-[0.99] transition-transform overflow-hidden relative"
               style="background: linear-gradient(105deg, rgba(38,28,12,0.95) 0%, rgba(26,18,6,0.98) 100%);
                      border: 2px solid rgba(200,148,40,0.55);
                      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,210,100,0.12);">
         <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
              style="background: radial-gradient(ellipse at 30% 50%, rgba(220,168,60,0.12), transparent 60%);"></div>
-        <div class="text-3xl sm:text-4xl shrink-0 leading-none">🌅</div>
+        <div class="text-2xl sm:text-4xl shrink-0 leading-none">🌅</div>
         <div class="flex-1 text-left min-w-0">
           <div class="font-black tracking-wide leading-tight"
-               style="font-family: 'Noto Serif TC', serif; font-size: clamp(1rem, 3vw, 1.35rem); color: #F2CF86;">
+               style="font-family: 'Noto Serif TC', serif; font-size: clamp(0.9rem, 3vw, 1.35rem); color: #F2CF86;">
             今天的一天
           </div>
-          <div class="text-xs sm:text-sm mt-0.5 truncate"
+          <div class="text-[0.72rem] sm:text-sm mt-0.5 truncate"
                style="color: rgba(255,215,150,0.5);">
             採買 · 煮飯 · 聽歌，走過一整天的故事
           </div>
         </div>
-        <div class="shrink-0 text-sm font-bold tracking-widest px-4 py-2 rounded-full"
+        <div class="shrink-0 text-xs sm:text-sm font-bold tracking-widest px-3 sm:px-4 py-1.5 sm:py-2 rounded-full"
              style="background: linear-gradient(135deg, #C88C18, #7A5000); color: #FFF3CC;
                     box-shadow: 0 4px 14px rgba(200,120,0,0.3);">
           開始
@@ -99,9 +98,9 @@
       </button>
     </div>
 
-    <!-- ── Game Grid (3 × 2 Layout) ── -->
-    <main class="shrink-0 px-3 sm:px-4 md:px-6 lg:px-10 py-3 sm:py-4 md:py-6 grid gap-3 sm:gap-4 md:gap-5 relative z-10"
-          style="grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 1400px; margin: 0 auto; width: 100%;">
+    <!-- ── Game Grid (2-col mobile / 3-col tablet+) ── -->
+    <main class="shrink-0 px-3 sm:px-4 md:px-6 lg:px-10 py-2 sm:py-4 md:py-6 grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4 md:gap-5 relative z-10"
+          style="max-width: 1400px; margin: 0 auto; width: 100%;">
       <div
         v-for="(game, index) in games"
         :key="game.id"
@@ -120,11 +119,11 @@
                                 0 0 28px rgba(220,176,78,0.2);"></div>
 
         <!-- Inner engraved frame -->
-        <div class="absolute inset-[8px] md:inset-[10px] rounded-[12px] md:rounded-[14px] pointer-events-none"
+        <div class="absolute inset-[6px] sm:inset-[8px] md:inset-[10px] rounded-[10px] sm:rounded-[12px] md:rounded-[14px] pointer-events-none"
              style="border: 2px solid rgba(96,72,33,0.9); box-shadow: inset 0 0 0 1px rgba(210,170,93,0.28);"></div>
 
         <!-- Card image -->
-        <div class="absolute inset-[12px] md:inset-[14px] rounded-[10px] md:rounded-[12px] overflow-hidden"
+        <div class="absolute inset-[8px] sm:inset-[12px] md:inset-[14px] rounded-[8px] sm:rounded-[10px] md:rounded-[12px] overflow-hidden"
              :style="game.poster
                ? {
                    backgroundImage: `url('${game.poster}')`,
@@ -137,14 +136,30 @@
         >
           <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(12,7,4,0.75) 0%, rgba(12,7,4,0.15) 40%, rgba(0,0,0,0.08) 100%);"></div>
 
-          <div class="absolute left-2.5 top-2.5 md:left-3 md:top-3 z-20">
+          <!-- Skill badge: hidden on mobile to reduce clutter, shown sm+ -->
+          <div class="hidden sm:block absolute left-2.5 top-2.5 md:left-3 md:top-3 z-20">
             <span
-              class="px-4 py-1.5 rounded-full text-[0.96rem] sm:text-[1.05rem] md:text-[1.15rem] font-black tracking-[0.05em]"
+              class="px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[0.85rem] sm:text-[0.96rem] md:text-[1.15rem] font-black tracking-[0.05em] whitespace-nowrap"
               style="background: rgba(22,12,4,0.82); color:#F8DEAC; border: 1px solid rgba(216,172,92,0.56); backdrop-filter: blur(4px); box-shadow: 0 6px 16px rgba(0,0,0,0.3);"
             >
               {{ game.skill }}
             </span>
           </div>
+
+          <!-- Play count: dot on mobile, full badge on sm+ -->
+          <template v-if="playCountOf[game.id]">
+            <!-- Mobile: green dot only -->
+            <div class="sm:hidden absolute right-2 top-2 z-20 w-4 h-4 rounded-full flex items-center justify-center"
+                 style="background: rgba(14,36,18,0.9); border: 1.5px solid rgba(80,180,80,0.7);">
+              <span class="text-[0.6rem] font-black leading-none" style="color:#6ABE50;">✓</span>
+            </div>
+            <!-- sm+: full badge -->
+            <div class="hidden sm:flex absolute right-2.5 top-2.5 md:right-3 md:top-3 z-20 items-center gap-1 px-2.5 py-1 rounded-full text-[0.82rem] font-black"
+                 style="background: rgba(14,36,18,0.88); color:#6ABE50; border: 1px solid rgba(80,180,80,0.4); backdrop-filter: blur(4px);">
+              <span>✓</span>
+              <span>{{ playCountOf[game.id] }}</span>
+            </div>
+          </template>
 
           <div v-if="!game.poster" class="absolute inset-0 flex items-center justify-center">
             <div class="text-[72px] md:text-[86px] transition-transform duration-300 group-hover:scale-110"
@@ -155,8 +170,8 @@
         </div>
 
         <!-- Vintage title plate -->
-        <div class="absolute left-[16px] right-[16px] bottom-[18px] md:bottom-[22px] z-20">
-          <div class="px-3 py-2 rounded-[10px] text-center night-card-title"
+        <div class="absolute left-[8px] right-[8px] sm:left-[16px] sm:right-[16px] bottom-[10px] sm:bottom-[18px] md:bottom-[22px] z-20">
+          <div class="px-2 sm:px-3 py-1.5 sm:py-2 rounded-[8px] sm:rounded-[10px] text-center night-card-title whitespace-nowrap overflow-hidden"
                style="background: linear-gradient(to bottom, rgba(28,26,22,0.7), rgba(14,13,12,0.82)); border: 1px solid rgba(170,125,64,0.45);">
             {{ game.name }}
           </div>
@@ -167,21 +182,25 @@
              style="background: radial-gradient(circle at 50% 35%, rgba(233,195,108,0.14), transparent 60%);"></div>
 
            <!-- Click hint rim -->
-           <div class="absolute inset-[6px] md:inset-[8px] rounded-[12px] md:rounded-[14px] pointer-events-none opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+           <div class="absolute inset-[5px] sm:inset-[6px] md:inset-[8px] rounded-[10px] sm:rounded-[12px] md:rounded-[14px] pointer-events-none opacity-75 group-hover:opacity-100 transition-opacity duration-300"
              style="box-shadow: inset 0 0 0 1px rgba(245,220,150,0.22), 0 0 16px rgba(220,176,78,0.16);"></div>
       </div>
     </main>
 
 
+  <!-- Mascot -->
+  <MascotGuide :messages="mascotMessages" :actions="mascotActions" :auto-show="isFirstVisit" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DifficultySelector from '../components/DifficultySelector.vue'
 import SongSelector from '../components/SongSelector.vue'
+import MascotGuide from '../components/MascotGuide.vue'
 import { useProfileStore } from '../stores/profileStore'
+import { useGameStore } from '../stores/gameStore'
 import vintageBackground from '../assets/懷舊背景3.png'
 import game1Poster from '../assets/Game1.png'
 import game2Poster from '../assets/Game2.png'
@@ -192,7 +211,16 @@ import game6Poster from '../assets/Game6.png'
 
 const router = useRouter()
 const profileStore = useProfileStore()
+const gameStore = useGameStore()
 const comingSoon = ref(null)
+
+const playCountOf = computed(() => {
+  const counts = {}
+  gameStore.sessions.forEach(s => {
+    counts[s.gameId] = (counts[s.gameId] || 0) + 1
+  })
+  return counts
+})
 const showDifficultyModal = ref(false)
 const showSongModal = ref(false)
 const selectedGameName = ref('')
@@ -359,6 +387,80 @@ onUnmounted(() => {
   if (introDimTimer) clearTimeout(introDimTimer)
   if (introCardTimer) clearTimeout(introCardTimer)
 })
+
+const FIRST_VISIT_KEY = 'kim-i-first-visit'
+const isFirstVisit = !localStorage.getItem(FIRST_VISIT_KEY)
+if (isFirstVisit) localStorage.setItem(FIRST_VISIT_KEY, '1')
+
+const totalSessions = computed(() => gameStore.sessions.length)
+
+const todaySessionCount = computed(() => {
+  const today = new Date().toDateString()
+  return gameStore.sessions.filter(s => new Date(s.timestamp).toDateString() === today).length
+})
+
+const lastGameId = computed(() => gameStore.sessions.at(-1)?.gameId ?? null)
+
+const hour = new Date().getHours()
+const timeOfDay = hour < 11 ? 'morning' : hour < 14 ? 'noon' : hour < 18 ? 'afternoon' : 'evening'
+
+const GAME_SUGGESTIONS = {
+  morning:   { id: 'shopping', name: '購物遊戲', label: '出門買菜去 🛒' },
+  noon:      { id: 'cooking',  name: '料理遊戲', label: '來煮午飯吧 🍳' },
+  afternoon: { id: 'riddle',   name: '謎題遊戲', label: '動動腦筋 🧩' },
+  evening:   { id: 'music',    name: '音樂遊戲', label: '唱首老歌放鬆 🎵' },
+}
+
+const suggestion = GAME_SUGGESTIONS[timeOfDay]
+
+const mascotMessages = computed(() => {
+  if (isFirstVisit) return [
+    '你好！我是金寶！很高興認識你！😊',
+    '這裡有很多有趣的遊戲，點圖片就可以開始喔！',
+    '記得每天出門走走，到「金憶街區」解鎖更多故事！',
+  ]
+  if (todaySessionCount.value === 0) {
+    if (timeOfDay === 'morning') return [
+      '早安！今天的早晨真舒服！',
+      '要不要先去買個菜？讓腦袋動一動！',
+    ]
+    if (timeOfDay === 'noon') return [
+      '午安！肚子餓了嗎？',
+      '來玩料理遊戲，煮一頓好飯吧！',
+    ]
+    if (timeOfDay === 'afternoon') return [
+      '下午了，動動腦筋精神會更好喔！',
+      '要不要來玩個謎題遊戲？',
+    ]
+    return [
+      '晚上好！今天辛苦了！',
+      '來唱首老歌放鬆一下吧 🎵',
+    ]
+  }
+  if (lastGameId.value) {
+    const names = { shopping:'購物', cooking:'料理', music:'音樂', riddle:'謎題', puzzle:'拼圖', puppet:'布袋戲' }
+    return [
+      `剛才的${names[lastGameId.value] ?? ''}遊戲玩得很好！`,
+      '要繼續玩，還是換一個試試看？',
+      '記得出門走走，金憶街區等著你 🗺️',
+    ]
+  }
+  return [
+    `今天已經玩了 ${todaySessionCount.value} 局，真棒！`,
+    '別忘了出門走走，步數夠了可以解鎖新故事喔！',
+  ]
+})
+
+const mascotActions = computed(() => {
+  if (isFirstVisit) return []
+  if (todaySessionCount.value === 0) return [
+    { label: suggestion.label, fn: () => router.push({ name: suggestion.id }) },
+  ]
+  return [
+    { label: suggestion.label, fn: () => router.push({ name: suggestion.id }) },
+    { label: '去金憶街區走走 🗺️', fn: () => router.push({ name: 'outdoor' }) },
+  ]
+})
 </script>
 
 <style scoped>
@@ -391,7 +493,7 @@ onUnmounted(() => {
 .kimi-brand-title {
   font-family: 'Noto Serif TC', 'PMingLiU', serif;
   font-weight: 900;
-  font-size: clamp(1.45rem, 4.4vw, 3.3rem);
+  font-size: clamp(1.25rem, 4.4vw, 3.3rem);
   letter-spacing: 0.08em;
   color: #f2cf86;
   text-shadow:
@@ -403,9 +505,10 @@ onUnmounted(() => {
 .night-card-title {
   font-family: 'Noto Serif TC', 'PMingLiU', serif;
   font-weight: 900;
-  font-size: clamp(1.35rem, 2.9vw, 3.2rem);
-  line-height: 1.12;
-  letter-spacing: 0.03em;
+  /* Mobile: fixed comfortable size so chars don't squeeze */
+  font-size: 0.95rem;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
   color: #f7dfb6;
   text-shadow:
     0 1px 0 rgba(58, 32, 10, 0.75),
@@ -413,9 +516,24 @@ onUnmounted(() => {
     0 0 10px rgba(232, 183, 86, 0.2);
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 640px) {
   .night-card-title {
-    font-size: clamp(1.2rem, 4.2vw, 2.5rem);
+    font-size: clamp(1rem, 3.8vw, 2.5rem);
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (min-width: 1025px) {
+  .night-card-title {
+    font-size: clamp(1.35rem, 2.9vw, 3.2rem);
+    letter-spacing: 0.03em;
+  }
+}
+
+/* iOS Safari: background-attachment fixed is unsupported, scroll is used by default */
+@supports (-webkit-touch-callout: none) {
+  .game-menu-root {
+    background-attachment: scroll !important;
   }
 }
 </style>

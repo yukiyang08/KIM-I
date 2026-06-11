@@ -146,7 +146,11 @@
                 </span>
               </div>
               <div class="flex-1 flex items-center justify-center">
-                <Radar :data="radarData" :options="radarOptions" style="max-height:200px; width:100%;" />
+                <Radar v-if="hasData" :data="radarData" :options="radarOptions" style="max-height:200px; width:100%;" />
+                <div v-else class="flex flex-col items-center gap-2">
+                  <Icon icon="solar:radar-bold" width="32" height="32" style="color:#EDE8E0;" />
+                  <div class="text-[11px] text-center" style="color:#9B7040;">玩一局後<br>雷達圖就會出現</div>
+                </div>
               </div>
             </div>
 

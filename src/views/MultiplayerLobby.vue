@@ -58,6 +58,7 @@
                   style="background: rgba(255,245,220,0.95); color:#241305;">
             <option value="co-op">合作模式</option>
             <option value="versus">輕競賽模式</option>
+            <option value="battle">線上對戰</option>
             <option value="assist">陪玩模式</option>
           </select>
 
@@ -78,6 +79,14 @@
             <option value="60">1 分鐘</option>
             <option value="120">2 分鐘</option>
             <option value="all">完整歌曲</option>
+          </select>
+
+          <label class="block text-sm mt-4 mb-2" style="color: rgba(255,232,188,0.82);">難度</label>
+          <select v-model="difficulty" class="w-full px-4 py-3 rounded-xl text-base outline-none"
+                  style="background: rgba(255,245,220,0.95); color:#241305;">
+            <option value="easy">初級 🌱</option>
+            <option value="normal">中級 ⚙️</option>
+            <option value="hard">高級 🔥</option>
           </select>
 
           <label class="block text-sm mt-4 mb-2" style="color: rgba(255,232,188,0.82);">最多人數</label>
@@ -130,7 +139,7 @@
               <div>
                 <div class="font-black tracking-[0.12em]">房號 {{ room.code }}</div>
                 <div class="text-sm opacity-80 mt-1">
-                  {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }} ・ {{ durationLabel(room.duration) }} ・ {{ room.players.length }}/{{ room.maxPlayers }} 人
+                  {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }} ・ {{ difficultyLabel(room.difficulty) }} ・ {{ durationLabel(room.duration) }} ・ {{ room.players.length }}/{{ room.maxPlayers }} 人
                 </div>
               </div>
               <div class="text-sm font-bold px-2.5 py-1 rounded-lg"
@@ -145,7 +154,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   createRoom,
   getOrCreateLocalPlayer,
@@ -155,6 +164,7 @@ import {
 } from '../utils/multiplayerRoom'
 
 const router = useRouter()
+const route = useRoute()
 const storedPlayer = getOrCreateLocalPlayer('玩家')
 
 const playerName = ref(storedPlayer.name)
@@ -162,6 +172,7 @@ const joinCode = ref('')
 const mode = ref('co-op')
 const track = ref('music-rhythm2')
 const duration = ref('60')
+const difficulty = ref('normal')
 const maxPlayers = ref(4)
 const errorText = ref('')
 const creating = ref(false)
@@ -177,6 +188,7 @@ const waitingRooms = computed(() =>
 const modeLabel = (value) => {
   if (value === 'versus') return '輕競賽'
   if (value === 'assist') return '陪玩'
+  if (value === 'battle') return '線上對戰'
   return '合作'
 }
 
@@ -196,6 +208,12 @@ const durationLabel = (value) => {
   if (value === '120') return '2分鐘'
   if (value === 'all') return '完整'
   return '1分鐘'
+}
+
+const difficultyLabel = (value) => {
+  if (value === 'easy') return '初級'
+  if (value === 'hard') return '高級'
+  return '中級'
 }
 
 const refreshRooms = async () => {
@@ -225,6 +243,7 @@ const createNewRoom = async () => {
       mode: mode.value,
       track: track.value,
       duration: duration.value,
+      difficulty: difficulty.value,
       maxPlayers: maxPlayers.value,
     })
     if (result.error) { errorText.value = result.error; return }
@@ -264,6 +283,17 @@ const quickJoin = async (code) => {
 onMounted(() => {
   refreshRooms()
   refreshTimer = setInterval(refreshRooms, 5000)
+
+  // Arrived via invite QR code / link: pre-fill the room code and join.
+  const inviteCode = String(route.query.code || '').trim().toUpperCase()
+  if (inviteCode.length === 6) {
+    joinCode.value = inviteCode
+    if ((playerName.value || '').trim() && playerName.value !== '玩家') {
+      joinRoom()
+    } else {
+      errorText.value = '輸入你的暱稱後，按「加入」就能進入房間。'
+    }
+  }
 })
 
 onUnmounted(() => {

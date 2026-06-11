@@ -77,23 +77,28 @@ export const useGameStore = defineStore('game', () => {
     return result
   })
 
-  const baseline = { memory: 82, attention: 65, execution: 88, visual: 75, reactionSpeed: 70 }
+  // Used only for internal alert thresholds, not shown directly to user
+  const baseline = { memory: 70, attention: 70, execution: 70, visual: 70, reactionSpeed: 70 }
 
-  const radarCurrent = computed(() => {
-    const d = latestByDimension.value
-    return [
-      d.memory        ?? baseline.memory,
-      d.attention     ?? baseline.attention,
-      d.execution     ?? baseline.execution,
-      d.visual        ?? baseline.visual,
-      d.reactionSpeed ?? baseline.reactionSpeed,
-    ]
-  })
+  // Average of last 3 sessions per dimension; 0 when no data
+  const radarCurrent = computed(() =>
+    dimensionOrder.map(dim => {
+      const related = sessions.value.filter(s => dimensionOf[s.gameId] === dim)
+      if (!related.length) return 0
+      const recent = related.slice(-3)
+      return Math.round(recent.reduce((sum, s) => sum + s.score, 0) / recent.length)
+    })
+  )
 
-  const radarBaseline = [
-    baseline.memory, baseline.attention, baseline.execution,
-    baseline.visual, baseline.reactionSpeed,
-  ]
+  // Average of sessions before the most recent 3; mirrors current when not enough history
+  const radarBaseline = computed(() =>
+    dimensionOrder.map((dim, i) => {
+      const related = sessions.value.filter(s => dimensionOf[s.gameId] === dim)
+      if (related.length <= 1) return radarCurrent.value[i]
+      const prev = related.slice(0, -1).slice(-3)
+      return Math.round(prev.reduce((sum, s) => sum + s.score, 0) / prev.length)
+    })
+  )
 
   const hasData = computed(() => sessions.value.length > 0)
 
@@ -129,28 +134,19 @@ export const useGameStore = defineStore('game', () => {
   }
 
   const dimensionBreakdown = computed(() =>
-    dimensionOrder.map((dim) => {
+    dimensionOrder.map((dim, i) => {
       const related = sessions.value.filter((s) => dimensionOf[s.gameId] === dim)
-      const recent = related.slice(-3)
-      const current = recent.length
-        ? Math.round(recent.reduce((sum, item) => sum + item.score, 0) / recent.length)
-        : baseline[dim]
 
-      const base = baseline[dim]
-      const delta = current - base
-      let trend = 'stuck'
-      if (delta >= 5) trend = 'improving'
-      else if (delta <= -5) trend = 'declining'
-
-      return {
-        key: dim,
-        label: dimensionLabel[dim],
-        current,
-        baseline: base,
-        delta,
-        trend,
-        sessionsCount: related.length,
+      if (!related.length) {
+        return { key: dim, label: dimensionLabel[dim], current: 0, baseline: 0, delta: 0, trend: 'stuck', sessionsCount: 0 }
       }
+
+      const current = radarCurrent.value[i]
+      const base = radarBaseline.value[i]
+      const delta = current - base
+      const trend = delta >= 5 ? 'improving' : delta <= -5 ? 'declining' : 'stuck'
+
+      return { key: dim, label: dimensionLabel[dim], current, baseline: base, delta, trend, sessionsCount: related.length }
     })
   )
 

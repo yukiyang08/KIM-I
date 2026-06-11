@@ -30,12 +30,15 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 flex flex-col items-center justify-center px-5 sm:px-8 py-6 relative z-10 overflow-y-auto">
+    <div class="flex-1 flex flex-col items-center justify-start px-5 sm:px-8 py-6 pt-8 relative z-10 overflow-y-auto">
+
+      <!-- Mascot guide: inline above form -->
+      <MascotGuide :messages="mascotMessages" :inline="true" :auto-show="true" :auto-next="true" />
+
       <transition name="step-fade" mode="out-in">
 
         <!-- Step 0: Name -->
         <div v-if="step === 0" key="name" class="w-full max-w-md text-center">
-          <div class="text-5xl mb-6">👋</div>
           <h2 class="font-black mb-2" style="font-family:'Noto Serif TC',serif; font-size:clamp(1.6rem,6vw,2.4rem); color:#F2CF86;">
             歡迎來到金憶
           </h2>
@@ -58,6 +61,11 @@
                   class="w-full py-4 rounded-full text-black text-lg font-black active:scale-95 transition-transform"
                   style="background:linear-gradient(135deg,#D4A020,#8B6000); box-shadow:0 12px 36px rgba(200,120,0,0.3);">
             開始設定 →
+          </button>
+          <button @click="router.push({ name: 'voice-setup' })"
+                  class="w-full mt-3 py-4 rounded-full text-lg font-black active:scale-95 transition-transform"
+                  style="background:rgba(242,207,134,0.12); border:2px solid rgba(242,207,134,0.45); color:#F2CF86;">
+            🎤 不想打字？用說的也可以！
           </button>
         </div>
 
@@ -221,6 +229,7 @@
 
       </transition>
     </div>
+
   </div>
 </template>
 
@@ -228,6 +237,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProfileStore } from '../stores/profileStore'
+import MascotGuide from '../components/MascotGuide.vue'
 
 const router  = useRouter()
 const profile = useProfileStore()
@@ -299,6 +309,44 @@ const finish = () => {
   profile.completeSetup()
   router.push({ name: 'lobby' })
 }
+
+const STEP_MESSAGES = [
+  // Step 0: Name
+  [
+    '你好！我是金寶！👋 很高興認識你！',
+    '填上你的名字，讓我知道怎麼叫你～',
+    '不想填名字也沒關係，直接按「開始設定」就好喔！',
+  ],
+  // Step 1: Birth year
+  [
+    '你是哪一年出生的呢？',
+    '用左右按鈕調整出生年份喔！',
+    '我會根據你的年代，準備你最熟悉的故事和歌曲！',
+  ],
+  // Step 2: Region
+  [
+    '你從哪裡來呢？點一下你的家鄉！',
+    '不同地方有不同的故事，我會幫你找到最有感覺的那一種！',
+  ],
+  // Step 3: Occupation
+  [
+    '你以前從事什麼工作呢？',
+    '選一個最接近的就好，這樣遊戲裡的場景會更貼近你的生活！',
+  ],
+  // Step 4: Family
+  [
+    '說說你的家庭吧！',
+    '選你全盛時期住在什麼樣的家裡～',
+  ],
+  // Step 5: Done
+  [
+    `太棒了！設定完成！`,
+    '我已經準備好你專屬的遊戲體驗了！',
+    '按下「開始我的故事」，我帶你去玩！🎮',
+  ],
+]
+
+const mascotMessages = computed(() => STEP_MESSAGES[step.value] ?? STEP_MESSAGES[0])
 </script>
 
 <style scoped>
