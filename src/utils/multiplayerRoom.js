@@ -210,7 +210,18 @@ export const subscribeToRoom = (roomId, onUpdate) => {
       table: 'multiplayer_rooms',
       filter: `id=eq.${roomId}`,
     }, (payload) => onUpdate(dbToRoom(payload.new)))
-    .subscribe()
+    .subscribe((status) => {
+      // websocket 斷線/訂閱失敗時自動重連，避免漏掉「開始遊戲」等事件
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        setTimeout(() => {
+          // 只有當這個 channel 仍是該房間的現役訂閱才重連
+          // （主動 unsubscribe 或被新訂閱取代時不重連）
+          if (activeChannels.get(roomId) === channel) {
+            subscribeToRoom(roomId, onUpdate)
+          }
+        }, 1500)
+      }
+    })
   activeChannels.set(roomId, channel)
   return channel
 }

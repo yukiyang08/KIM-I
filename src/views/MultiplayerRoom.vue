@@ -33,7 +33,19 @@
               {{ modeLabel(room.mode) }} ・ {{ songLabel(room.track) }} ・ {{ difficultyLabel(room.difficulty) }} ・ {{ durationLabel(room.duration) }}
             </p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- 準備按鈕：等待中時固定在右上角，未準備時發光提醒 -->
+            <button
+              v-if="room.status === 'waiting'"
+              @click="toggleMyReady"
+              class="text-base font-black px-5 py-2.5 rounded-xl"
+              :class="{ 'ready-glow': !myReady }"
+              :style="myReady
+                ? 'background: rgba(96,170,112,0.3); color:#D0FFD8; border:2px solid rgba(120,220,140,0.5);'
+                : 'background: linear-gradient(135deg,#E4B84D,#A37212); color:#2A1808; border:2px solid rgba(255,220,130,0.6);'"
+            >
+              {{ myReady ? '✓ 已準備' : '準備好了！' }}
+            </button>
             <div class="text-sm px-3 py-1.5 rounded-lg font-bold"
                  :style="statusPillStyle(room.status)">
               {{ statusLabel(room.status) }}
@@ -248,14 +260,6 @@
 
         <div class="mt-5 flex flex-wrap gap-3">
           <button
-            @click="toggleMyReady"
-            class="px-5 py-3 rounded-xl text-base font-black"
-            :style="myReady ? stopReadyStyle : setReadyStyle"
-          >
-            {{ myReady ? '取消準備' : '我已準備' }}
-          </button>
-
-          <button
             v-if="isHost"
             @click="startGame"
             class="px-6 py-3 rounded-xl text-base font-black"
@@ -367,21 +371,12 @@ const runCountdown = () => {
 
 const readyStyle = { background: 'rgba(96,170,112,0.26)', color: '#D0FFD8' }
 const waitingStyle = { background: 'rgba(130,95,40,0.28)', color: '#FFE1A8' }
-const setReadyStyle = { background: 'rgba(96,170,112,0.26)', color: '#D0FFD8' }
-const stopReadyStyle = { background: 'rgba(156,82,52,0.28)', color: '#FFD7C6' }
-
 const isHost = computed(() => room.value?.hostId === currentPlayer.id)
 
-// Invite QR code: scanning opens the lobby with the room code pre-filled.
-// On localhost the QR points to the deployed site so phones can actually open it.
-const PROD_ORIGIN = 'https://kim-i.vercel.app'
-const inviteOrigin = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-  ? PROD_ORIGIN
-  : window.location.origin
+// Invite QR code: scanning opens the deployed multiplayer lobby.
 const qrDataUrl = ref('')
 const inviteCopied = ref(false)
-const inviteUrl = computed(() =>
-  room.value?.code ? `${inviteOrigin}/multiplayer?code=${room.value.code}` : '')
+const inviteUrl = computed(() => 'https://kim-i.vercel.app/multiplayer')
 
 watch(inviteUrl, async (url) => {
   if (!url) { qrDataUrl.value = ''; return }
@@ -494,6 +489,7 @@ const applyRoom = (latest) => {
 
   const isMember = (latest.players || []).some((player) => player.id === currentPlayer.id)
   if (!isMember) { errorText.value = '你已不在此房間。'; return }
+  if (errorText.value === '你已不在此房間。') errorText.value = ''
 
   if (latest.status === 'playing') {
     const me = (latest.players || []).find((p) => p.id === currentPlayer.id)
@@ -560,16 +556,24 @@ const leaveCurrentRoom = async () => {
   router.push({ name: 'multiplayer-lobby' })
 }
 
+let pollTimer = null
+
 onMounted(async () => {
   await refreshRoom()
   subscribeToRoom(roomId.value, applyRoom)
   clockTimer = setInterval(() => { nowMs.value = Date.now() }, 1000)
+  // Realtime 後備輪詢：就算 websocket 斷線漏掉事件（例如房主按開始），
+  // 最慢 2.5 秒內也會從這裡同步到最新狀態（applyRoom 會擋掉過時資料）
+  pollTimer = setInterval(() => {
+    if (room.value?.status !== 'finished') refreshRoom()
+  }, 2500)
 })
 
 onUnmounted(() => {
   unsubscribeFromRoom(roomId.value)
   if (clockTimer) clearInterval(clockTimer)
   if (countdownTimer) clearInterval(countdownTimer)
+  if (pollTimer) clearInterval(pollTimer)
 })
 </script>
 
@@ -581,6 +585,15 @@ onUnmounted(() => {
 
 .countdown-fade-enter-active, .countdown-fade-leave-active { transition: opacity 0.35s ease; }
 .countdown-fade-enter-from, .countdown-fade-leave-to { opacity: 0; }
+
+/* 未準備時的呼吸發光，吸引長輩注意 */
+.ready-glow {
+  animation: ready-pulse 1.6s ease-in-out infinite;
+}
+@keyframes ready-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(240, 192, 64, 0.55); transform: scale(1); }
+  50%      { box-shadow: 0 0 0 12px rgba(240, 192, 64, 0); transform: scale(1.04); }
+}
 
 @keyframes countdown-pop {
   0%   { transform: scale(1.5); opacity: 0; }
