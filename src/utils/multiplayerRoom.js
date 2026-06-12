@@ -194,7 +194,7 @@ export const broadcastBattleScore = async (roomId, playerId, liveScore) => {
     p_player_id: playerId,
     p_score: Math.max(0, Math.round(liveScore || 0)),
   })
-}
+} 
 
 // ─── Realtime subscription ────────────────────────────────────────────────────
 

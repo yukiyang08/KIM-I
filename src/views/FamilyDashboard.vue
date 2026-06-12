@@ -271,7 +271,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="s in [...sessionsSource.value].reverse().slice(0,20)" :key="s.timestamp"
+                  <tr v-for="s in [...sessionsSource].reverse().slice(0,20)" :key="s.timestamp"
                     class="transition-colors" style="border-top:1px solid #EDE8E0;"
                     :style="hoveredRow === s.timestamp ? 'background:#FFF8F0;' : ''"
                     @mouseenter="hoveredRow = s.timestamp" @mouseleave="hoveredRow = null">
