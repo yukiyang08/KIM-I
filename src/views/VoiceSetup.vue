@@ -235,7 +235,6 @@ const mergeProfile = (p) => {
 const say = async (text) => {
   lastReply.value = text
   messages.value.push({ role: 'assistant', content: text })
-  await speech.speak(text)
 }
 
 const listen = () => {
@@ -391,15 +390,15 @@ onUnmounted(() => {
 }
 
 .mascot {
-  width: 200px;
-  height: 200px;
+  width: 240px;
+  height: 240px;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 14px 36px rgba(240, 192, 64, 0.3));
   transition: filter 0.3s ease;
 }
 @media (min-width: 640px) {
-  .mascot { width: 250px; height: 250px; }
+  .mascot { width: 300px; height: 300px; }
 }
 
 /* 待機：輕輕飄浮 */
@@ -426,7 +425,7 @@ onUnmounted(() => {
   animation: mascot-listen 1.6s ease-in-out infinite;
 }
 .mascot-stage--listening .mascot {
-  filter: drop-shadow(0 14px 40px rgba(111, 207, 124, 0.55));
+  filter: drop-shadow(0 14px 40px rgba(240, 192, 64, 0.45));
 }
 @keyframes mascot-listen {
   0%, 100% { transform: rotate(-3deg); }

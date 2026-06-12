@@ -147,8 +147,8 @@ onUnmounted(stopAutoNext)
 
 .mascot-btn {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 96px;
+  height: 96px;
   cursor: pointer;
   pointer-events: all;
   filter: drop-shadow(0 4px 16px rgba(240,192,64,0.35));
@@ -293,8 +293,8 @@ onUnmounted(stopAutoNext)
 
 .mascot-inline-img-wrap {
   flex-shrink: 0;
-  width: 100px;
-  height: 100px;
+  width: 130px;
+  height: 130px;
   animation: mascot-float 3s ease-in-out infinite;
   filter: drop-shadow(0 4px 12px rgba(240,192,64,0.3));
 }

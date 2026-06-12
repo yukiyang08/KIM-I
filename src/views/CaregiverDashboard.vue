@@ -653,12 +653,25 @@
           </div>
 
           <div class="analysis-summary-grid gap-3">
-            <div v-for="s in analysisSummary" :key="s.label" class="bg-white rounded-2xl p-4" style="border:1px solid #EDE8E0;">
-              <div class="text-[12px] mb-1" style="color:#9B7040;">{{ s.label }}</div>
-              <div class="font-black text-[22px] leading-none mb-1" :style="{ color: s.color }">{{ s.value }}</div>
-              <div class="text-[11px] font-semibold" :style="{ color: s.positive?'#1E9E6A':'#C04030' }">
-                {{ s.positive?'↑':'↓' }} {{ s.change }}
+            <div v-for="s in analysisSummary" :key="s.label"
+              class="bg-white rounded-2xl p-4 flex flex-col gap-3"
+              style="border:1px solid #EDE8E0; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+              <div class="flex items-center justify-between">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" :style="{ background: s.iconBg }">
+                  <Icon :icon="s.icon" width="18" height="18" :style="{ color: s.color }" />
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  :style="s.positive ? 'background:#E8F5EF; color:#1E9E6A;' : 'background:#FEF0F0; color:#C04030;'">
+                  {{ s.positive ? '↑' : '↓' }} {{ s.changeShort }}
+                </span>
               </div>
+              <div>
+                <div class="font-black leading-none mb-0.5" style="font-size:28px;" :style="{ color: s.color }">
+                  {{ s.value }}<span style="font-size:13px; margin-left:2px; opacity:0.65;">{{ s.unit }}</span>
+                </div>
+                <div class="text-[12px]" style="color:#9B7040;">{{ s.label }}</div>
+              </div>
+              <div class="text-[10px] pt-2 border-t" style="border-color:#EDE8E0; color:#B0A090;">{{ s.change }}</div>
             </div>
           </div>
 
@@ -691,26 +704,65 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl p-4" style="border:1px solid #EDE8E0;">
-            <h3 class="font-black text-[13px] mb-4" style="color:#2D2010;">長者表現比較</h3>
-            <div class="space-y-3">
-              <div v-for="p in patients" :key="p.id"
-                class="flex items-center gap-4 cursor-pointer transition-opacity hover:opacity-80"
-                @click="openPatient(p)">
-                <img :src="avatarSrc(p)" class="w-7 h-7 rounded-full object-cover shrink-0" />
-                <div class="w-14 text-[12px] font-semibold shrink-0 truncate" style="color:#2D2010;">{{ p.name }}</div>
-                <div class="flex-1 flex gap-1">
-                  <div v-for="(score, di) in p.dimensions" :key="di"
-                    class="flex-1 rounded-sm"
-                    :title="['記憶力','注意力','執行力','視覺空間','反應力'][di]+': '+score"
-                    :style="{ height:'20px', background: score>=75?'#1E9E6A':score>=55?'#E8974A':'#C04030', opacity: 0.7+score/333 }"></div>
-                </div>
-                <div class="w-12 text-right font-black text-[13px] shrink-0" :style="{ color: p.weekScore>=80?'#1E9E6A':'#E8974A' }">{{ p.weekScore }}</div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold w-20 text-center shrink-0" :style="getStatusBadge(p)">{{ p.statusLabel }}</span>
+          <div class="bg-white rounded-2xl overflow-hidden" style="border:1px solid #EDE8E0;">
+            <div class="px-4 py-3 flex items-center justify-between border-b" style="border-color:#EDE8E0;">
+              <h3 class="font-black text-[13px]" style="color:#2D2010;">長者能力比較表</h3>
+              <div class="flex items-center gap-3 text-[10px]" style="color:#9B7040;">
+                <span class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-sm inline-block" style="background:#1E9E6A;"></span>優良 ≥75
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-sm inline-block" style="background:#E8974A;"></span>普通 ≥55
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-sm inline-block" style="background:#C04030;"></span>需加強
+                </span>
               </div>
             </div>
-            <div class="flex gap-4 mt-3 pt-3 border-t text-[11px] flex-wrap" style="border-color:#EDE8E0; color:#9B7040;">
-              <span>← 記憶力</span><span>注意力</span><span>執行力</span><span>視覺空間</span><span>反應力 →</span>
+            <div class="overflow-x-auto">
+              <table class="w-full" style="min-width:580px;">
+                <thead style="background:#FAFAF7;">
+                  <tr class="text-[11px]" style="color:#9B7040; border-bottom:1px solid #EDE8E0;">
+                    <th class="text-left px-4 py-2.5 font-semibold">長者</th>
+                    <th v-for="dim in ['記憶力','注意力','執行力','視覺空間','反應力']" :key="dim"
+                      class="text-center px-3 py-2.5 font-semibold">{{ dim }}</th>
+                    <th class="text-center px-3 py-2.5 font-semibold">週均分</th>
+                    <th class="text-center px-3 py-2.5 font-semibold">狀態</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in patients" :key="p.id"
+                    class="cursor-pointer transition-colors" style="border-top:1px solid #F0EBE0;"
+                    :style="hoveredRow === p.id ? 'background:#FFF8F0;' : ''"
+                    @mouseenter="hoveredRow = p.id" @mouseleave="hoveredRow = null"
+                    @click="openPatient(p)">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-2">
+                        <img :src="avatarSrc(p)" class="w-7 h-7 rounded-full object-cover shrink-0" />
+                        <span class="text-[13px] font-semibold" style="color:#2D2010;">{{ p.name }}</span>
+                      </div>
+                    </td>
+                    <td v-for="(score, di) in p.dimensions" :key="di" class="text-center px-3 py-3">
+                      <div class="flex flex-col items-center gap-1">
+                        <span class="font-black text-[12px]"
+                          :style="{ color: score>=75?'#1E9E6A':score>=55?'#E8974A':'#C04030' }">{{ score }}</span>
+                        <div class="w-10 h-1.5 rounded-full" style="background:#F0EBE0;">
+                          <div class="h-full rounded-full"
+                            :style="{ width: score+'%', background: score>=75?'#1E9E6A':score>=55?'#E8974A':'#C04030' }"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="text-center px-3 py-3">
+                      <span class="font-black text-[14px]" :style="{ color: p.weekScore>=80?'#1E9E6A':p.weekScore>=65?'#E8974A':'#C04030' }">
+                        {{ p.weekScore }}
+                      </span>
+                    </td>
+                    <td class="text-center px-3 py-3">
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap" :style="getStatusBadge(p)">{{ p.statusLabel }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -1003,7 +1055,7 @@ const gameStats = [
   { name:'記憶音樂', icon:'solar:music-note-bold',   iconColor:'#2C7BC8', iconBg:'#EEF4FB', sessions:42, avgScore:83 },
   { name:'購物清單', icon:'solar:bag-2-bold',         iconColor:'#C87820', iconBg:'#FEF3E8', sessions:38, avgScore:76 },
   { name:'廚房烹飪', icon:'solar:cup-hot-bold',       iconColor:'#0891B2', iconBg:'#E0F2FE', sessions:31, avgScore:81 },
-  { name:'布袋戲謎', icon:'solar:masks-theatre-bold', iconColor:'#7B4EA0', iconBg:'#F5EEF8', sessions:25, avgScore:69 },
+  { name:'布袋戲謎', icon:'solar:magic-stick-bold', iconColor:'#7B4EA0', iconBg:'#F5EEF8', sessions:25, avgScore:69 },
   { name:'拼圖謎題', icon:'solar:widget-2-bold',      iconColor:'#C04030', iconBg:'#FEF0F0', sessions:29, avgScore:74 },
 ]
 
@@ -1012,7 +1064,7 @@ const allTrainingRecords = computed(() => {
     { game:'記憶音樂', icon:'solar:music-note-bold',   iconColor:'#2C7BC8', dimension:'記憶力'   },
     { game:'購物清單', icon:'solar:bag-2-bold',         iconColor:'#C87820', dimension:'執行力'   },
     { game:'廚房烹飪', icon:'solar:cup-hot-bold',       iconColor:'#0891B2', dimension:'注意力'   },
-    { game:'布袋戲謎', icon:'solar:masks-theatre-bold', iconColor:'#7B4EA0', dimension:'反應力'   },
+    { game:'布袋戲謎', icon:'solar:magic-stick-bold', iconColor:'#7B4EA0', dimension:'反應力'   },
     { game:'拼圖謎題', icon:'solar:widget-2-bold',      iconColor:'#C04030', dimension:'視覺空間' },
   ]
   const dt = ['今天 10:20','今天 09:45','今天 09:10','昨天 16:30','昨天 15:20','昨天 14:00','前天 17:10','前天 15:50']
@@ -1031,10 +1083,10 @@ const analysisSummary = computed(() => {
   const sessions = gameStats.reduce((s,g) => s+g.sessions, 0)
   const improved = patients.value.filter(p => (p.weekDelta||0) > 0).length
   return [
-    { label:'平均認知分數', value:avgScore, color:'#E8974A', change:'較上月 +3 分',   positive:true  },
-    { label:'本週訓練場次', value:sessions, color:'#0891B2', change:'較上週 +12 場', positive:true  },
-    { label:'進步長者人數', value:improved, color:'#1E9E6A', change:'較上週 +2 位',  positive:true  },
-    { label:'平均出席率',   value:'78%',    color:'#7C3AED', change:'較上月 -2%',    positive:false },
+    { label:'平均認知分數', value:avgScore, unit:'分', icon:'solar:star-bold',                  iconBg:'#FEF0D8', color:'#E8974A', change:'較上月 +3 分',   changeShort:'+3 分', positive:true  },
+    { label:'本週訓練場次', value:sessions, unit:'場', icon:'solar:clipboard-list-bold',         iconBg:'#E0F2FE', color:'#0891B2', change:'較上週 +12 場', changeShort:'+12 場',positive:true  },
+    { label:'進步長者人數', value:improved, unit:'位', icon:'solar:graph-up-bold',               iconBg:'#E8F5EF', color:'#1E9E6A', change:'較上週 +2 位',  changeShort:'+2 位', positive:true  },
+    { label:'平均出席率',   value:'78',     unit:'%',  icon:'solar:users-group-rounded-bold',    iconBg:'#EDE9FE', color:'#7C3AED', change:'較上月 -2%',    changeShort:'-2%',   positive:false },
   ]
 })
 

@@ -460,7 +460,7 @@ const gameOverview = [
   { id:'music',    name:'懷舊音樂', icon:'solar:music-note-bold',   iconColor:'#2C7BC8', iconBg:'#EEF4FB' },
   { id:'shopping', name:'柑仔店採買', icon:'solar:bag-2-bold',       iconColor:'#C87820', iconBg:'#FEF3E8' },
   { id:'cooking',  name:'阿嬤家常菜', icon:'solar:cup-hot-bold',     iconColor:'#1E9E6A', iconBg:'#E8F5EF' },
-  { id:'puppet',   name:'廟口布袋戲', icon:'solar:masks-theatre-bold',iconColor:'#7B4EA0', iconBg:'#F5EEF8' },
+  { id:'puppet',   name:'廟口布袋戲', icon:'solar:magic-stick-bold',  iconColor:'#7B4EA0', iconBg:'#F5EEF8' },
   { id:'riddle',   name:'老歌猜謎',  icon:'solar:star-bold',         iconColor:'#E8974A', iconBg:'#FEF0D8' },
   { id:'puzzle',   name:'廟口大拼圖', icon:'solar:widget-2-bold',    iconColor:'#C04030', iconBg:'#FEF0F0' },
 ]
@@ -473,7 +473,7 @@ const avgGameScore = (gameId) => {
 
 // ── Dim icons ─────────────────────────────────────────────────
 const dimIcons = [
-  'solar:brain-bold',
+  'solar:cpu-bolt-bold',
   'solar:eye-bold',
   'solar:bolt-bold',
   'solar:layers-bold',
